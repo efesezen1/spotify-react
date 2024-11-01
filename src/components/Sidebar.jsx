@@ -1,14 +1,19 @@
 import { Box } from '@radix-ui/themes'
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
 import { ArrowRightIcon, PlusIcon } from '@radix-ui/react-icons'
+import { fetchSelectedPlaylist } from '../../store/slicers/userSlice'
+import { useNavigate } from 'react-router-dom'
 
 const Sidebar = ({ className }) => {
-   const user = useSelector((state) => state.user)
+   const navigate = useNavigate()
    const { userPlaylists } = useSelector((state) => state.user)
+   const { selectedPlaylist } = useSelector((state) => state.user)
+   const id = selectedPlaylist?.id
 
+   const dispatch = useDispatch()
    return (
       <>
          <Box
@@ -51,7 +56,12 @@ const Sidebar = ({ className }) => {
             {userPlaylists.map((playlist) => (
                <Box
                   key={playlist.id}
-                  className="hover:bg-red-50 active:bg-red-100 transition-all duration-300  rounded-md pr-3"
+                  onClick={() => {
+                     dispatch(fetchSelectedPlaylist(playlist.href)).then(() => {
+                        navigate('/playlist/' + playlist.id)
+                     })
+                  }}
+                  className={`${playlist.id === id ? 'bg-red-50' : ''} hover:bg-red-50 active:bg-red-100 transition-all duration-300  rounded-md pr-3`}
                >
                   <Flex justify="" align="center" className="">
                      <img

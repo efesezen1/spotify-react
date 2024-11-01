@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { HomeLayout, Browse, Error, Login } from './pages'
+import { HomeLayout, Browse, Error, Login, Playlist } from './pages'
 import { ErrorElement } from './components'
 const router = createBrowserRouter([
    {
@@ -10,6 +10,11 @@ const router = createBrowserRouter([
          {
             index: true,
             element: <Browse />,
+            errorElement: <ErrorElement />,
+         },
+         {
+            path: '/playlist/:id',
+            element: <Playlist />,
             errorElement: <ErrorElement />,
          },
       ],

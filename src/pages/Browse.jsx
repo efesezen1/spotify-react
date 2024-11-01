@@ -11,25 +11,23 @@ const Browse = ({ className }) => {
    const { playlistRecommendations } = useSelector((state) => state.user)
 
    return (
-      <>
-         <Flex direction="column" gap="3" className={`h-full ${className} `}>
-            <Box className=" h-full overflow-y-scroll overflow-x-hidden" p="3">
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-               <ItemRow playlistRecommendations={playlistRecommendations} />
-            </Box>
-         </Flex>
-      </>
+      <Flex direction="column" className={` h-full ${className} `}>
+         <Box className="  overflow-y-scroll overflow-x-hidden">
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} />
+         </Box>
+      </Flex>
    )
 }
 

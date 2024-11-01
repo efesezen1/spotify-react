@@ -77,7 +77,7 @@ const Navbar = () => {
                            className="AvatarFallback"
                            delayMs={600}
                         >
-                           CT
+                           EF
                         </Avatar.Fallback>
                      </Avatar.Root>
                   </Popover.Trigger>

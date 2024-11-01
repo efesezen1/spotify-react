@@ -17,7 +17,7 @@ const HomeLayout = () => {
             style={{ width: '100%' }}
          >
             <Sidebar className="w-1/4 lg:w-1/6" />
-            <Box className="w-3/4 lg:w-5/6">
+            <Box className="w-3/4 lg:w-5/6  h-full" p="3">
                <Outlet />
             </Box>
          </Flex>
