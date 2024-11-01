@@ -28,14 +28,16 @@ const Navbar = () => {
          </Box>
 
          <Flex gap="2" align="center" className="w-[40%]">
-            <Button
-               className="w-[2.3rem] h-[2.3rem] "
-               onClick={() => {
-                  navigate('/')
-               }}
-            >
-               <HomeIcon height="30" width="30" />
-            </Button>
+            <Tooltip content="Home" delayDuration={0} className="">
+               <Button
+                  className="w-[2.3rem] h-[2.3rem] "
+                  onClick={() => {
+                     navigate('/')
+                  }}
+               >
+                  <HomeIcon height="30" width="30" />
+               </Button>
+            </Tooltip>
             <TextField.Root
                style={{ width: '100%' }}
                color="gray"

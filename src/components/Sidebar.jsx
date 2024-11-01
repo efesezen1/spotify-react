@@ -5,13 +5,15 @@ import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
 import { ArrowRightIcon, PlusIcon } from '@radix-ui/react-icons'
 
-const Sidebar = () => {
+const Sidebar = ({ className }) => {
    const user = useSelector((state) => state.user)
    const { userPlaylists } = useSelector((state) => state.user)
 
    return (
       <>
-         <Box className="w-[30vw] overflow-y-scroll m-2 relative rounded-lg ">
+         <Box
+            className={`${className} overflow-y-scroll m-2 relative rounded-lg `}
+         >
             <Flex
                direction="row"
                align="center"
@@ -23,7 +25,9 @@ const Sidebar = () => {
                   <Box className="mr-2 text-xl">
                      <Library />
                   </Box>
-                  <Text className=" w-full select-none">Playlists</Text>
+                  <Text className=" w-full select-none  text-nowrap">
+                     Playlists
+                  </Text>
                </Flex>
                <Flex gap="5">
                   <Button

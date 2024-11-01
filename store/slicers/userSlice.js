@@ -1,5 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+
 import axios from 'axios'
+
 const fetchUser = createAsyncThunk(
    'user/fetchUser',
    async (token, { dispatch }) => {
@@ -13,7 +15,7 @@ const fetchUser = createAsyncThunk(
 
          const credentials = { token, id: response.data.id }
          dispatch(fetchUserPlaylists(credentials))
-         dispatch(fetchPlaybackState(credentials))
+         dispatch(fetchPlayerState(credentials))
          dispatch(fetchPlaylistRecommendations(credentials))
          return response.data
       } catch (error) {
@@ -42,8 +44,8 @@ const fetchUserPlaylists = createAsyncThunk(
    }
 )
 
-const fetchPlaybackState = createAsyncThunk(
-   'user/fetchPlaybackState',
+const fetchPlayerState = createAsyncThunk(
+   'user/fetchPlayerState',
    async ({ token, id }, { dispatch, getState }) => {
       try {
          const response = await axios.get(
@@ -56,7 +58,7 @@ const fetchPlaybackState = createAsyncThunk(
          )
 
          dispatch(setPlayerState(response.data))
-
+         console.log(response.data)
          return response.data
       } catch (error) {
          console.error(error.response.data.error)
@@ -136,7 +138,7 @@ const userSlice = createSlice({
          })
    },
 })
-export { fetchUser, fetchPlaybackState }
+export { fetchUser, fetchPlayerState }
 export const {
    setUser,
    removeUser,

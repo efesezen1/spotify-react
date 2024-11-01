@@ -16,10 +16,12 @@ const HomeLayout = () => {
             className="h-[calc(100vh-8rem)]"
             style={{ width: '100%' }}
          >
-            <Sidebar />
-            <Outlet />
+            <Sidebar className="w-1/4 lg:w-1/6" />
+            <Box className="w-3/4 lg:w-5/6">
+               <Outlet />
+            </Box>
          </Flex>
-            <hr />
+         <hr />
          <Flex className="h-20 ">
             <Player />
          </Flex>

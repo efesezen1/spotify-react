@@ -17,7 +17,7 @@ createRoot(document.getElementById('root')).render(
          radius="large"
       >
          <RouterProvider router={router} />
-         {/* <ThemePanel /> */}
+      {/* <ThemePanel /> */}
       </Theme>
    </Provider>
 )
