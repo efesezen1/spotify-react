@@ -10,12 +10,19 @@ import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
 
 const Playlist = () => {
    const { id } = useParams()
+   const container = useRef(null)
    const playlist = useSelector((state) => state.user.selectedPlaylist)
    const token = useSelector((state) => state.user.token)
 
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
-
+   const [selectedTrack, setSelectedTrack] = useState(null)
    const dispatch = useDispatch()
+
+   useEffect(() => {
+      return () => {
+         setSelectedTrack(null)
+      }
+   }, [id])
 
    useEffect(() => {
       if (!playlist && token) {
@@ -28,6 +35,7 @@ const Playlist = () => {
    useEffect(() => {
       return () => {
          dispatch(setSelectedPlaylist(null))
+         setSelectedTrack(null)
       }
    }, [])
 
@@ -71,7 +79,9 @@ const Playlist = () => {
    return (
       <Flex
          direction="column"
-         className={` rounded bg-gradient-to-b ${gradient_color} via-white via-50% to-slate-white h-full `}
+         className={` rounded bg-gradient-to-b ${gradient_color} via-white via-50%  to-slate-white h-full `}
+         ref={container}
+         onClick={() => setSelectedTrack(null)}
       >
          <Flex direction="row" className="w-full">
             <Flex className="p-5 ">
@@ -99,7 +109,12 @@ const Playlist = () => {
             </Flex>
          </Flex>
 
-         <Table.Root size="2" layout="" className="overflow-y-scroll  ">
+         <Table.Root
+            size="2"
+            layout=""
+            className="overflow-y-scroll"
+            onClick={(e) => e.stopPropagation()}
+         >
             <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10">
                <Table.Row>
                   <Table.ColumnHeaderCell>
@@ -127,13 +142,18 @@ const Playlist = () => {
                {playlist?.tracks?.items?.map((item, index) => (
                   <Table.Row
                      key={item.track.id}
-                     onClick={() => console.log(row.current)}
+                     onClick={() => setSelectedTrack(item.track.id)}
                      onMouseEnter={() => setCurrentUserIdOnHover(item.track.id)}
                      onMouseLeave={() => setCurrentUserIdOnHover(null)}
-                     className="select-none  hover:backdrop-brightness-95 active:backdrop-brightness-90"
+                     className={`select-none  hover:backdrop-brightness-95 active:backdrop-brightness-90 ${
+                        selectedTrack === item.track.id
+                           ? 'backdrop-brightness-90'
+                           : ''
+                     }`}
                   >
                      <Table.RowHeaderCell>
-                        {currentUserIdOnHover === item.track.id ? (
+                        {currentUserIdOnHover === item.track.id ||
+                        selectedTrack === item.track.id ? (
                            <PlayIcon />
                         ) : (
                            index + 1
