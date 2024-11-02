@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Box, Text, Flex, Button, Table } from '@radix-ui/themes'
 import {
@@ -6,11 +6,14 @@ import {
    setSelectedPlaylist,
 } from '../../store/slicers/userSlice'
 import { useParams } from 'react-router-dom'
-import { TimerIcon } from '@radix-ui/react-icons'
+import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
+
 const Playlist = () => {
    const { id } = useParams()
    const playlist = useSelector((state) => state.user.selectedPlaylist)
    const token = useSelector((state) => state.user.token)
+
+   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
 
    const dispatch = useDispatch()
 
@@ -124,9 +127,18 @@ const Playlist = () => {
                {playlist?.tracks?.items?.map((item, index) => (
                   <Table.Row
                      key={item.track.id}
+                     onClick={() => console.log(row.current)}
+                     onMouseEnter={() => setCurrentUserIdOnHover(item.track.id)}
+                     onMouseLeave={() => setCurrentUserIdOnHover(null)}
                      className="select-none  hover:backdrop-brightness-95 active:backdrop-brightness-90"
                   >
-                     <Table.RowHeaderCell>{index + 1}</Table.RowHeaderCell>
+                     <Table.RowHeaderCell>
+                        {currentUserIdOnHover === item.track.id ? (
+                           <PlayIcon />
+                        ) : (
+                           index + 1
+                        )}
+                     </Table.RowHeaderCell>
                      <Table.Cell>
                         <Text size="1">{item.track.name}</Text>
                      </Table.Cell>
@@ -134,7 +146,9 @@ const Playlist = () => {
                         <Text size="1">{item.track.album.name}</Text>
                      </Table.Cell>
                      <Table.Cell>
-                        <Text size="1">{timeAgo(item.added_at)}</Text>
+                        <Text className="text-nowrap" size="1">
+                           {timeAgo(item.added_at)}
+                        </Text>
                      </Table.Cell>
                      <Table.Cell>
                         <Text size="1">

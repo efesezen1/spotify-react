@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom'
 import Logout from './Logout'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 const Navbar = () => {
    const user = useSelector((state) => state.user)
    const navigate = useNavigate()
@@ -21,11 +22,15 @@ const Navbar = () => {
          gap="2"
          p="2"
       >
-         <Box className="px-4 h-full flex items-center hover:scale-125 transition-all duration-300 active:scale-90 ">
+         <motion.div
+            initial={{ opacity: 0, rotate: 0 }}
+            animate={{ opacity: 1, rotate: 720 }}
+            className="px-4 h-full flex items-center  "
+         >
             <Link to="/" className="cursor-default">
                <SpotifyIcon className="" />
             </Link>
-         </Box>
+         </motion.div>
 
          <Flex gap="2" align="center" className="w-[40%]">
             <Tooltip content="Home" delayDuration={0} className="">
