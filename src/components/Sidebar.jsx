@@ -3,9 +3,10 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
-import { ArrowRightIcon, PlusIcon } from '@radix-ui/react-icons'
+import { ArrowRightIcon, PlayIcon, PlusIcon } from '@radix-ui/react-icons'
 import { fetchSelectedPlaylist } from '../../store/slicers/userSlice'
 import { useNavigate } from 'react-router-dom'
+import MediaPlayIcon from './icon/MediaPlayIcon'
 
 const Sidebar = ({ className }) => {
    const navigate = useNavigate()
@@ -61,14 +62,22 @@ const Sidebar = ({ className }) => {
                         navigate('/playlist/' + playlist.id)
                      })
                   }}
-                  className={`${playlist.id === id ? 'bg-red-50' : ''} hover:bg-red-50 active:bg-red-100 transition-all duration-300  rounded-md pr-3`}
+                  className={`${playlist.id === id ? 'bg-red-100' : ''} ${
+                     playlist.id !== id ? 'hover:bg-red-50' : ''
+                  } active:bg-red-100 transition-all duration-300  rounded-md pr-3`}
                >
                   <Flex justify="" align="center" className="">
-                     <img
-                        className="w-12 rounded-md p-1 m-1 ml-2"
-                        src={playlist.images[0].url}
-                        alt=""
-                     />
+                     <Box className="relative ">
+                        {/* <Box className="absolute top-0 right-0 w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] hover:backdrop-blur-xl  hover:opacity-90   m-1 flex justify-center items-center">
+                           <MediaPlayIcon className='opacity-0 hover:opacity-100' />
+                           
+                        </Box> */}
+                        <img
+                           className="w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2"
+                           src={playlist.images[0].url}
+                           alt=""
+                        />
+                     </Box>
 
                      <Flex direction="column" className="ml-2 select-none">
                         <Text className="text-sm text-nowrap  ">

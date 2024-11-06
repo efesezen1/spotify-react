@@ -54,6 +54,11 @@ const Playlist = () => {
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
    }
 
+   const hoverClass = (item) =>
+      selectedTrack !== item.track.id ? 'hover:backdrop-brightness-95' : ''
+
+   const activeClass = (item) =>
+      selectedTrack === item.track.id ? 'backdrop-brightness-90' : ''
    const timeAgo = (date) => {
       const now = new Date()
       const diff = now - new Date(date)
@@ -139,44 +144,54 @@ const Playlist = () => {
             </Table.Header>
 
             <Table.Body>
-               {playlist?.tracks?.items?.map((item, index) => (
-                  <Table.Row
-                     key={item.track.id}
-                     onClick={() => setSelectedTrack(item.track.id)}
-                     onMouseEnter={() => setCurrentUserIdOnHover(item.track.id)}
-                     onMouseLeave={() => setCurrentUserIdOnHover(null)}
-                     className={`select-none  hover:backdrop-brightness-95 active:backdrop-brightness-90 ${
-                        selectedTrack === item.track.id
-                           ? 'backdrop-brightness-90'
-                           : ''
-                     }`}
-                  >
-                     <Table.RowHeaderCell>
-                        {currentUserIdOnHover === item.track.id ||
-                        selectedTrack === item.track.id ? (
-                           <PlayIcon />
-                        ) : (
-                           index + 1
-                        )}
-                     </Table.RowHeaderCell>
-                     <Table.Cell>
-                        <Text size="1">{item.track.name}</Text>
-                     </Table.Cell>
-                     <Table.Cell>
-                        <Text size="1">{item.track.album.name}</Text>
-                     </Table.Cell>
-                     <Table.Cell>
-                        <Text className="text-nowrap" size="1">
-                           {timeAgo(item.added_at)}
-                        </Text>
-                     </Table.Cell>
-                     <Table.Cell>
-                        <Text size="1">
-                           {formatDuration(item.track.duration_ms)}
-                        </Text>
-                     </Table.Cell>
-                  </Table.Row>
-               ))}
+               {playlist?.tracks?.items?.map((item, index) => {
+                  return (
+                     <Table.Row
+                        key={item.track.id}
+                        onClick={() => setSelectedTrack(item.track.id)}
+                        onMouseEnter={() =>
+                           setCurrentUserIdOnHover(item.track.id)
+                        }
+                        onMouseLeave={() => setCurrentUserIdOnHover(null)}
+                        className={`select-none   active:backdrop-brightness-90
+                        ${hoverClass(item)}
+                        
+                        ${activeClass(item)}`}
+                     >
+                        <Table.RowHeaderCell>
+                           {currentUserIdOnHover === item.track.id ||
+                           selectedTrack === item.track.id ? (
+                              <PlayIcon />
+                           ) : (
+                              index + 1
+                           )}
+                        </Table.RowHeaderCell>
+                        <Table.Cell>
+                           <Flex direction={'column'}>
+                              <Text size="2">{item.track.name}</Text>
+                              <Text size="1">
+                                 {item.track.artists
+                                    .map((artist) => artist.name)
+                                    .join(', ')}
+                              </Text>
+                           </Flex>
+                        </Table.Cell>
+                        <Table.Cell>
+                           <Text size="2">{item.track.album.name}</Text>
+                        </Table.Cell>
+                        <Table.Cell>
+                           <Text className="text-nowrap" size="2">
+                              {timeAgo(item.added_at)}
+                           </Text>
+                        </Table.Cell>
+                        <Table.Cell>
+                           <Text size="2">
+                              {formatDuration(item.track.duration_ms)}
+                           </Text>
+                        </Table.Cell>
+                     </Table.Row>
+                  )
+               })}
             </Table.Body>
          </Table.Root>
       </Flex>

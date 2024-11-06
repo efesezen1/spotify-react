@@ -58,7 +58,7 @@ const fetchPlayerState = createAsyncThunk(
          )
 
          dispatch(setPlayerState(response?.data))
-         console.log(response.data)
+
          return response.data
       } catch (error) {
          console.error(error.response.data.error)
@@ -69,7 +69,7 @@ const fetchPlayerState = createAsyncThunk(
 const fetchSelectedPlaylist = createAsyncThunk(
    'user/fetchSelectedPlaylist',
    async (url, { dispatch, getState }) => {
-      console.log(url)
+
 
       const token = getState()?.user?.token
       console.log('Playlist fetching...')
@@ -82,7 +82,7 @@ const fetchSelectedPlaylist = createAsyncThunk(
 
          dispatch(setSelectedPlaylist(response?.data))
          console.log('Fetch successful')
-         console.log(response.data)
+
          return response.data
       } catch (error) {
          console.error(error.response.data.error)
@@ -169,7 +169,7 @@ const userSlice = createSlice({
          })
          .addCase(fetchSelectedPlaylist.fulfilled, (state, action) => {
             state.status = 'succeeded'
-            console.log(action)
+
          })
          .addCase(fetchSelectedPlaylist.rejected, (state, action) => {
             state.status = 'failed'
