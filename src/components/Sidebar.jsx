@@ -67,11 +67,7 @@ const Sidebar = ({ className }) => {
                   } active:bg-red-100 transition-all duration-300  rounded-md pr-3`}
                >
                   <Flex justify="" align="center" className="">
-                     <Box className="relative ">
-                        {/* <Box className="absolute top-0 right-0 w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] hover:backdrop-blur-xl  hover:opacity-90   m-1 flex justify-center items-center">
-                           <MediaPlayIcon className='opacity-0 hover:opacity-100' />
-                           
-                        </Box> */}
+                     <Box>
                         <img
                            className="w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2"
                            src={playlist.images[0].url}

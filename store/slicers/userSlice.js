@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
 import axios from 'axios'
 
 const fetchUser = createAsyncThunk(
@@ -14,6 +13,7 @@ const fetchUser = createAsyncThunk(
          dispatch(setToken(token))
 
          const credentials = { token, id: response?.data?.id }
+         dispatch(setCredentials(credentials))
          dispatch(fetchUserPlaylists(credentials))
          dispatch(fetchPlayerState(credentials))
          dispatch(fetchPlaylistRecommendations(credentials))
@@ -69,8 +69,6 @@ const fetchPlayerState = createAsyncThunk(
 const fetchSelectedPlaylist = createAsyncThunk(
    'user/fetchSelectedPlaylist',
    async (url, { dispatch, getState }) => {
-
-
       const token = getState()?.user?.token
       console.log('Playlist fetching...')
       try {
@@ -103,7 +101,6 @@ const fetchPlaylistRecommendations = createAsyncThunk(
             }
          )
 
-         dispatch(setPlaylistRecommendations(response?.data))
          return response?.data
       } catch (error) {}
    }
@@ -113,6 +110,7 @@ const userSlice = createSlice({
    name: 'user',
    initialState: {
       baseURL: 'https://api.spotify.com/v1',
+      credentials: null,
       user: null,
       profilePicture: '',
       state: 'idle',
@@ -142,11 +140,12 @@ const userSlice = createSlice({
       setPlayerState: (state, action) => {
          state.playerState = action.payload
       },
-      setPlaylistRecommendations: (state, action) => {
-         state.playlistRecommendations = action.payload
-      },
+      
       setSelectedPlaylist: (state, action) => {
          state.selectedPlaylist = action.payload
+      },
+      setCredentials: (state, action) => {
+         state.credentials = action.payload
       },
    },
    extraReducers: (builder) => {
@@ -169,11 +168,21 @@ const userSlice = createSlice({
          })
          .addCase(fetchSelectedPlaylist.fulfilled, (state, action) => {
             state.status = 'succeeded'
-
          })
          .addCase(fetchSelectedPlaylist.rejected, (state, action) => {
             state.status = 'failed'
 
+            state.error = action.error.message
+         })
+         .addCase(fetchPlaylistRecommendations.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(fetchPlaylistRecommendations.fulfilled, (state, action) => {
+            state.status = 'succeeded'
+            state.playlistRecommendations = action.payload
+         })
+         .addCase(fetchPlaylistRecommendations.rejected, (state, action) => {
+            state.status = 'failed'
             state.error = action.error.message
          })
    },
@@ -183,6 +192,7 @@ export {
    fetchPlayerState,
    fetchUserPlaylists,
    fetchSelectedPlaylist,
+   fetchPlaylistRecommendations,
 }
 export const {
    setUser,
@@ -192,5 +202,6 @@ export const {
    setPlaylistRecommendations,
    setPlayerState,
    setSelectedPlaylist,
+   setCredentials,
 } = userSlice.actions
 export default userSlice.reducer
