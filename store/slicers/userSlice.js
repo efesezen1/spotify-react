@@ -14,9 +14,9 @@ const fetchUser = createAsyncThunk(
 
          const credentials = { token, id: response?.data?.id }
          dispatch(setCredentials(credentials))
-         dispatch(fetchUserPlaylists(credentials))
+
          dispatch(fetchPlayerState(credentials))
-         dispatch(fetchPlaylistRecommendations(credentials))
+
          return response?.data
       } catch (error) {
          console.error(error?.response?.data?.error)
@@ -36,7 +36,7 @@ const fetchUserPlaylists = createAsyncThunk(
                },
             }
          )
-         dispatch(setPlaylists(response?.data?.items))
+
          return response?.data?.items
       } catch (error) {
          console.error(error.response.data.error)
@@ -134,13 +134,11 @@ const userSlice = createSlice({
       setToken: (state, action) => {
          state.token = action.payload
       },
-      setPlaylists: (state, action) => {
-         state.userPlaylists = action.payload
-      },
+
       setPlayerState: (state, action) => {
          state.playerState = action.payload
       },
-      
+
       setSelectedPlaylist: (state, action) => {
          state.selectedPlaylist = action.payload
       },
@@ -182,6 +180,17 @@ const userSlice = createSlice({
             state.playlistRecommendations = action.payload
          })
          .addCase(fetchPlaylistRecommendations.rejected, (state, action) => {
+            state.status = 'failed'
+            state.error = action.error.message
+         })
+         .addCase(fetchUserPlaylists.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(fetchUserPlaylists.fulfilled, (state, action) => {
+            state.status = 'succeeded'
+            state.userPlaylists = action.payload
+         })
+         .addCase(fetchUserPlaylists.rejected, (state, action) => {
             state.status = 'failed'
             state.error = action.error.message
          })

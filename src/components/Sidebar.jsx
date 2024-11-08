@@ -4,17 +4,25 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
 import { ArrowRightIcon, PlayIcon, PlusIcon } from '@radix-ui/react-icons'
-import { fetchSelectedPlaylist } from '../../store/slicers/userSlice'
+import {
+   fetchSelectedPlaylist,
+   fetchUserPlaylists,
+} from '../../store/slicers/userSlice'
 import { useNavigate } from 'react-router-dom'
 import MediaPlayIcon from './icon/MediaPlayIcon'
 
 const Sidebar = ({ className }) => {
+   const dispatch = useDispatch()
    const navigate = useNavigate()
-   const { userPlaylists } = useSelector((state) => state.user)
+   const { userPlaylists, credentials } = useSelector((state) => state.user)
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
 
-   const dispatch = useDispatch()
+   useEffect(() => {
+      if (!credentials) return
+      dispatch(fetchUserPlaylists(credentials))
+   }, [credentials])
+
    return (
       <>
          <Box
