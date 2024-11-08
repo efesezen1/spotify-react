@@ -3,13 +3,12 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
-import { ArrowRightIcon, PlayIcon, PlusIcon } from '@radix-ui/react-icons'
+import { ArrowRightIcon, PlusIcon } from '@radix-ui/react-icons'
 import {
    fetchSelectedPlaylist,
    fetchUserPlaylists,
 } from '../../store/slicers/userSlice'
 import { useNavigate } from 'react-router-dom'
-import MediaPlayIcon from './icon/MediaPlayIcon'
 
 const Sidebar = ({ className }) => {
    const dispatch = useDispatch()

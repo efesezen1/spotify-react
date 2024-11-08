@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { HomeLayout, Browse, Error, Login, Playlist } from './pages'
+import { HomeLayout, Browse, Error, Login, Playlist, Profile } from './pages'
 import { ErrorElement } from './components'
 const router = createBrowserRouter([
    {
@@ -15,6 +15,12 @@ const router = createBrowserRouter([
          {
             path: '/playlist/:id',
             element: <Playlist />,
+            errorElement: <ErrorElement />,
+         },
+
+         {
+            path: '/profile',
+            element: <Profile />,
             errorElement: <ErrorElement />,
          },
       ],

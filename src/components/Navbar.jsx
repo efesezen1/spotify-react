@@ -4,15 +4,14 @@ import * as Avatar from '@radix-ui/react-avatar'
 import * as Popover from '@radix-ui/react-popover'
 import { Button, Flex, Box, TextField, Text, Tooltip } from '@radix-ui/themes'
 import SpotifyIcon from './icon/SpotifyIcon'
-import { Link } from 'react-router-dom'
+import { Link, useNavigation, useNavigate } from 'react-router-dom'
 import Logout from './Logout'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 const Navbar = () => {
    const user = useSelector((state) => state.user)
    const navigate = useNavigate()
-
+   const navigation = useNavigation()
    return (
       <Flex
          direction="row"
@@ -89,17 +88,17 @@ const Navbar = () => {
                </Tooltip>
                <Popover.Portal>
                   <Popover.Content className="flex flex-col   w-[200px]  border rounded-lg text-left  mr-2 bg-white">
-                     <Button className="hover:bg-red-50 active:bg-red-100 pl-2 py-2 justify-start mt-1 mx-1 rounded">
+                     <Link to="/account" className="user-menu-item mt-1">
                         Account
-                     </Button>
-                     <Button className="hover:bg-red-50 active:bg-red-100 pl-2 py-2 justify-start mx-1 rounded">
+                     </Link>
+                     <Link to="/profile" className="user-menu-item ">
                         Profile
-                     </Button>
-                     <Button className="hover:bg-red-50 active:bg-red-100 pl-2 py-2 justify-start  mx-1 mb-1 rounded">
-                        Settings
-                     </Button>
+                     </Link>
+
+                     <Link className="user-menu-item mb-1">Settings</Link>
+
                      <hr />
-                     <Logout className="hover:bg-red-50 active:bg-red-100 pl-2 py-2 justify-start my-1  mx-1 rounded" />
+                     <Logout className="user-menu-item my-1  mx-1 " />
 
                      {/* <Popover.Close>Close</Popover.Close> */}
                      <Popover.Arrow className=" fill-white"></Popover.Arrow>

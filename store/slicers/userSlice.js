@@ -10,13 +10,9 @@ const fetchUser = createAsyncThunk(
                Authorization: `Bearer ${token}`,
             },
          })
-         dispatch(setToken(token))
-
          const credentials = { token, id: response?.data?.id }
          dispatch(setCredentials(credentials))
-
-         dispatch(fetchPlayerState(credentials))
-
+         dispatch(setToken(token))
          return response?.data
       } catch (error) {
          console.error(error?.response?.data?.error)
@@ -89,11 +85,28 @@ const fetchSelectedPlaylist = createAsyncThunk(
 )
 
 const fetchPlaylistRecommendations = createAsyncThunk(
-   'user/fetchPlaylistRecommendation',
+   'user/fetchPlaylistRecommendations',
    async ({ token, id }, { dispatch, getState }) => {
       try {
          const response = await axios.get(
             `https://api.spotify.com/v1/browse/featured-playlists?limit=10`,
+            {
+               headers: {
+                  Authorization: `Bearer ${token}`,
+               },
+            }
+         )
+
+         return response?.data
+      } catch (error) {}
+   }
+)
+const fetchFollowingArtists = createAsyncThunk(
+   'user/fetchFollowingArtists',
+   async (token, { dispatch, getState }) => {
+      try {
+         const response = await axios.get(
+            'https://api.spotify.com/v1/me/following?type=artist',
             {
                headers: {
                   Authorization: `Bearer ${token}`,
@@ -121,6 +134,7 @@ const userSlice = createSlice({
       playlistRecommendations: null,
       playerState: null,
       selectedPlaylist: null,
+      followingArtists: null,
    },
    reducers: {
       setUser: (state, action) => {
@@ -153,6 +167,7 @@ const userSlice = createSlice({
          })
          .addCase(fetchUser.fulfilled, (state, action) => {
             state.status = 'succeeded'
+            console.log(action.payload)
             state.user = action.payload
             state.profilePicture = action.payload.images[0].url
          })
@@ -169,7 +184,6 @@ const userSlice = createSlice({
          })
          .addCase(fetchSelectedPlaylist.rejected, (state, action) => {
             state.status = 'failed'
-
             state.error = action.error.message
          })
          .addCase(fetchPlaylistRecommendations.pending, (state) => {
@@ -194,6 +208,17 @@ const userSlice = createSlice({
             state.status = 'failed'
             state.error = action.error.message
          })
+         .addCase(fetchFollowingArtists.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(fetchFollowingArtists.fulfilled, (state, action) => {
+            state.status = 'succeeded'
+            state.followingArtists = action.payload
+         })
+         .addCase(fetchFollowingArtists.rejected, (state, action) => {
+            state.status = 'failed'
+            state.error = action.error.message
+         })
    },
 })
 export {
@@ -202,6 +227,7 @@ export {
    fetchUserPlaylists,
    fetchSelectedPlaylist,
    fetchPlaylistRecommendations,
+   fetchFollowingArtists,
 }
 export const {
    setUser,

@@ -4,8 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 .AvatarRoot {
    display: inline-flex;
    align-items: center;
@@ -37,4 +35,14 @@
    font-size: 15px;
    line-height: 1;
    font-weight: 500;
+}
+.btn-color {
+   @apply hover:bg-red-50 active:bg-red-100 rounded;
+}
+
+.user-menu-item {
+   @apply btn-color pl-2 py-2 justify-start mx-1 rounded;
+}
+.hero-image {
+   @apply h-[13vw] w-[13vw] xl:h-[9vw] xl:w-[9vw] block shadow;
 }

@@ -94,7 +94,7 @@ const Playlist = () => {
                   <img
                      src={playlist?.images[0]?.url}
                      alt=""
-                     className="  h-[13vw] w-[13vw] xl:h-[9vw] xl:w-[9vw] block object-cover rounded shadow"
+                     className=" hero-image rounded "
                   />
                ) : (
                   <></>
