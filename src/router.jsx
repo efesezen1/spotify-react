@@ -1,5 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { HomeLayout, Browse, Error, Login, Playlist, Profile } from './pages'
+import {
+   HomeLayout,
+   Browse,
+   Error,
+   Login,
+   Playlist,
+   Profile,
+   Artist,
+} from './pages'
 import { ErrorElement } from './components'
 const router = createBrowserRouter([
    {
@@ -17,10 +25,14 @@ const router = createBrowserRouter([
             element: <Playlist />,
             errorElement: <ErrorElement />,
          },
-
          {
             path: '/profile',
             element: <Profile />,
+            errorElement: <ErrorElement />,
+         },
+         {
+            path: '/artist/:id',
+            element: <Artist />,
             errorElement: <ErrorElement />,
          },
       ],

@@ -1,33 +1,59 @@
-import { Box, Flex, Text, Grid } from '@radix-ui/themes'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-   fetchFollowingArtists,
-   fetchUserTopItems,
-} from '../../store/slicers/userSlice'
+import { useParams } from 'react-router-dom'
+import { fetchArtist } from '../../store/slicers/userSlice'
+import { Box, Flex, Text, Grid } from '@radix-ui/themes'
 import * as Popover from '@radix-ui/react-popover'
-import { Link, useNavigate } from 'react-router-dom'
-import randomColor from 'randomcolor'
-import { random } from 'lodash'
 
-const Profile = () => {
-   const navigate = useNavigate()
-   const { userPlaylists, user, token, followingArtists, topItems } =
-      useSelector((state) => state.user)
-
-   const dispatch = useDispatch()
+const Artist = () => {
+   const params = useParams()
+   const id = params.id
+   const { token, currentArtist } = useSelector((state) => state.user)
+   const dispatch = useDispatch(fetchArtist)
    useEffect(() => {
-      if (!token) return
-      dispatch(fetchFollowingArtists({token}))
-      dispatch(fetchUserTopItems(token))
-   }, [token])
+      if (!token || !id) return
+      dispatch(fetchArtist({ token, id }))
+   }, [token, id])
 
    useEffect(() => {
-      if (!topItems) return
+      if (!currentArtist) return
+      const { artist, popularSongs, albums } = currentArtist
+      console.log(artist, popularSongs, albums)
+   }, [currentArtist])
 
-      console.log(topItems)
-   }, [topItems])
-
+   const artist = {
+      external_urls: {
+         spotify: 'https://open.spotify.com/artist/5K4W6rqBFWDnAN6FQUkS6x',
+      },
+      followers: {
+         href: null,
+         total: 27874490,
+      },
+      genres: ['chicago rap', 'hip hop', 'rap'],
+      href: 'https://api.spotify.com/v1/artists/5K4W6rqBFWDnAN6FQUkS6x?locale=en-US%2Cen%3Bq%3D0.9',
+      id: '5K4W6rqBFWDnAN6FQUkS6x',
+      images: [
+         {
+            url: 'https://i.scdn.co/image/ab6761610000e5eb6e835a500e791bf9c27a422a',
+            height: 640,
+            width: 640,
+         },
+         {
+            url: 'https://i.scdn.co/image/ab676161000051746e835a500e791bf9c27a422a',
+            height: 320,
+            width: 320,
+         },
+         {
+            url: 'https://i.scdn.co/image/ab6761610000f1786e835a500e791bf9c27a422a',
+            height: 160,
+            width: 160,
+         },
+      ],
+      name: 'Kanye West',
+      popularity: 93,
+      type: 'artist',
+      uri: 'spotify:artist:5K4W6rqBFWDnAN6FQUkS6x',
+   }
 
    return (
       <Flex
@@ -39,9 +65,9 @@ const Profile = () => {
          <Flex direction="column" className="w-full ">
             <Flex direction="row" className=" ">
                <Flex className="p-5 ">
-                  {user?.images[1]?.url ? (
+                  {artist?.images[1]?.url ? (
                      <img
-                        src={user?.images[0]?.url}
+                        src={artist?.images[0]?.url}
                         alt=""
                         className=" hero-image rounded-full object-cover  "
                      />
@@ -57,73 +83,32 @@ const Profile = () => {
                      className="ml-1 select-none"
                      color="gray"
                   >
-                     {/* {playlist?.name} */}
-                     {user?.type || ''}
+                     {artist?.type || ''}
                   </Text>
                   <Flex direction="column">
                      <Text size="9" weight="bold" className="select-none">
-                        {/* {playlist?.name} */}
-                        {user?.display_name || ''}
+                        {artist?.name || ''}
                      </Text>
                      <Text
                         className="mr-10  mt-3 ml-1 select-none"
                         size="2"
                         color="gray"
-                     >
-                        {/* {playlist?.description || ''} */}
-                     </Text>
+                     ></Text>
                      <Flex direction="row" className=" w-full">
-                        <Text
-                           className="mr-10  mt-3 ml-1 select-none"
-                           size="1"
-                           color="gray"
-                        >
-                           <Popover.Root>
-                              <Popover.Trigger>
-                                 {followingArtists?.artists?.total
-                                    ? `${followingArtists?.artists?.total} Followed Artists`
-                                    : ''}
-                              </Popover.Trigger>
-                              <Popover.Portal>
-                                 <Popover.Content className="flex flex-col   w-[15rem] max-h-[20rem] p-1 border rounded-lg text-left  mr-2 bg-white overflow-y-scroll">
-                                    {followingArtists?.artists?.items.map(
-                                       (artist) => {
-                                          return (
-                                             <Link
-                                                to={`/artist/${artist.id}`}
-                                                key={artist.id}
-                                                className="btn-color p-2 flex flex-row items-center gap-2"
-                                             >
-                                                <img
-                                                   src={artist?.images[2].url}
-                                                   alt={artist.name}
-                                                   className="w-[2rem] h-[2rem] object-cover rounded-full"
-                                                />
-                                                <Text>{artist.name}</Text>
-                                             </Link>
-                                          )
-                                       }
-                                    )}
-                                    <Popover.Arrow className=" fill-white"></Popover.Arrow>
-                                 </Popover.Content>
-                              </Popover.Portal>
-                           </Popover.Root>
-                        </Text>
                         <Text
                            className="mr-10  mt-3 ml-1"
                            size="1"
                            color="gray"
                         >
-                           {user?.followers?.total &&
-                              `${user?.followers?.total} Followers`}
+                           {artist?.followers?.total &&
+                              `${artist?.followers?.total} Followers`}
                         </Text>
                      </Flex>
                   </Flex>
                </Flex>
             </Flex>
-            {/* USER INFO END */}
-            {/* ARTISTS */}
-            <Flex
+
+            {/* <Flex
                direction="column"
                align={{ xs: 'center', md: 'start' }}
                className="overflow-y-scroll overflow-x-hidden"
@@ -133,10 +118,7 @@ const Profile = () => {
                      size="5"
                      weight="bold"
                      className="hover:underline select-none w-full  "
-                  >
-                     {/* {playlistRecommendations?.message} */}
-                     {/* Header */}
-                  </Text>
+                  ></Text>
                </Box>
                <Box className=" w-full overflow-y-scroll">
                   <Grid
@@ -148,10 +130,7 @@ const Profile = () => {
                         lg: '7',
                         xl: '9',
                      }}
-                     // direction="row"
                      align="center"
-                     // justify="center"
-                     // gap="2" // Adjust the gap as needed
                      className="w-full "
                   >
                      {topItems?.items.map((artist) => (
@@ -183,10 +162,10 @@ const Profile = () => {
                      ))}
                   </Grid>
                </Box>
-            </Flex>
+            </Flex> */}
          </Flex>
       </Flex>
    )
 }
 
-export default Profile
+export default Artist

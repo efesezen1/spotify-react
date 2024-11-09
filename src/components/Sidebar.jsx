@@ -85,7 +85,7 @@ const Sidebar = ({ className }) => {
                      <Flex direction="column" className="ml-2 select-none">
                         <Text className="text-sm text-nowrap  ">
                            {playlist.name.length > 25
-                              ? playlist.name.slice(0, 25) + '...'
+                              ? playlist.name.slice(0, 10) + '...'
                               : playlist.name}{' '}
                         </Text>
                         <Text color="gray" className="text-xs ">

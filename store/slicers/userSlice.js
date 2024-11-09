@@ -1,11 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const spotifyApi = axios.create({
+   baseURL: 'https://api.spotify.com/v1',
+})
+
+const getItem = (path, token) =>
+   spotifyApi.get(path, {
+      headers: {
+         Authorization: `Bearer ${token}`,
+      },
+   })
+
 const fetchUser = createAsyncThunk(
    'user/fetchUser',
    async (token, { dispatch }) => {
       try {
-         const response = await axios.get('https://api.spotify.com/v1/me', {
+         const response = await spotifyApi.get('/me', {
             headers: {
                Authorization: `Bearer ${token}`,
             },
@@ -22,16 +33,14 @@ const fetchUser = createAsyncThunk(
 
 const fetchUserPlaylists = createAsyncThunk(
    'user/fetchPlaylists',
-   async ({ token, id }, { dispatch, getState }) => {
+   async ({ id }, { dispatch, getState }) => {
       try {
-         const response = await axios.get(
-            `https://api.spotify.com/v1/users/${id}/playlists`,
-            {
-               headers: {
-                  Authorization: `Bearer ${token}`,
-               },
-            }
-         )
+         const token = getState()?.user?.token
+         const response = await spotifyApi.get(`/users/${id}/playlists`, {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         })
 
          return response?.data?.items
       } catch (error) {
@@ -42,16 +51,14 @@ const fetchUserPlaylists = createAsyncThunk(
 
 const fetchPlayerState = createAsyncThunk(
    'user/fetchPlayerState',
-   async ({ token, id }, { dispatch, getState }) => {
+   async ({ id }, { dispatch, getState }) => {
       try {
-         const response = await axios.get(
-            `https://api.spotify.com/v1/me/player`,
-            {
-               headers: {
-                  Authorization: `Bearer ${token}`,
-               },
-            }
-         )
+         const token = getState()?.user?.token
+         const response = await spotifyApi.get(`/me/player`, {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         })
 
          dispatch(setPlayerState(response?.data))
 
@@ -74,9 +81,6 @@ const fetchSelectedPlaylist = createAsyncThunk(
             },
          })
 
-         dispatch(setSelectedPlaylist(response?.data))
-         console.log('Fetch successful')
-
          return response.data
       } catch (error) {
          console.error(error.response.data.error)
@@ -86,10 +90,11 @@ const fetchSelectedPlaylist = createAsyncThunk(
 
 const fetchPlaylistRecommendations = createAsyncThunk(
    'user/fetchPlaylistRecommendations',
-   async ({ token, id }, { dispatch, getState }) => {
+   async ({ id }, { dispatch, getState }) => {
       try {
-         const response = await axios.get(
-            `https://api.spotify.com/v1/browse/featured-playlists?limit=10`,
+         const token = getState()?.user?.token
+         const response = await spotifyApi.get(
+            `/browse/featured-playlists?limit=10`,
             {
                headers: {
                   Authorization: `Bearer ${token}`,
@@ -103,38 +108,122 @@ const fetchPlaylistRecommendations = createAsyncThunk(
 )
 const fetchFollowingArtists = createAsyncThunk(
    'user/fetchFollowingArtists',
-   async (token, { dispatch, getState }) => {
+   async (_, { dispatch, getState }) => {
       try {
-         const response = await axios.get(
-            'https://api.spotify.com/v1/me/following?type=artist',
+         const token = getState()?.user?.token
+         const response = await spotifyApi.get('/me/following?type=artist', {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         })
+
+         return response?.data
+      } catch (error) {}
+   }
+)
+const fetchArtist = createAsyncThunk(
+   'user/fetchArtist',
+   async ({ id }, { dispatch, getState }) => {
+      try {
+         const token = getState()?.user?.token
+         const responseArtist = spotifyApi.get(`/artists/${id}`, {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         })
+
+         const responsePopularSongs = spotifyApi.get(
+            `/artists/${id}/top-tracks`,
             {
                headers: {
                   Authorization: `Bearer ${token}`,
                },
             }
          )
+         const responseAlbums = spotifyApi.get(`/artists/${id}/albums`, {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         })
 
-         return response?.data
+         const [artist, popularSongs, albums] = await Promise.all([
+            responseArtist,
+            responsePopularSongs,
+            responseAlbums,
+         ])
+
+         return {
+            artist: artist.data,
+            popularSongs: popularSongs.data,
+            albums: albums.data,
+         }
       } catch (error) {}
+   }
+)
+const fetchUserTopItems = createAsyncThunk(
+   'user/fetchUserTopItems',
+   async (_, { dispatch, getState }) => {
+      const token = getState()?.user?.token
+      // Recursive helper function to accumulate results
+      // const fetchData = async (url, accumulatedItems = []) => {
+      //    try {
+      //       const response = await spotifyApi.get(url, {
+      //          headers: {
+      //             Authorization: `Bearer ${token}`,
+      //          },
+      //       })
+      //       const data = response.data
+      //       const combinedItems = [...accumulatedItems, ...data.items]
+
+      //       // If there's a `next` URL, fetch the next page recursively
+      //       if (data.next) {
+      //          return await fetchData(data.next, combinedItems)
+      //       } else {
+      //          // No more pages, return the combined results
+      //          return combinedItems
+      //       }
+      //    } catch (error) {
+      //       throw new Error('Failed to fetch user top items.')
+      //    }
+      // }
+
+      const fetchData = async (url) => {
+         try {
+            const response = await spotifyApi.get(url, {
+               headers: {
+                  Authorization: `Bearer ${token}`,
+               },
+            })
+            return response.data
+         } catch (error) {
+            throw new Error('Failed to fetch user top items.')
+         }
+      }
+
+      // Start the recursive fetching from the initial URL
+      const initialUrl = '/me/top/artists'
+      const topItems = await fetchData(initialUrl)
+      return topItems
    }
 )
 
 const userSlice = createSlice({
    name: 'user',
    initialState: {
-      baseURL: 'https://api.spotify.com/v1',
       credentials: null,
       user: null,
       profilePicture: '',
       state: 'idle',
       error: null,
-      token: '',
+      token: null,
       userPlaylists: [],
       // returns an object with {message, playlists}
       playlistRecommendations: null,
       playerState: null,
       selectedPlaylist: null,
       followingArtists: null,
+      topItems: null,
+      currentArtist: null,
    },
    reducers: {
       setUser: (state, action) => {
@@ -181,6 +270,8 @@ const userSlice = createSlice({
          })
          .addCase(fetchSelectedPlaylist.fulfilled, (state, action) => {
             state.status = 'succeeded'
+            console.log(action.payload)
+            state.selectedPlaylist = action.payload
          })
          .addCase(fetchSelectedPlaylist.rejected, (state, action) => {
             state.status = 'failed'
@@ -219,6 +310,28 @@ const userSlice = createSlice({
             state.status = 'failed'
             state.error = action.error.message
          })
+         .addCase(fetchUserTopItems.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(fetchUserTopItems.fulfilled, (state, action) => {
+            state.status = 'succeeded'
+            state.topItems = action.payload
+         })
+         .addCase(fetchUserTopItems.rejected, (state, action) => {
+            state.status = 'failed'
+            state.error = action.error.message
+         })
+         .addCase(fetchArtist.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(fetchArtist.fulfilled, (state, action) => {
+            state.status = 'succeeded'
+            state.currentArtist = action.payload
+         })
+         .addCase(fetchArtist.rejected, (state, action) => {
+            state.status = 'failed'
+            state.error = action.error.message
+         })
    },
 })
 export {
@@ -228,6 +341,8 @@ export {
    fetchSelectedPlaylist,
    fetchPlaylistRecommendations,
    fetchFollowingArtists,
+   fetchUserTopItems,
+   fetchArtist,
 }
 export const {
    setUser,

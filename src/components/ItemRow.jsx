@@ -24,26 +24,7 @@ const ItemRow = ({ playlistRecommendations }) => {
       ],
    }
 
-   const user = useSelector((state) => state.user)
-   const fetchPlaylist = async (playlistURL) => {
-      const token = user.token
-      console.log(token)
 
-      console.log('Playlist fetching...')
-      try {
-         const response = await axios.get(playlistURL, {
-            headers: {
-               Authorization: `Bearer ${token}`,
-            },
-         })
-
-         console.log('Fetch successfull')
-         console.log(response.data)
-         // return response.data
-      } catch (error) {
-         console.error(error.response.data.error)
-      }
-   }
 
    return (
       <Flex direction="column">
@@ -70,7 +51,7 @@ const ItemRow = ({ playlistRecommendations }) => {
                         // fetchPlaylist(playlist.href)
                      }
                      key={playlist.id}
-                     className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded p-1 w-[200px] transition-all duration-200 "
+                     className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded p-1  transition-all duration-200 "
                   >
                      <img
                         src={playlist.images[0].url}

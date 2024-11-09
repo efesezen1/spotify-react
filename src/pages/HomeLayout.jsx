@@ -8,7 +8,7 @@ import Navbar from '../components/Navbar'
 import SetUser from '../components/SetUser'
 const HomeLayout = () => {
    return (
-      <Flex direction="column" className="h-screen ">
+      <Flex direction="column" className="h-screen overflow-hidden ">
          <SetUser />
          <Navbar />
          <Flex
@@ -17,7 +17,10 @@ const HomeLayout = () => {
             style={{ width: '100%' }}
          >
             <Sidebar className="w-1/4 lg:w-1/6" />
-            <Box className="w-3/4 lg:w-5/6  h-full" p="3">
+            <Box
+               className="w-3/4 lg:w-5/6  h-full max-w-[1955px] mx-auto  rounded "
+               p="3"
+            >
                <Outlet />
             </Box>
          </Flex>
