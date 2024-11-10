@@ -4,7 +4,7 @@ import { Box, Text, Flex, Button, Table } from '@radix-ui/themes'
 import {
    fetchSelectedPlaylist,
    setSelectedPlaylist,
-} from '../../store/slicers/userSlice'
+} from '../store/slicers/userSlice'
 import { useParams } from 'react-router-dom'
 import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
 

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
    fetchPlaylistRecommendations,
    fetchUser,
-} from '../../store/slicers/userSlice'
+} from '../store/slicers/userSlice'
 import { Flex, Text, Box, Grid } from '@radix-ui/themes'
 import Slider from 'react-slick'
 import { motion } from 'framer-motion'

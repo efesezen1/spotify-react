@@ -1,7 +1,7 @@
 import { Box, Text, Flex } from '@radix-ui/themes'
 import React from 'react'
 import Slider from 'react-slick'
-import { fetchSelectedPlaylist } from '../../store/slicers/userSlice'
+import { fetchSelectedPlaylist } from '../store/slicers/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import _ from 'lodash'
 import axios from 'axios'
@@ -23,8 +23,6 @@ const ItemRow = ({ playlistRecommendations }) => {
          },
       ],
    }
-
-
 
    return (
       <Flex direction="column">

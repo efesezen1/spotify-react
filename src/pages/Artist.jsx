@@ -1,59 +1,42 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
-import { fetchArtist } from '../../store/slicers/userSlice'
-import { Box, Flex, Text, Grid } from '@radix-ui/themes'
+import { fetchArtist, setCurrentArtist } from '../store/slicers/userSlice'
+import { Box, Flex, Text, Grid, Table } from '@radix-ui/themes'
 import * as Popover from '@radix-ui/react-popover'
+import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
 
 const Artist = () => {
    const params = useParams()
    const id = params.id
    const { token, currentArtist } = useSelector((state) => state.user)
    const dispatch = useDispatch(fetchArtist)
+   const [artist, setArtist] = useState(null)
+   const [popularSongs, setPopularSongs] = useState(null)
+   const [albums, setAlbums] = useState(null)
    useEffect(() => {
       if (!token || !id) return
       dispatch(fetchArtist({ token, id }))
    }, [token, id])
 
+   const formatDuration = (ms) => {
+      const minutes = Math.floor(ms / 60000)
+      const seconds = ((ms % 60000) / 1000).toFixed(0)
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`
+   }
+
    useEffect(() => {
       if (!currentArtist) return
       const { artist, popularSongs, albums } = currentArtist
-      console.log(artist, popularSongs, albums)
-   }, [currentArtist])
+      console.log(popularSongs.tracks)
+      setArtist(artist)
+      setPopularSongs(popularSongs.tracks)
+      setAlbums(albums)
 
-   const artist = {
-      external_urls: {
-         spotify: 'https://open.spotify.com/artist/5K4W6rqBFWDnAN6FQUkS6x',
-      },
-      followers: {
-         href: null,
-         total: 27874490,
-      },
-      genres: ['chicago rap', 'hip hop', 'rap'],
-      href: 'https://api.spotify.com/v1/artists/5K4W6rqBFWDnAN6FQUkS6x?locale=en-US%2Cen%3Bq%3D0.9',
-      id: '5K4W6rqBFWDnAN6FQUkS6x',
-      images: [
-         {
-            url: 'https://i.scdn.co/image/ab6761610000e5eb6e835a500e791bf9c27a422a',
-            height: 640,
-            width: 640,
-         },
-         {
-            url: 'https://i.scdn.co/image/ab676161000051746e835a500e791bf9c27a422a',
-            height: 320,
-            width: 320,
-         },
-         {
-            url: 'https://i.scdn.co/image/ab6761610000f1786e835a500e791bf9c27a422a',
-            height: 160,
-            width: 160,
-         },
-      ],
-      name: 'Kanye West',
-      popularity: 93,
-      type: 'artist',
-      uri: 'spotify:artist:5K4W6rqBFWDnAN6FQUkS6x',
-   }
+      return () => {
+         setCurrentArtist(null)
+      }
+   }, [currentArtist])
 
    return (
       <Flex
@@ -107,6 +90,91 @@ const Artist = () => {
                   </Flex>
                </Flex>
             </Flex>
+
+            <Table.Root
+               size="2"
+               layout=""
+               className="overflow-y-scroll"
+               onClick={(e) => e.stopPropagation()}
+            >
+               <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10">
+                  <Table.Row>
+                     <Table.ColumnHeaderCell>
+                        <Box className="text-xs">#</Box>
+                     </Table.ColumnHeaderCell>
+                     <Table.ColumnHeaderCell>
+                        <Box className="text-xs">Title</Box>
+                     </Table.ColumnHeaderCell>
+                     <Table.ColumnHeaderCell>
+                        <Box className="text-xs">Album</Box>
+                     </Table.ColumnHeaderCell>
+
+                     <Table.ColumnHeaderCell>
+                        <Box className="text-xs">Date Added</Box>
+                     </Table.ColumnHeaderCell>
+                     <Table.ColumnHeaderCell>
+                        <Box className="text-xs">
+                           <TimerIcon />
+                        </Box>
+                     </Table.ColumnHeaderCell>
+                  </Table.Row>
+               </Table.Header>
+
+               <Table.Body>
+                  {popularSongs?.map((item, index) => {
+                     return (
+                        <Table.Row
+                           key={item?.id}
+                           // onClick={() => setSelectedTrack(item.id)}
+                           // onMouseEnter={() =>
+                           //    setCurrentUserIdOnHover(item.track.id)
+                           // }
+                           // onMouseLeave={() => setCurrentUserIdOnHover(null)}
+                           // ${hoverClass(item)
+                           // ${activeClass(item)}
+                           className={`select-none active:backdrop-brightness-90}`}
+                        >
+                           <Table.RowHeaderCell>
+                              {/* {currentUserIdOnHover === item.track.id ||
+                              selectedTrack === item.track.id ? (
+                                 <PlayIcon />
+                              ) : (
+                                 index + 1
+                              )} */}
+                              {index + 1}
+                           </Table.RowHeaderCell>
+                           <Table.Cell>
+                              <Flex direction={'column'}>
+                                 {/* Song Title */}
+                                 <Text size="2">{item?.name}</Text>
+                                 {/* Artists */}
+                                 <Text size="1">
+                                    {item.artists
+                                       .map((artist) => artist?.name)
+                                       .join(', ')}
+                                 </Text>
+                              </Flex>
+                           </Table.Cell>
+                           <Table.Cell>
+                              {/* Album Name */}
+                              <Text size="2">{item?.album?.name}</Text>
+                           </Table.Cell>
+                           <Table.Cell>
+                              <Text className="text-nowrap" size="2">
+                                 {/* {timeAgo(item.release_date)} */}
+                                 efe
+                              </Text>
+                           </Table.Cell>
+                           <Table.Cell>
+                              <Text size="2">
+                                 {formatDuration(item?.duration_ms)}
+                              </Text>
+                           </Table.Cell>
+                        </Table.Row>
+                     )
+                  })}
+               </Table.Body>
+            </Table.Root>
 
             {/* <Flex
                direction="column"

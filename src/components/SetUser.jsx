@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchUser } from '../../store/slicers/userSlice'
+import { fetchUser } from '../store/slicers/userSlice'
 
 const SetUser = () => {
    const dispatch = useDispatch()

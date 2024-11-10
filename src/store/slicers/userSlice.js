@@ -16,11 +16,7 @@ const fetchUser = createAsyncThunk(
    'user/fetchUser',
    async (token, { dispatch }) => {
       try {
-         const response = await spotifyApi.get('/me', {
-            headers: {
-               Authorization: `Bearer ${token}`,
-            },
-         })
+         const response = await getItem('/me', token)
          const credentials = { token, id: response?.data?.id }
          dispatch(setCredentials(credentials))
          dispatch(setToken(token))
@@ -36,11 +32,7 @@ const fetchUserPlaylists = createAsyncThunk(
    async ({ id }, { dispatch, getState }) => {
       try {
          const token = getState()?.user?.token
-         const response = await spotifyApi.get(`/users/${id}/playlists`, {
-            headers: {
-               Authorization: `Bearer ${token}`,
-            },
-         })
+         const response = await getItem(`/users/${id}/playlists`, token)
 
          return response?.data?.items
       } catch (error) {
@@ -54,11 +46,8 @@ const fetchPlayerState = createAsyncThunk(
    async ({ id }, { dispatch, getState }) => {
       try {
          const token = getState()?.user?.token
-         const response = await spotifyApi.get(`/me/player`, {
-            headers: {
-               Authorization: `Bearer ${token}`,
-            },
-         })
+
+         const response = await getItem(`/me/player`, token)
 
          dispatch(setPlayerState(response?.data))
 
@@ -93,13 +82,9 @@ const fetchPlaylistRecommendations = createAsyncThunk(
    async ({ id }, { dispatch, getState }) => {
       try {
          const token = getState()?.user?.token
-         const response = await spotifyApi.get(
+         const response = await getItem(
             `/browse/featured-playlists?limit=10`,
-            {
-               headers: {
-                  Authorization: `Bearer ${token}`,
-               },
-            }
+            token
          )
 
          return response?.data
@@ -111,11 +96,8 @@ const fetchFollowingArtists = createAsyncThunk(
    async (_, { dispatch, getState }) => {
       try {
          const token = getState()?.user?.token
-         const response = await spotifyApi.get('/me/following?type=artist', {
-            headers: {
-               Authorization: `Bearer ${token}`,
-            },
-         })
+
+         const response = await getItem('/me/following?type=artist', token)
 
          return response?.data
       } catch (error) {}
@@ -248,6 +230,9 @@ const userSlice = createSlice({
       setCredentials: (state, action) => {
          state.credentials = action.payload
       },
+      setCurrentArtist: (state, action) => {
+         state.currentArtist = action.payload
+      },
    },
    extraReducers: (builder) => {
       builder
@@ -256,7 +241,7 @@ const userSlice = createSlice({
          })
          .addCase(fetchUser.fulfilled, (state, action) => {
             state.status = 'succeeded'
-            console.log(action.payload)
+            // console.log(action.payload)
             state.user = action.payload
             state.profilePicture = action.payload.images[0].url
          })
@@ -352,6 +337,7 @@ export const {
    setPlaylistRecommendations,
    setPlayerState,
    setSelectedPlaylist,
+   setCurrentArtist,
    setCredentials,
 } = userSlice.actions
 export default userSlice.reducer

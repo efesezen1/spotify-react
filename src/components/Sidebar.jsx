@@ -7,7 +7,7 @@ import { ArrowRightIcon, PlusIcon } from '@radix-ui/react-icons'
 import {
    fetchSelectedPlaylist,
    fetchUserPlaylists,
-} from '../../store/slicers/userSlice'
+} from '../store/slicers/userSlice'
 import { useNavigate } from 'react-router-dom'
 
 const Sidebar = ({ className }) => {

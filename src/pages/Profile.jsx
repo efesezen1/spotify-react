@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import {
    fetchFollowingArtists,
    fetchUserTopItems,
-} from '../../store/slicers/userSlice'
+} from '../store/slicers/userSlice'
 import * as Popover from '@radix-ui/react-popover'
 import { Link, useNavigate } from 'react-router-dom'
 import randomColor from 'randomcolor'
@@ -18,16 +18,9 @@ const Profile = () => {
    const dispatch = useDispatch()
    useEffect(() => {
       if (!token) return
-      dispatch(fetchFollowingArtists({token}))
+      dispatch(fetchFollowingArtists({ token }))
       dispatch(fetchUserTopItems(token))
    }, [token])
-
-   useEffect(() => {
-      if (!topItems) return
-
-      console.log(topItems)
-   }, [topItems])
-
 
    return (
       <Flex
