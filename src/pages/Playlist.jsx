@@ -5,7 +5,7 @@ import {
    fetchSelectedPlaylist,
    setSelectedPlaylist,
 } from '../store/slicers/userSlice'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
 
 const Playlist = () => {
@@ -171,8 +171,16 @@ const Playlist = () => {
                               <Text size="2">{item.track.name}</Text>
                               <Text size="1">
                                  {item.track.artists
-                                    .map((artist) => artist.name)
-                                    .join(', ')}
+                                    .map((artist) => (
+                                       <Link
+                                          to={`/artist/${artist.id}`}
+                                          key={artist.id}
+                                          className="hover:underline"
+                                       >
+                                          {artist.name}
+                                       </Link>
+                                    ))
+                                    .reduce((prev, curr) => [prev, ', ', curr])}
                               </Text>
                            </Flex>
                         </Table.Cell>

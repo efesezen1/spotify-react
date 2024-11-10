@@ -14,11 +14,16 @@ const Artist = () => {
    const [artist, setArtist] = useState(null)
    const [popularSongs, setPopularSongs] = useState(null)
    const [albums, setAlbums] = useState(null)
+   const [selectedTrack, setSelectedTrack] = useState(null)
+   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
+   const hoverClass = (item) =>
+      selectedTrack !== item.id ? 'hover:backdrop-brightness-95' : ''
    useEffect(() => {
       if (!token || !id) return
       dispatch(fetchArtist({ token, id }))
    }, [token, id])
-
+   const activeClass = (item) =>
+      selectedTrack === item.id ? 'backdrop-brightness-90' : ''
    const formatDuration = (ms) => {
       const minutes = Math.floor(ms / 60000)
       const seconds = ((ms % 60000) / 1000).toFixed(0)
@@ -34,7 +39,8 @@ const Artist = () => {
       setAlbums(albums)
 
       return () => {
-         setCurrentArtist(null)
+         dispatch(setCurrentArtist(null))
+         setSelectedTrack(null)
       }
    }, [currentArtist])
 
@@ -43,6 +49,7 @@ const Artist = () => {
          className="rounded bg-gradient-to-b from-lime-500 via-white via-50% to-slate-white h-full w-full overflow-y-scroll"
          direction="column"
          align={'center'}
+         onClick={() => setSelectedTrack(null)}
       >
          {/* USER INFO */}
          <Flex direction="column" className="w-full ">
@@ -90,14 +97,18 @@ const Artist = () => {
                   </Flex>
                </Flex>
             </Flex>
-
+            {popularSongs && (
+               <Text weight="bold" size="7" className="ml-3">
+                  Popular
+               </Text>
+            )}
             <Table.Root
                size="2"
                layout=""
                className="overflow-y-scroll"
                onClick={(e) => e.stopPropagation()}
             >
-               <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10">
+               {/* <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10">
                   <Table.Row>
                      <Table.ColumnHeaderCell>
                         <Box className="text-xs">#</Box>
@@ -110,61 +121,57 @@ const Artist = () => {
                      </Table.ColumnHeaderCell>
 
                      <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Date Added</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
                         <Box className="text-xs">
                            <TimerIcon />
                         </Box>
                      </Table.ColumnHeaderCell>
                   </Table.Row>
-               </Table.Header>
+               </Table.Header> */}
 
                <Table.Body>
                   {popularSongs?.map((item, index) => {
                      return (
                         <Table.Row
                            key={item?.id}
-                           // onClick={() => setSelectedTrack(item.id)}
-                           // onMouseEnter={() =>
-                           //    setCurrentUserIdOnHover(item.track.id)
-                           // }
-                           // onMouseLeave={() => setCurrentUserIdOnHover(null)}
-                           // ${hoverClass(item)
-                           // ${activeClass(item)}
-                           className={`select-none active:backdrop-brightness-90}`}
+                           onClick={() => {
+                              console.log(item)
+                              setSelectedTrack(item)
+                           }}
+                           onMouseEnter={() => setCurrentUserIdOnHover(item.id)}
+                           onMouseLeave={() => setCurrentUserIdOnHover(null)}
+                           className={`select-none active:backdrop-brightness-90 ${hoverClass(
+                              item
+                           )} ${activeClass(item)}`}
                         >
                            <Table.RowHeaderCell>
-                              {/* {currentUserIdOnHover === item.track.id ||
-                              selectedTrack === item.track.id ? (
-                                 <PlayIcon />
+                              {currentUserIdOnHover === item.id ||
+                              selectedTrack === item.id ? (
+                                 <PlayIcon
+                                    onClick={() => {
+                                       setSelectedTrack(item)
+                                    }}
+                                 />
                               ) : (
                                  index + 1
-                              )} */}
-                              {index + 1}
+                              )}
                            </Table.RowHeaderCell>
                            <Table.Cell>
                               <Flex direction={'column'}>
                                  {/* Song Title */}
                                  <Text size="2">{item?.name}</Text>
                                  {/* Artists */}
-                                 <Text size="1">
+                                 {/* <Text size="1">
                                     {item.artists
                                        .map((artist) => artist?.name)
                                        .join(', ')}
-                                 </Text>
+                                 </Text> */}
                               </Flex>
                            </Table.Cell>
                            <Table.Cell>
                               {/* Album Name */}
                               <Text size="2">{item?.album?.name}</Text>
                            </Table.Cell>
-                           <Table.Cell>
-                              <Text className="text-nowrap" size="2">
-                                 {/* {timeAgo(item.release_date)} */}
-                                 efe
-                              </Text>
-                           </Table.Cell>
+
                            <Table.Cell>
                               <Text size="2">
                                  {formatDuration(item?.duration_ms)}
@@ -175,7 +182,6 @@ const Artist = () => {
                   })}
                </Table.Body>
             </Table.Root>
-
             {/* <Flex
                direction="column"
                align={{ xs: 'center', md: 'start' }}
