@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
-import { ArrowRightIcon, PlusIcon } from '@radix-ui/react-icons'
+import { ArrowRightIcon, PlusIcon, ValueNoneIcon } from '@radix-ui/react-icons'
 import {
    fetchSelectedPlaylist,
    fetchUserPlaylists,
@@ -63,33 +63,43 @@ const Sidebar = ({ className }) => {
             </Flex>
             {userPlaylists.map((playlist) => (
                <Box
-                  key={playlist.id}
+                  key={playlist?.id}
                   onClick={() => {
-                     dispatch(fetchSelectedPlaylist(playlist.href)).then(() => {
-                        navigate('/playlist/' + playlist.id)
-                     })
+                     dispatch(fetchSelectedPlaylist(playlist?.href)).then(
+                        () => {
+                           navigate('/playlist/' + playlist?.id)
+                        }
+                     )
                   }}
-                  className={`${playlist.id === id ? 'bg-red-100' : ''} ${
-                     playlist.id !== id ? 'hover:bg-red-50' : ''
+                  className={`${playlist?.id === id ? 'bg-red-100' : ''} ${
+                     playlist?.id !== id ? 'hover:bg-red-50' : ''
                   } active:bg-red-100 transition-all duration-300  rounded-md pr-3`}
                >
                   <Flex justify="" align="center" className="">
                      <Box>
-                        <img
-                           className="w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2"
-                           src={playlist.images[0].url}
-                           alt=""
-                        />
+                        {/* {console.log(playlist?.images)} */}
+                        {playlist?.images?.at(0)?.url ? (
+                           <img
+                              className="w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2"
+                              src={playlist?.images?.at(0)?.url}
+                              alt=""
+                           />
+                        ) : (
+                           <Box className="w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2 flex justify-center items-center  shadow">
+                              <ValueNoneIcon />
+                           </Box>
+                        )}
                      </Box>
 
+                     {console.log(playlist)}
                      <Flex direction="column" className="ml-2 select-none">
                         <Text className="text-sm text-nowrap  ">
-                           {playlist.name.length > 25
-                              ? playlist.name.slice(0, 10) + '...'
-                              : playlist.name}{' '}
+                           {playlist?.name.length > 25
+                              ? playlist?.name.slice(0, 10) + '...'
+                              : playlist?.name}{' '}
                         </Text>
                         <Text color="gray" className="text-xs ">
-                           {playlist.owner.display_name}
+                           {playlist?.owner?.display_name || 'Unknown'}
                         </Text>
                      </Flex>
                   </Flex>

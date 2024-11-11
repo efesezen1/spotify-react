@@ -7,7 +7,12 @@ import {
    setCurrentSong,
 } from '../store/slicers/userSlice'
 import { Link, useParams } from 'react-router-dom'
-import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
+import {
+   PauseIcon,
+   PlayIcon,
+   TimerIcon,
+   ValueNoneIcon,
+} from '@radix-ui/react-icons'
 
 const Playlist = () => {
    const { id } = useParams()
@@ -96,14 +101,16 @@ const Playlist = () => {
       >
          <Flex direction="row" className="w-full">
             <Flex className="p-5 ">
-               {playlist?.images[0]?.url ? (
+               {playlist?.images?.at(0)?.url ? (
                   <img
-                     src={playlist?.images[0]?.url}
+                     src={playlist?.images.at(0)?.url}
                      alt=""
                      className=" hero-image rounded "
                   />
                ) : (
-                  <></>
+                  <Box className="hero-image rounded  !flex justify-center items-center ">
+                     <ValueNoneIcon />
+                  </Box>
                )}
             </Flex>
 
