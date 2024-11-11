@@ -87,18 +87,18 @@ const Navbar = () => {
                   </Popover.Trigger>
                </Tooltip>
                <Popover.Portal>
-                  <Popover.Content className="flex flex-col   w-[200px]  border rounded-lg text-left  mr-2 bg-white">
-                     <Link to="/account" className="user-menu-item mt-1">
+                  <Popover.Content className="popover-menu  w-[200px]">
+                     <Link to="/account" className="popover-menu-item mt-1">
                         Account
                      </Link>
-                     <Link to="/profile" className="user-menu-item ">
+                     <Link to="/profile" className="popover-menu-item ">
                         Profile
                      </Link>
 
-                     <Link className="user-menu-item mb-1">Settings</Link>
+                     <Link className="popover-menu-item mb-1">Settings</Link>
 
                      <hr />
-                     <Logout className="user-menu-item my-1  mx-1 " />
+                     <Logout className="popover-menu-item my-1  mx-1 " />
 
                      {/* <Popover.Close>Close</Popover.Close> */}
                      <Popover.Arrow className=" fill-white"></Popover.Arrow>

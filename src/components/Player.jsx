@@ -83,7 +83,6 @@ const Player = ({ previewUrl }) => {
             ref={audioRef}
             src={currentSong?.track?.preview_url}
             loop={isOnLoop}
-            className='bg-red-600'
          />
 
          <Flex className="w-1/4 lg:w-1/6 bg-slate-50 mb-2">efe</Flex>

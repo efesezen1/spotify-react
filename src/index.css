@@ -40,9 +40,14 @@
    @apply hover:bg-red-50 active:bg-red-100 rounded;
 }
 
-.user-menu-item {
+.popover-menu {
+   @apply flex flex-col border rounded-lg text-left  mr-2 bg-white;
+}
+
+.popover-menu-item {
    @apply btn-color pl-2 py-2 justify-start mx-1 rounded;
 }
+
 .hero-image {
    @apply h-[13vw] w-[13vw] xl:h-[9vw] xl:w-[9vw] block shadow;
 }
