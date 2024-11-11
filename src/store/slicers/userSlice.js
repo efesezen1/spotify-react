@@ -206,12 +206,20 @@ const userSlice = createSlice({
       followingArtists: null,
       topItems: null,
       currentArtist: null,
+      currentSong: null,
+      isPlaying: false,
+      isOnLoop: false,
+      isShuffled: false,
    },
    reducers: {
       setUser: (state, action) => {
          state.user = action.payload
 
          state.profilePicture = action.payload.images[0].url
+      },
+      setCurrentSong: (state, action) => {
+         console.log('setCurrentSong fired', action.payload)
+         state.currentSong = action.payload
       },
       removeUser: (state) => {
          state.user = null
@@ -232,6 +240,18 @@ const userSlice = createSlice({
       },
       setCurrentArtist: (state, action) => {
          state.currentArtist = action.payload
+      },
+      setIsPlaying: (state, action) => {
+         state.isPlaying = action.payload
+      },
+      setIsOnLoop: (state, action) => {
+         state.isOnLoop = action.payload
+      },
+      setIsShuffled: (state, action) => {
+         state.isShuffled = action.payload
+      },
+      setError: (state, action) => {
+         state.error = action.payload
       },
    },
    extraReducers: (builder) => {
@@ -339,5 +359,9 @@ export const {
    setSelectedPlaylist,
    setCurrentArtist,
    setCredentials,
+   setCurrentSong,
+   setIsOnLoop,
+   setIsPlaying,
+   setIsShuffled,
 } = userSlice.actions
 export default userSlice.reducer

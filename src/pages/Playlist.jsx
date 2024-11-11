@@ -4,6 +4,7 @@ import { Box, Text, Flex, Button, Table } from '@radix-ui/themes'
 import {
    fetchSelectedPlaylist,
    setSelectedPlaylist,
+   setCurrentSong,
 } from '../store/slicers/userSlice'
 import { Link, useParams } from 'react-router-dom'
 import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
@@ -11,8 +12,13 @@ import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
 const Playlist = () => {
    const { id } = useParams()
    const container = useRef(null)
-   const playlist = useSelector((state) => state.user.selectedPlaylist)
-   const token = useSelector((state) => state.user.token)
+
+   const {
+      token,
+      selectedPlaylist: playlist,
+      isPlaying,
+      currentSong,
+   } = useSelector((state) => state.user)
 
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
    const [selectedTrack, setSelectedTrack] = useState(null)
@@ -161,9 +167,25 @@ const Playlist = () => {
                         <Table.RowHeaderCell>
                            {currentUserIdOnHover === item.track.id ||
                            selectedTrack === item.track.id ? (
-                              <PlayIcon />
+                              isPlaying ? (
+                                 currentSong.track.id === item.track.id ? (
+                                    <PauseIcon />
+                                 ) : (
+                                    <PlayIcon
+                                       onClick={() =>
+                                          dispatch(setCurrentSong(item))
+                                       }
+                                    />
+                                 )
+                              ) : (
+                                 <PlayIcon
+                                    onClick={() =>
+                                       dispatch(setCurrentSong(item))
+                                    }
+                                 />
+                              )
                            ) : (
-                              index + 1
+                              <Box className="text-xs">{index + 1}</Box>
                            )}
                         </Table.RowHeaderCell>
                         <Table.Cell>
