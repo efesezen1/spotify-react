@@ -35,6 +35,12 @@ const router = createBrowserRouter([
             element: <Artist />,
             errorElement: <ErrorElement />,
          },
+         //  TODO : ADD ALBUM PAGE
+         // {
+         //    path: '/album/:id',
+         //    element: <Playlist />,
+         //    errorElement: <ErrorElement />,
+         // },
       ],
    },
    {

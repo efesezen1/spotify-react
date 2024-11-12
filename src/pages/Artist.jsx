@@ -33,7 +33,6 @@ const Artist = () => {
    useEffect(() => {
       if (!currentArtist) return
       const { artist, popularSongs, albums } = currentArtist
-      console.log(popularSongs.tracks)
       setArtist(artist)
       setPopularSongs(popularSongs.tracks)
       setAlbums(albums)
@@ -134,7 +133,7 @@ const Artist = () => {
                         <Table.Row
                            key={item?.id}
                            onClick={() => {
-                              console.log(item)
+                              // console.log(item)
                               setSelectedTrack(item)
                            }}
                            onMouseEnter={() => setCurrentUserIdOnHover(item.id)}

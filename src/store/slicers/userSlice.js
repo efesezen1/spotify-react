@@ -189,6 +189,54 @@ const fetchUserTopItems = createAsyncThunk(
    }
 )
 
+const createPlaylist = createAsyncThunk(
+   'user/createPlaylist',
+   async ({ name, description, isPublic }, { dispatch, getState }) => {
+      const token = getState()?.user?.token
+      const userId = getState()?.user?.user?.id
+      console.log(name, description, isPublic, 'in da slice.')
+      const response = await spotifyApi.post(
+         `/users/${userId}/playlists`,
+         {
+            name,
+            description,
+            public: isPublic,
+         },
+         {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         }
+      )
+      return response.data
+   }
+)
+const editPlaylist = createAsyncThunk(
+   'user/editPlaylist',
+   async (
+      { name, description, isPublic, playlistId },
+      { dispatch, getState }
+   ) => {
+      const token = getState()?.user?.token
+      const userId = getState()?.user?.user?.id
+      console.log(name, description, isPublic, 'in da slice.')
+      const response = await spotifyApi.post(
+         `/playlists/${playlistId}`,
+         {
+            name,
+            description,
+            public: isPublic,
+         },
+         {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         }
+      )
+      return response.data
+   }
+)
+
 const userSlice = createSlice({
    name: 'user',
    initialState: {
@@ -275,7 +323,6 @@ const userSlice = createSlice({
          })
          .addCase(fetchSelectedPlaylist.fulfilled, (state, action) => {
             state.status = 'succeeded'
-            console.log(action.payload)
             state.selectedPlaylist = action.payload
          })
          .addCase(fetchSelectedPlaylist.rejected, (state, action) => {
@@ -337,8 +384,22 @@ const userSlice = createSlice({
             state.status = 'failed'
             state.error = action.error.message
          })
+         .addCase(createPlaylist.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(editPlaylist.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(editPlaylist.fulfilled, (state) => {
+            state.status = 'succeeded'
+         })
+         .addCase(editPlaylist.rejected, (state) => {
+            state.status = 'failed'
+            state.error = action.error.message
+         })
    },
 })
+
 export {
    fetchUser,
    fetchPlayerState,
@@ -348,6 +409,8 @@ export {
    fetchFollowingArtists,
    fetchUserTopItems,
    fetchArtist,
+   createPlaylist,
+   editPlaylist,
 }
 export const {
    setUser,

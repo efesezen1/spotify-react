@@ -1,21 +1,52 @@
 import { Box } from '@radix-ui/themes'
-import React, { useEffect } from 'react'
+import usePrevious from '../hook/prevId'
+import * as Dialog from '@radix-ui/react-dialog'
+import * as Switch from '@radix-ui/react-switch'
+import * as Popover from '@radix-ui/react-popover'
+
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
-import { ArrowRightIcon, PlusIcon, ValueNoneIcon } from '@radix-ui/react-icons'
+import {
+   ArrowRightIcon,
+   Cross2Icon,
+   PlusIcon,
+   ValueNoneIcon,
+} from '@radix-ui/react-icons'
 import {
    fetchSelectedPlaylist,
    fetchUserPlaylists,
+   createPlaylist,
 } from '../store/slicers/userSlice'
-import { useNavigate } from 'react-router-dom'
+import {
+   useLocation,
+   useNavigate,
+   useNavigation,
+   useSearchParams,
+} from 'react-router-dom'
 
 const Sidebar = ({ className }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
+   const location = useLocation()
    const { userPlaylists, credentials } = useSelector((state) => state.user)
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
+   // const searchParams = useSearchParams()
+
+   useEffect(() => {
+      const loc = location.pathname.split('/').filter((x) => x !== '')
+      if (loc?.at(0) === 'playlist') {
+         const currentLocation = loc?.at(1)
+         const isCurrentIdNotIncludedInPlaylist = userPlaylists.some((item) => {
+            return item?.id === currentLocation
+         })
+         if (!isCurrentIdNotIncludedInPlaylist) {
+            dispatch(fetchUserPlaylists(credentials))
+         }
+      }
+   }, [location.pathname])
 
    useEffect(() => {
       if (!credentials) return
@@ -42,15 +73,29 @@ const Sidebar = ({ className }) => {
                      Playlists
                   </Text>
                </Flex>
-               <Flex gap="5">
-                  <Button
-                     variant="ghost"
-                     // radius="full"
-                     color="white"
-                     className=" color-white rounded w-5 h-7"
-                  >
-                     <PlusIcon />
-                  </Button>
+               <Flex gap="1">
+                  <Popover.Root>
+                     <Popover.Trigger className=" color-white rounded w-5 h-7">
+                        <Button
+                           variant="ghost"
+                           className="h-full w-full"
+                           // radius="full"
+                           color="white"
+                        >
+                           <PlusIcon />
+                        </Button>
+                     </Popover.Trigger>
+                     <Popover.Anchor />
+                     <Popover.Portal>
+                        <Popover.Content className="popover-menu w-[200px]">
+                           <CreatePlaylist />
+
+                           <Button className="popover-menu-item mb-1">
+                              Create new playlist
+                           </Button>
+                        </Popover.Content>
+                     </Popover.Portal>
+                  </Popover.Root>
                   <Button
                      variant="ghost"
                      // radius="full"
@@ -61,7 +106,7 @@ const Sidebar = ({ className }) => {
                   </Button>
                </Flex>
             </Flex>
-            {userPlaylists.map((playlist) => (
+            {userPlaylists?.map((playlist) => (
                <Box
                   key={playlist?.id}
                   onClick={() => {
@@ -80,18 +125,17 @@ const Sidebar = ({ className }) => {
                         {/* {console.log(playlist?.images)} */}
                         {playlist?.images?.at(0)?.url ? (
                            <img
-                              className="w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2"
+                              className="sidebar-image object-contain"
                               src={playlist?.images?.at(0)?.url}
                               alt=""
                            />
                         ) : (
-                           <Box className="w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2 flex justify-center items-center  shadow">
+                           <Box className="sidebar-image flex justify-center items-center  ">
                               <ValueNoneIcon />
                            </Box>
                         )}
                      </Box>
 
-                     {console.log(playlist)}
                      <Flex direction="column" className="ml-2 select-none">
                         <Text className="text-sm text-nowrap  ">
                            {playlist?.name.length > 25
@@ -107,6 +151,123 @@ const Sidebar = ({ className }) => {
             ))}
          </Box>
       </>
+   )
+}
+
+const CreatePlaylist = () => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+   const navigation = useNavigation()
+   const [isPublic, setIsPublic] = useState(false)
+   
+
+   // useEffect(() => {
+   //    console.log(isPublic)
+   // }, [isPublic])
+
+   const user = useSelector((state) => state.user.user)
+   const handleCreatePlaylist = ({ name, description, isPublic }) => {
+      // console.log(user)
+      dispatch(createPlaylist({ name, description, isPublic }))
+         .then((action) => {
+            const response = action.payload
+            if (!response?.id) return
+            navigate('/playlist/' + response?.id)
+         })
+         .catch((error) => console.log(error))
+   }
+
+   return (
+      <Dialog.Root>
+         <Dialog.Trigger>
+            <Button className="w-[calc(200px-.6rem)] popover-menu-item mt-1 ">
+               Create new playlist
+            </Button>
+         </Dialog.Trigger>
+         <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-blackA6 data-[state=open]:animate-overlayShow" />
+            <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] max-w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none data-[state=open]:animate-contentShow">
+               <Dialog.Title className="m-0 text-[17px] font-medium capitalize ">
+                  Create new playlist
+               </Dialog.Title>
+               <Dialog.Description className="mb-5 mt-2.5 text-[15px] leading-normal ">
+                  Create your playlist here. Click create when you're done.
+               </Dialog.Description>
+               <fieldset className="mb-[15px] flex items-center gap-5">
+                  <label
+                     className="w-[90px] text-right text-[15px] capitalize"
+                     htmlFor="playlistName"
+                  >
+                     Playlist Name
+                  </label>
+                  <input
+                     className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
+                     id="playlistName"
+                     defaultValue="My Playlist #48"
+                  />
+               </fieldset>
+               <fieldset className="mb-[15px] flex items-center gap-5">
+                  <label
+                     className="w-[90px] text-right text-[15px] "
+                     htmlFor="description"
+                  >
+                     Description
+                  </label>
+                  <input
+                     className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
+                     id="description"
+                     defaultValue="New playlist description"
+                  />
+               </fieldset>
+               <form className="mb-[15px] flex items-center gap-5">
+                  <label
+                     className="w-[90px] text-right text-[15px] "
+                     htmlFor="playlist-audience"
+                  >
+                     Make private
+                  </label>
+                  <Switch.Root
+                     checked={isPublic}
+                     onCheckedChange={()=>setIsPublic((prev) => !prev)}
+                     className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA6 shadow-[0_2px_10px] shadow-blackA4 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black"
+                     id="playlist-audience"
+                     style={{
+                        '-webkit-tap-highlight-color': 'rgba(0, 0, 0, 0)',
+                     }}
+                  >
+                     <Switch.Thumb className="block size-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]" />
+                  </Switch.Root>
+               </form>
+               <div className="mt-[25px] flex justify-end">
+                  <Dialog.Close asChild>
+                     <Button
+                        onClick={() => {
+                           handleCreatePlaylist({
+                              name: document.getElementById('playlistName')
+                                 .value,
+                              description:
+                                 document.getElementById('description').value,
+                              isPublic,
+                           })
+                        }}
+                        variant="soft"
+                     >
+                        Create
+                     </Button>
+                     {/* <button>efe</button> */}
+                  </Dialog.Close>
+               </div>
+               <Dialog.Close asChild>
+                  <button
+                     className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full  hover:bg-violet4 focus:shadow-[0_0_0_2px] focus: focus:outline-none"
+                     aria-label="Close"
+                  >
+                     <Cross2Icon />
+                  </button>
+               </Dialog.Close>
+            </Dialog.Content>
+         </Dialog.Portal>
+      </Dialog.Root>
    )
 }
 

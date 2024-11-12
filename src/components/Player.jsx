@@ -22,6 +22,7 @@ import {
    setIsShuffled,
    setIsOnLoop,
 } from '../store/slicers/userSlice'
+import { Link } from 'react-router-dom'
 
 const Player = ({ previewUrl }) => {
    const dispatch = useDispatch()
@@ -85,7 +86,27 @@ const Player = ({ previewUrl }) => {
             loop={isOnLoop}
          />
 
-         <Flex className="w-1/4 lg:w-1/6 bg-slate-50 mb-2">efe</Flex>
+         <Flex className="w-1/4 lg:w-1/6 mb-2" direction="row" align="center">
+            <img
+               className="sidebar-image"
+               src={currentSong?.track?.album?.images?.at(-1)?.url}
+               alt=""
+            />
+            <Flex direction="column" pl="2">
+               <Link to={`/album/${currentSong?.track?.album?.id}`}>{currentSong?.track?.name}</Link>
+               {currentSong?.track?.artists
+                  .map((artist) => (
+                     <Link
+                        to={`/artist/${artist.id}`}
+                        key={artist.id}
+                        className="hover:underline"
+                     >
+                        {artist.name}
+                     </Link>
+                  ))
+                  .reduce((prev, curr) => [prev, ', ', curr])}
+            </Flex>
+         </Flex>
 
          <Flex
             direction="row"

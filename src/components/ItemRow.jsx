@@ -54,7 +54,7 @@ const ItemRow = ({ playlistRecommendations }) => {
                      <img
                         src={playlist.images[0].url}
                         alt="playlist"
-                        className="w-full h-full object-cover rounded"
+                        className="w-full h-full object-contain rounded"
                      />
                      <Flex direction="column" p="1">
                         <Text size="2" weight="bold " className="">

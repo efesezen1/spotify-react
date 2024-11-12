@@ -51,3 +51,7 @@
 .hero-image {
    @apply h-[13vw] w-[13vw] xl:h-[9vw] xl:w-[9vw] block shadow;
 }
+
+.sidebar-image {
+   @apply w-[5vw] h-[5vw] lg:w-[3vw] lg:h-[3vw] rounded-md  m-1 ml-2 shadow;
+}
