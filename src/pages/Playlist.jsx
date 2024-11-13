@@ -10,7 +10,7 @@ import {
    setIsPlaying,
    editPlaylist,
 } from '../store/slicers/userSlice'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
    PauseIcon,
    PlayIcon,
@@ -104,17 +104,6 @@ const Playlist = () => {
       return 'just now'
    }
 
-   const handleEditPlaylist = ({ name, description, isPublic }) => {
-      // console.log(user)
-      dispatch(editPlaylist({ name, description, isPublic }))
-         .then((action) => {
-            const response = action.payload
-            if (!response?.id) return
-            navigate('/playlist/' + response?.id)
-         })
-         .catch((error) => console.log(error))
-   }
-
    return (
       <Flex
          direction="column"
@@ -143,95 +132,30 @@ const Playlist = () => {
                {console.log('xxx')}
                {console.log(user?.id === playlist?.owner?.id)} */}
                {console.log(playlist)}
-               <Dialog.Root>
-                  <Dialog.Trigger className=" text-start">
-                     <Text size="9" weight="bold" className="">
-                        {playlist?.name}
-                     </Text>
-                  </Dialog.Trigger>
-                  <Dialog.Portal>
-                     <Dialog.Overlay className="fixed inset-0 bg-blackA6 data-[state=open]:animate-overlayShow" />
-                     <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] max-w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none data-[state=open]:animate-contentShow">
-                        <Dialog.Title className="m-0 text-[17px] font-medium capitalize ">
-                           Edit playlist
-                        </Dialog.Title>
-                        <Dialog.Description className="mb-5 mt-2.5 text-[15px] leading-normal ">
-                           Edit your playlist here. Click edit when you're done.
-                        </Dialog.Description>
-                        <fieldset className="mb-[15px] flex items-center gap-5">
-                           <label
-                              className="w-[90px] text-right text-[15px] capitalize"
-                              htmlFor="playlistName"
-                           >
-                              Playlist Name
-                           </label>
-                           <input
-                              className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
-                              id="playlistName"
-                              defaultValue={playlist?.name}
-                           />
-                        </fieldset>
-                        <fieldset className="mb-[15px] flex items-center gap-5">
-                           <label
-                              className="w-[90px] text-right text-[15px] "
-                              htmlFor="description"
-                           >
-                              Description
-                           </label>
-                           <input
-                              className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
-                              id="description"
-                              defaultValue={playlist?.description}
-                           />
-                        </fieldset>
-                        <Switch.Root
-                           checked={isPublic}
-                           onCheckedChange={() => setIsPublic((prev) => !prev)}
-                           className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA6 shadow-[0_2px_10px] shadow-blackA4 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black"
-                           id="playlist-audience"
-                           style={{
-                              '-webkit-tap-highlight-color': 'rgba(0, 0, 0, 0)',
-                           }}
-                        >
-                           <Switch.Thumb className="block size-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]" />
-                        </Switch.Root>
-                        <div className="mt-[25px] flex justify-end">
-                           <Dialog.Close asChild>
-                              <Button
-                                 onClick={() => {
-                                    handleEditPlaylist({
-                                       name: document.getElementById(
-                                          'playlistName'
-                                       ).value,
-                                       description:
-                                          document.getElementById('description')
-                                             .value,
-                                       isPublic,
-                                       id: playlist.id,
-                                    })
-                                 }}
-                                 variant="soft"
-                              >
-                                 Edit
-                              </Button>
-                              {/* <button>efe</button> */}
-                           </Dialog.Close>
-                        </div>
-                        <Dialog.Close asChild>
-                           <button
-                              className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full  hover:bg-violet4 focus:shadow-[0_0_0_2px] focus: focus:outline-none"
-                              aria-label="Close"
-                           >
-                              <Cross2Icon />
-                           </button>
-                        </Dialog.Close>
-                     </Dialog.Content>
-                  </Dialog.Portal>
-               </Dialog.Root>
-               <Text className="mr-10  mt-3 ml-1" size="2" color="gray">
+
+               {user?.id === playlist?.owner?.id ? (
+                  <InteractiveHeader
+                     setIsPublic={setIsPublic}
+                     isPublic={isPublic}
+                     playlist={playlist}
+                  />
+               ) : (
+                  <Text size="9" weight="bold" className=" select-none">
+                     {playlist?.name}
+                  </Text>
+               )}
+               <Text
+                  className="mr-10  mt-3 ml-1 select-none"
+                  size="2"
+                  color="gray"
+               >
                   {playlist?.description || ''}
                </Text>
-               <Text className="mr-10  mt-3 ml-1" size="1" color="gray">
+               <Text
+                  className="mr-10  mt-3 ml-1 select-none "
+                  size="1"
+                  color="gray"
+               >
                   {playlist?.owner.display_name}
                </Text>
             </Flex>
@@ -361,6 +285,115 @@ const Playlist = () => {
             </Flex>
          )}
       </Flex>
+   )
+}
+
+const InteractiveHeader = ({
+   playlist,
+   setIsPublic,
+
+   isPublic,
+}) => {
+   const dispatch = useDispatch()
+   const navigate = useNavigate()
+
+   const handleEditPlaylist = ({ name, description, isPublic }) => {
+      // console.log(user)
+      dispatch(
+         editPlaylist({ name, description, isPublic, playlistId: playlist.id })
+      )
+         .then((action) => {
+            const response = action.payload
+            if (!response?.id) return
+            navigate('/playlist/' + response?.id)
+         })
+         .catch((error) => console.log(error))
+   }
+
+   return (
+      <Dialog.Root>
+         <Dialog.Trigger className=" text-start">
+            <Text size="9" weight="bold" className="">
+               {playlist?.name}
+            </Text>
+         </Dialog.Trigger>
+         <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 bg-blackA6 data-[state=open]:animate-overlayShow" />
+            <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] max-w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none data-[state=open]:animate-contentShow">
+               <Dialog.Title className="m-0 text-[17px] font-medium capitalize ">
+                  Edit playlist
+               </Dialog.Title>
+               <Dialog.Description className="mb-5 mt-2.5 text-[15px] leading-normal ">
+                  Edit your playlist here. Click edit when you're done.
+               </Dialog.Description>
+               <fieldset className="mb-[15px] flex items-center gap-5">
+                  <label
+                     className="w-[90px] text-right text-[15px] capitalize"
+                     htmlFor="playlistName"
+                  >
+                     Playlist Name
+                  </label>
+                  <input
+                     className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
+                     id="playlistName"
+                     defaultValue={playlist?.name}
+                  />
+               </fieldset>
+               <fieldset className="mb-[15px] flex items-center gap-5">
+                  <label
+                     className="w-[90px] text-right text-[15px] "
+                     htmlFor="description"
+                  >
+                     Description
+                  </label>
+                  <input
+                     className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
+                     id="description"
+                     defaultValue={playlist?.description}
+                  />
+               </fieldset>
+               <Switch.Root
+                  checked={isPublic}
+                  onCheckedChange={() => setIsPublic((prev) => !prev)}
+                  className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA6 shadow-[0_2px_10px] shadow-blackA4 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black"
+                  id="playlist-audience"
+                  style={{
+                     '-webkit-tap-highlight-color': 'rgba(0, 0, 0, 0)',
+                  }}
+               >
+                  <Switch.Thumb className="block size-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]" />
+               </Switch.Root>
+               <div className="mt-[25px] flex justify-end">
+                  <Dialog.Close asChild>
+                     <Button
+                        onClick={() => {
+                           handleEditPlaylist({
+                              name: document.getElementById('playlistName')
+                                 .value,
+                              description:
+                                 document.getElementById('description').value,
+                              isPublic,
+                              id: playlist.id,
+                           })
+                        }}
+                        variant="soft"
+                     >
+                        Edit
+                     </Button>
+                     {/* <button>efe</button> */}
+                  </Dialog.Close>
+               </div>
+               <Dialog.Close asChild>
+                  <button
+                     className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full  hover:bg-violet4 focus:shadow-[0_0_0_2px] focus: focus:outline-none"
+                     aria-label="Close"
+                  >
+                     <Cross2Icon />
+                  </button>
+               </Dialog.Close>
+            </Dialog.Content>
+         </Dialog.Portal>
+      </Dialog.Root>
    )
 }
 

@@ -220,7 +220,7 @@ const editPlaylist = createAsyncThunk(
       const token = getState()?.user?.token
       const userId = getState()?.user?.user?.id
       console.log(name, description, isPublic, 'in da slice.')
-      const response = await spotifyApi.post(
+      const response = await spotifyApi.put(
          `/playlists/${playlistId}`,
          {
             name,
