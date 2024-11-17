@@ -6,6 +6,7 @@ import { Box, Flex, Text, Button, TextField } from '@radix-ui/themes'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import SetUser from '../components/SetUser'
+import FireyPlayer from '../components/FireyPlayer'
 const HomeLayout = () => {
    const [sidebarClosed, setSidebarClosed] = useState(false)
    return (
@@ -33,6 +34,7 @@ const HomeLayout = () => {
          </Flex>
          <hr />
          <Flex className="h-20 ">
+            {/* <FireyPlayer /> */}
             <Player />
          </Flex>
       </Flex>
