@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@radix-ui/themes'
+import { Button, Flex, Text } from '@radix-ui/themes'
 import LogoutIcon from './icon/LogoutIcon'
 const Logout = ({ className }) => {
    const navigate = useNavigate()
@@ -10,9 +10,16 @@ const Logout = ({ className }) => {
       console.log('Logout successful.')
    }
    return (
-      <Button className={`flex justify-between items-center ${className}`} onClick={logout}>
-         Logout <LogoutIcon className="mr-2" />
-      </Button>
+      <Flex
+         justify="center"
+         direction={'row'}
+         align={'center'}
+         className={`w-full ${className} select-none`}
+         onClick={logout}
+      >
+         <Text className="">Logout</Text>
+         <LogoutIcon className="mr-2" />
+      </Flex>
    )
 }
 export default Logout
