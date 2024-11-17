@@ -14,7 +14,7 @@ const Logout = ({ className }) => {
          justify="center"
          direction={'row'}
          align={'center'}
-         className={`w-full ${className}`}
+         className={`w-full ${className} select-none`}
          onClick={logout}
       >
          <Text className="">Logout</Text>

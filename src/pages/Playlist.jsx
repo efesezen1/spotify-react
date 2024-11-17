@@ -112,47 +112,46 @@ const Playlist = () => {
          onClick={() => setSelectedTrack(null)}
       >
          <Flex direction="row" className="w-full">
-            <Flex className="p-5 ">
+            <Flex className="p-5  h-full items-center aspect-square">
                {playlist?.images?.at(0)?.url ? (
                   <img
                      src={playlist?.images.at(0)?.url}
                      alt=""
-                     className=" hero-image rounded object-contain "
+                     className="hero-image rounded object-cover w-full h-full" // Adjust to make sure the image fills the square container
                   />
                ) : (
-                  <Box className="hero-image rounded  !flex justify-center items-center ">
+                  <Flex
+                     className="hero-image rounded bg-gray-200"
+                     align={'center'}
+                     justify="center"
+                  >
                      <ValueNoneIcon />
-                  </Box>
+                  </Flex>
                )}
             </Flex>
 
-            <Flex direction="column" justify="end" className="my-5">
-               {/* {user && console.log(user?.id)}
-               {console.log(playlist?.owner?.id)}
-               {console.log('xxx')}
-               {console.log(user?.id === playlist?.owner?.id)} */}
-               {console.log(playlist)}
-
+            <Flex direction="column" justify="end" className="my-5 flex-grow">
                {user?.id === playlist?.owner?.id ? (
                   <InteractiveHeader
                      setIsPublic={setIsPublic}
                      isPublic={isPublic}
                      playlist={playlist}
+                     size={{ initial: '8', lg: '9' }}
                   />
                ) : (
-                  <Text size="9" weight="bold" className=" select-none">
+                  <Text size="9" weight="bold" className="select-none">
                      {playlist?.name}
                   </Text>
                )}
                <Text
-                  className="mr-10  mt-3 ml-1 select-none"
+                  className="mr-10 mt-3 ml-1 select-none"
                   size="2"
                   color="gray"
                >
                   {playlist?.description || ''}
                </Text>
                <Text
-                  className="mr-10  mt-3 ml-1 select-none "
+                  className="mr-10 mt-3 ml-1 select-none"
                   size="1"
                   color="gray"
                >
@@ -211,7 +210,11 @@ const Playlist = () => {
                               selectedTrack === item.track.id ? (
                                  isPlaying ? (
                                     currentSong.track.id === item.track.id ? (
-                                       <PauseIcon />
+                                       <PauseIcon
+                                          onClick={() => {
+                                             dispatch(setIsPlaying(false))
+                                          }}
+                                       />
                                     ) : (
                                        <PlayIcon
                                           onClick={() =>
@@ -290,6 +293,7 @@ const Playlist = () => {
 
 const InteractiveHeader = ({
    playlist,
+   size,
    setIsPublic,
 
    isPublic,
@@ -313,7 +317,7 @@ const InteractiveHeader = ({
    return (
       <Dialog.Root>
          <Dialog.Trigger className=" text-start">
-            <Text size="9" weight="bold" className="">
+            <Text size={size} weight="bold" className="">
                {playlist?.name}
             </Text>
          </Dialog.Trigger>

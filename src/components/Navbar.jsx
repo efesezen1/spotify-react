@@ -22,8 +22,8 @@ const Navbar = () => {
          p="2"
       >
          <motion.div
-            initial={{ opacity: 0, rotate: 0 }}
-            animate={{ opacity: 1, rotate: 720 }}
+            whileHover={{ scale: 1.1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             className="px-4 h-full flex items-center  "
          >
             <Link to="/" className="cursor-default">

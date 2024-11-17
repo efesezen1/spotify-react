@@ -71,6 +71,10 @@ const Player = ({ previewUrl }) => {
    }, [audioRef])
 
    useEffect(() => {
+      !isPlaying && audioRef.current.pause()
+   }, [isPlaying])
+
+   useEffect(() => {
       if (!currentSong) return
       audioRef.current.pause()
       dispatch(setIsPlaying(false))
@@ -93,7 +97,9 @@ const Player = ({ previewUrl }) => {
                alt=""
             />
             <Flex direction="column" pl="2">
-               <Link to={`/album/${currentSong?.track?.album?.id}`}>{currentSong?.track?.name}</Link>
+               <Link to={`/album/${currentSong?.track?.album?.id}`}>
+                  {currentSong?.track?.name}
+               </Link>
                {currentSong?.track?.artists
                   .map((artist) => (
                      <Link

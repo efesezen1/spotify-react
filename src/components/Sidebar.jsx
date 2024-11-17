@@ -1,15 +1,15 @@
-import { Box } from '@radix-ui/themes'
+import { Box, Tooltip } from '@radix-ui/themes'
 import usePrevious from '../hook/prevId'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Switch from '@radix-ui/react-switch'
 import * as Popover from '@radix-ui/react-popover'
-
+import { motion } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
 import {
-   ArrowRightIcon,
+   ArrowLeftIcon,
    Cross2Icon,
    PlusIcon,
    ValueNoneIcon,
@@ -26,10 +26,11 @@ import {
    useSearchParams,
 } from 'react-router-dom'
 
-const Sidebar = ({ className }) => {
+const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const location = useLocation()
+
    const { userPlaylists, credentials } = useSelector((state) => state.user)
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
@@ -54,60 +55,57 @@ const Sidebar = ({ className }) => {
    }, [credentials])
 
    return (
-      <>
-         <Box
-            className={`${className} overflow-y-scroll m-2 relative rounded-lg `}
+      <Flex direction={'column'}>
+         <Flex
+            direction="row"
+            align="center"
+            justify={`${sidebarClosed ? 'center' : 'between'}`}
+            py="4"
+            className={`sticky top-0  m-2 ml-4 rounded-t p-3`}
          >
             <Flex
                direction="row"
                align="center"
-               justify="between"
-               p="4"
-               className="  sticky top-0 !bg-white "
+               className={`${sidebarClosed && 'flex justify-center'} `}
             >
-               <Flex direction="row" align="center" className="">
-                  <Box className="mr-2 text-xl">
-                     <Library />
-                  </Box>
-                  <Text className=" w-full select-none  text-nowrap">
+               <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className={`mr-1 text-xl `}
+                  onClick={() => {
+                     setSidebarClosed(!sidebarClosed)
+                  }}
+               >
+                  <Library />
+               </motion.div>
+               {!sidebarClosed && (
+                  <Text className="w-full select-none  text-nowrap ">
                      Playlists
                   </Text>
-               </Flex>
-               <Flex gap="1">
-                  <Popover.Root>
-                     <Popover.Trigger className=" color-white rounded w-5 h-7">
-                        <Button
-                           variant="ghost"
-                           className="h-full w-full"
-                           // radius="full"
-                           color="white"
-                        >
-                           <PlusIcon />
-                        </Button>
-                     </Popover.Trigger>
-                     <Popover.Anchor />
-                     <Popover.Portal>
-                        <Popover.Content className="popover-menu w-[200px]">
-                           <CreatePlaylist />
-
-                           <Button className="popover-menu-item mb-1">
-                              Create new playlist
-                           </Button>
-                        </Popover.Content>
-                     </Popover.Portal>
-                  </Popover.Root>
-                  <Button
-                     variant="ghost"
-                     // radius="full"
-                     color="white"
-                     className=" color-white rounded w-5 h-7"
-                  >
-                     <ArrowRightIcon />
-                  </Button>
-               </Flex>
+               )}
             </Flex>
+            {!sidebarClosed && (
+               <Flex gap="3" className={``}>
+                  <CreatePlaylist />
+                  <Tooltip content="Minimize Sidebar" className="">
+                     <Button
+                        variant="ghost"
+                        // radius="full"
+                        color="white"
+                        className=" color-white rounded w-[20px]  h-7 mt-0.5"
+                        onClick={() => setSidebarClosed(!sidebarClosed)}
+                     >
+                        <ArrowLeftIcon />
+                     </Button>
+                  </Tooltip>
+               </Flex>
+            )}
+         </Flex>
+         <Box
+            className={`${className} overflow-y-scroll m-2 relative rounded-lg `}
+         >
             {userPlaylists?.map((playlist) => (
-               <Box
+               <Flex
+                  direction={'row'}
                   key={playlist?.id}
                   onClick={() => {
                      dispatch(fetchSelectedPlaylist(playlist?.href)).then(
@@ -118,54 +116,55 @@ const Sidebar = ({ className }) => {
                   }}
                   className={`${playlist?.id === id ? 'bg-red-100' : ''} ${
                      playlist?.id !== id ? 'hover:bg-red-50' : ''
-                  } active:bg-red-100 transition-all duration-300  rounded-md pr-3`}
+                  } ${
+                     !sidebarClosed && 'pr-3'
+                  } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
                >
-                  <Flex justify="" align="center" className="">
+                  <Flex justify="" align="center" className="w-full">
                      <Box>
-                        {/* {console.log(playlist?.images)} */}
                         {playlist?.images?.at(0)?.url ? (
                            <img
-                              className="sidebar-image object-contain"
+                              className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
                               src={playlist?.images?.at(0)?.url}
                               alt=""
                            />
                         ) : (
-                           <Box className="sidebar-image flex justify-center items-center  ">
+                           <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
+                              {' '}
+                              // Set fixed width and height here
                               <ValueNoneIcon />
                            </Box>
                         )}
                      </Box>
 
-                     <Flex direction="column" className="ml-2 select-none">
-                        <Text className="text-sm text-nowrap  ">
-                           {playlist?.name.length > 25
-                              ? playlist?.name.slice(0, 10) + '...'
-                              : playlist?.name}{' '}
-                        </Text>
-                        <Text color="gray" className="text-xs ">
-                           {playlist?.owner?.display_name || 'Unknown'}
-                        </Text>
-                     </Flex>
+                     {!sidebarClosed && (
+                        <Flex direction="column" className="ml-2 select-none">
+                           <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
+                              {playlist?.name}
+                           </Text>
+                           <Text color="gray" className="text-xs ">
+                              {playlist?.owner?.display_name || 'Unknown'}
+                           </Text>
+                        </Flex>
+                     )}
                   </Flex>
-               </Box>
+               </Flex>
             ))}
          </Box>
-      </>
+      </Flex>
    )
 }
 
-const CreatePlaylist = () => {
+const CreatePlaylist = ({ children, className }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
-   const navigation = useNavigation()
+
    const [isPublic, setIsPublic] = useState(false)
-   
 
    // useEffect(() => {
    //    console.log(isPublic)
    // }, [isPublic])
 
-   const user = useSelector((state) => state.user.user)
    const handleCreatePlaylist = ({ name, description, isPublic }) => {
       // console.log(user)
       dispatch(createPlaylist({ name, description, isPublic }))
@@ -179,10 +178,19 @@ const CreatePlaylist = () => {
 
    return (
       <Dialog.Root>
-         <Dialog.Trigger>
-            <Button className="w-[calc(200px-.6rem)] popover-menu-item mt-1 ">
-               Create new playlist
-            </Button>
+         <Dialog.Trigger
+            className={` ${className} h-[40px] w-[40px] flex justify-center items-center `}
+         >
+            <Tooltip content="Create Playlist" delayDuration={0}>
+               <Button
+                  variant="ghost"
+                  // radius="full"
+                  className={`color-white  h-[30px] w-[20px] rounded  `}
+                  color="white"
+               >
+                  <PlusIcon />
+               </Button>
+            </Tooltip>
          </Dialog.Trigger>
          <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 bg-blackA6 data-[state=open]:animate-overlayShow" />
@@ -228,7 +236,7 @@ const CreatePlaylist = () => {
                   </label>
                   <Switch.Root
                      checked={isPublic}
-                     onCheckedChange={()=>setIsPublic((prev) => !prev)}
+                     onCheckedChange={() => setIsPublic((prev) => !prev)}
                      className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA6 shadow-[0_2px_10px] shadow-blackA4 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black"
                      id="playlist-audience"
                      style={{

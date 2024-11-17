@@ -1,21 +1,47 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
-import { fetchArtist, setCurrentArtist } from '../store/slicers/userSlice'
-import { Box, Flex, Text, Grid, Table } from '@radix-ui/themes'
+import {
+   fetchArtist,
+   setCurrentArtist,
+   setIsFollowing,
+   checkIsFollowing,
+   followOrUnfollow,
+} from '../store/slicers/userSlice'
+import { Box, Flex, Text, Grid, Table, Button } from '@radix-ui/themes'
 import * as Popover from '@radix-ui/react-popover'
 import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
-
 const Artist = () => {
    const params = useParams()
    const id = params.id
-   const { token, currentArtist } = useSelector((state) => state.user)
+
+   const { token, currentArtist, isFollowing } = useSelector(
+      (state) => state.user
+   )
+   const [followStatus, setFollowStatus] = useState(false)
+   const [hoverOnFollowBtn, setHoverOnFollowBtn] = useState(false)
    const dispatch = useDispatch(fetchArtist)
    const [artist, setArtist] = useState(null)
    const [popularSongs, setPopularSongs] = useState(null)
    const [albums, setAlbums] = useState(null)
    const [selectedTrack, setSelectedTrack] = useState(null)
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
+
+   useEffect(() => {
+      if (id && !token) return
+
+      dispatch(
+         checkIsFollowing({
+            type: 'artist',
+            id,
+         })
+      )
+   }, [currentArtist])
+
+   useEffect(() => {
+      if (isFollowing.length === 0) return
+   }, [isFollowing])
+
    const hoverClass = (item) =>
       selectedTrack !== item.id ? 'hover:backdrop-brightness-95' : ''
    useEffect(() => {
@@ -42,6 +68,12 @@ const Artist = () => {
          setSelectedTrack(null)
       }
    }, [currentArtist])
+
+   useEffect(() => {
+      return () => {
+         dispatch(setIsFollowing(false))
+      }
+   }, [])
 
    return (
       <Flex
@@ -92,6 +124,57 @@ const Artist = () => {
                            {artist?.followers?.total &&
                               `${artist?.followers?.total} Followers`}
                         </Text>
+                        {/* follow status */}
+                        {/* <Box>
+                           {isFollowing ? (
+                              hoverOnFollowBtn ? (
+                                 <Button
+                                    variant="outline"
+                                    color="blue"
+                                    onMouseLeave={() =>
+                                       setHoverOnFollowBtn(false)
+                                    }
+                                    onClick={() => {
+                                       dispatch(
+                                          followOrUnfollow({
+                                             type: 'artist',
+                                             id,
+                                             action: 'unfollow',
+                                          })
+                                       )
+                                    }}
+                                 >
+                                    Unfollow
+                                 </Button>
+                              ) : (
+                                 <Button
+                                    variant="outline"
+                                    color="blue"
+                                    onMouseEnter={() =>
+                                       setHoverOnFollowBtn(true)
+                                    }
+                                 >
+                                    Following
+                                 </Button>
+                              )
+                           ) : (
+                              <Button
+                                 variant="outline"
+                                 color="blue"
+                                 onClick={() =>
+                                    dispatch(
+                                       followOrUnfollow({
+                                          type: 'artist',
+                                          id,
+                                          action: 'follow',
+                                       })
+                                    )
+                                 }
+                              >
+                                 Follow
+                              </Button>
+                           )}
+                        </Box> */}
                      </Flex>
                   </Flex>
                </Flex>

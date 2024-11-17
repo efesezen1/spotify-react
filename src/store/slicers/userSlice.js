@@ -142,6 +142,49 @@ const fetchArtist = createAsyncThunk(
       } catch (error) {}
    }
 )
+
+const checkIsFollowing = createAsyncThunk(
+   'user/checkIsFollowing',
+   async ({ type = artist, id }, { dispatch, getState }) => {
+      try {
+         const token = getState()?.user?.token
+         // console.log(token)
+         // console.log('Token type:', typeof token) // Should log 'string'
+         // const idUrl = ids.reduce((id, acc) => `${acc},${id}`, '')
+         // console.log('idURL', idUrl)
+
+         const response = await spotifyApi(
+            `/me/following/contains?type=${type}&ids=${id}`,
+            {
+               headers: {
+                  Authorization: `Bearer ${token}`,
+               },
+            }
+         )
+         return response?.data
+      } catch (error) {}
+   }
+)
+
+const followOrUnfollow = createAsyncThunk(
+   'user/followOrUnfollow',
+   async ({ type = artist, id, action = 'follow' }, { dispatch, getState }) => {
+      try {
+         console.log(type, id, action)
+         console.log('user/followOrUnfollow invoked.')
+         const token = getState()?.user?.token
+         const response = await spotifyApi[
+            (action === 'follow' && 'put') || (action === 'unfollow' && 'delete')
+         ](`/me/following/type=${type}/ids=${id}`, {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         })
+         return response?.data
+      } catch (error) {}
+   }
+)
+
 const fetchUserTopItems = createAsyncThunk(
    'user/fetchUserTopItems',
    async (_, { dispatch, getState }) => {
@@ -258,6 +301,7 @@ const userSlice = createSlice({
       isPlaying: false,
       isOnLoop: false,
       isShuffled: false,
+      isFollowing: [],
    },
    reducers: {
       setUser: (state, action) => {
@@ -300,6 +344,9 @@ const userSlice = createSlice({
       },
       setError: (state, action) => {
          state.error = action.payload
+      },
+      setIsFollowing: (state, action) => {
+         state.isFollowing = action.payload
       },
    },
    extraReducers: (builder) => {
@@ -397,6 +444,30 @@ const userSlice = createSlice({
             state.status = 'failed'
             state.error = action.error.message
          })
+         .addCase(checkIsFollowing.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(checkIsFollowing.fulfilled, (state, action) => {
+            state.status = 'succeeded'
+            state.isFollowing = action.payload
+         })
+         .addCase(checkIsFollowing.rejected, (state, action) => {
+            state.status = 'failed'
+            state.error = action.error.message
+         })
+         .addCase(followOrUnfollow.pending, (state) => {
+            state.status = 'loading'
+         })
+         .addCase(followOrUnfollow.fulfilled, (state, action) => {
+            state.status = 'succeeded'
+            console.log('user action was successful.')
+            console.log('action.payload', action.payload)
+            state.isFollowing = !state.isFollowing
+         })
+         .addCase(followOrUnfollow.rejected, (state, action) => {
+            state.status = 'failed'
+            state.error = action.error.message
+         })
    },
 })
 
@@ -411,6 +482,8 @@ export {
    fetchArtist,
    createPlaylist,
    editPlaylist,
+   checkIsFollowing,
+   followOrUnfollow,
 }
 export const {
    setUser,
@@ -426,5 +499,6 @@ export const {
    setIsOnLoop,
    setIsPlaying,
    setIsShuffled,
+   setIsFollowing,
 } = userSlice.actions
 export default userSlice.reducer
