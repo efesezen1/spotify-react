@@ -100,17 +100,19 @@ const Player = ({ previewUrl }) => {
                <Link to={`/album/${currentSong?.track?.album?.id}`}>
                   {currentSong?.track?.name}
                </Link>
-               {currentSong?.track?.artists
-                  .map((artist) => (
-                     <Link
-                        to={`/artist/${artist.id}`}
-                        key={artist.id}
-                        className="hover:underline"
-                     >
-                        {artist.name}
-                     </Link>
-                  ))
-                  .reduce((prev, curr) => [prev, ', ', curr])}
+               <Box className=" whitespace-nowrap text-ellipsis text-sm">
+                  {currentSong?.track?.artists
+                     .map((artist) => (
+                        <Link
+                           to={`/artist/${artist.id}`}
+                           key={artist.id}
+                           className="hover:underline"
+                        >
+                           {artist.name}
+                        </Link>
+                     ))
+                     .reduce((prev, curr) => [prev, ', ', curr])}
+               </Box>
             </Flex>
          </Flex>
 
