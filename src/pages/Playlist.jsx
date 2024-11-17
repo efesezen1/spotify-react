@@ -209,7 +209,8 @@ const Playlist = () => {
                               {currentUserIdOnHover === item.track.id ||
                               selectedTrack === item.track.id ? (
                                  isPlaying ? (
-                                    currentSong.track.id === item.track.id ? (
+                                    currentSong?.track?.id ===
+                                    item?.track?.id ? (
                                        <PauseIcon
                                           onClick={() => {
                                              dispatch(setIsPlaying(false))

@@ -1,17 +1,23 @@
 import React from 'react'
-import { MagnifyingGlassIcon, HomeIcon, BellIcon } from '@radix-ui/react-icons'
+import {
+   MagnifyingGlassIcon,
+   HomeIcon,
+   BellIcon,
+   CaretLeftIcon,
+   CaretRightIcon,
+} from '@radix-ui/react-icons'
 import * as Avatar from '@radix-ui/react-avatar'
 import * as Popover from '@radix-ui/react-popover'
 import { Button, Flex, Box, TextField, Text, Tooltip } from '@radix-ui/themes'
 import SpotifyIcon from './icon/SpotifyIcon'
-import { Link, useNavigation, useNavigate } from 'react-router-dom'
+import { Link, useNavigation, useNavigate, useLocation } from 'react-router-dom'
 import Logout from './Logout'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 const Navbar = () => {
    const user = useSelector((state) => state.user)
    const navigate = useNavigate()
-   const navigation = useNavigation()
+   const location = useLocation()
    return (
       <Flex
          direction="row"
@@ -30,7 +36,34 @@ const Navbar = () => {
                <SpotifyIcon className="" />
             </Link>
          </motion.div>
-
+         <Flex gap="4">
+            <Button
+               variant="ghost"
+               // className="w-[2.3rem] h-[2.3rem] "
+               onClick={() => {
+                  if (location.key) {
+                     navigate(-1)
+                  }
+               }}
+               disabled={!location.key}
+               className={`color-white  h-[20px] w-[20px] rounded  `}
+            >
+               <CaretLeftIcon />
+            </Button>
+            <Button
+               className={`color-white  h-[20px] w-[20px] rounded  `}
+               variant="ghost"
+               // className="w-[2.3rem] h-[2.3rem] "
+               // className={`color-white  h-[30px] w-[20px] rounded  `}
+               onClick={() => {
+                  navigate(1)
+               }}
+            >
+               <CaretRightIcon
+               // height="30" width="30"
+               />
+            </Button>
+         </Flex>
          <Flex gap="2" align="center" className="w-[40%]">
             <Tooltip content="Home" delayDuration={0} className="">
                <Button

@@ -131,7 +131,6 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                         ) : (
                            <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
                               {' '}
-                              // Set fixed width and height here
                               <ValueNoneIcon />
                            </Box>
                         )}

@@ -76,6 +76,7 @@ const Player = ({ previewUrl }) => {
 
    useEffect(() => {
       if (!currentSong) return
+      console.log(currentSong)
       audioRef.current.pause()
       dispatch(setIsPlaying(false))
       audioRef.current.play()
@@ -86,7 +87,7 @@ const Player = ({ previewUrl }) => {
       <Flex direction="row" className="w-full">
          <audio
             ref={audioRef}
-            src={currentSong?.track?.preview_url}
+            src={currentSong?.track?.preview_url || currentSong?.preview_url}
             loop={isOnLoop}
          />
 

@@ -7,6 +7,8 @@ import {
    setIsFollowing,
    checkIsFollowing,
    followOrUnfollow,
+   setCurrentSong,
+   setIsPlaying,
 } from '../store/slicers/userSlice'
 import { Box, Flex, Text, Grid, Table, Button } from '@radix-ui/themes'
 import * as Popover from '@radix-ui/react-popover'
@@ -15,9 +17,8 @@ const Artist = () => {
    const params = useParams()
    const id = params.id
 
-   const { token, currentArtist, isFollowing } = useSelector(
-      (state) => state.user
-   )
+   const { token, currentArtist, isFollowing, isPlaying, currentSong } =
+      useSelector((state) => state.user)
    const [followStatus, setFollowStatus] = useState(false)
    const [hoverOnFollowBtn, setHoverOnFollowBtn] = useState(false)
    const dispatch = useDispatch(fetchArtist)
@@ -27,6 +28,19 @@ const Artist = () => {
    const [selectedTrack, setSelectedTrack] = useState(null)
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
 
+   let humanReadableNum = (number) => {
+      let numStr = number.toString()
+      let counter = 0
+      let res = ''
+      for (let i = numStr.length - 1; i >= 0; i--) {
+         res = numStr[i] + res
+         counter++
+         if (counter % 3 === 0 && i !== 0) {
+            res = '.' + res
+         }
+      }
+      return res
+   }
    useEffect(() => {
       if (id && !token) return
 
@@ -117,12 +131,14 @@ const Artist = () => {
                      ></Text>
                      <Flex direction="row" className=" w-full">
                         <Text
-                           className="mr-10  mt-3 ml-1"
+                           className="mr-10  mt-3 ml-1 select-none"
                            size="1"
                            color="gray"
                         >
                            {artist?.followers?.total &&
-                              `${artist?.followers?.total} Followers`}
+                              `${humanReadableNum(
+                                 artist?.followers?.total
+                              )} Followers`}
                         </Text>
                         {/* follow status */}
                         {/* <Box>
@@ -212,6 +228,7 @@ const Artist = () => {
 
                <Table.Body>
                   {popularSongs?.map((item, index) => {
+                     // console.log(item)
                      return (
                         <Table.Row
                            key={item?.id}
@@ -219,14 +236,17 @@ const Artist = () => {
                               // console.log(item)
                               setSelectedTrack(item)
                            }}
-                           onMouseEnter={() => setCurrentUserIdOnHover(item.id)}
+                           onMouseEnter={() => {
+                              // console.log(item)
+                              setCurrentUserIdOnHover(item.id)
+                           }}
                            onMouseLeave={() => setCurrentUserIdOnHover(null)}
                            className={`select-none active:backdrop-brightness-90 ${hoverClass(
                               item
                            )} ${activeClass(item)}`}
                         >
                            <Table.RowHeaderCell>
-                              {currentUserIdOnHover === item.id ||
+                              {/* {currentUserIdOnHover === item.id ||
                               selectedTrack === item.id ? (
                                  <PlayIcon
                                     onClick={() => {
@@ -235,6 +255,33 @@ const Artist = () => {
                                  />
                               ) : (
                                  index + 1
+                              )} */}
+
+                              {currentUserIdOnHover === item.id ||
+                              selectedTrack === item.id ? (
+                                 isPlaying ? (
+                                    currentSong.id === item.id ? (
+                                       <PauseIcon
+                                          onClick={() => {
+                                             dispatch(setIsPlaying(false))
+                                          }}
+                                       />
+                                    ) : (
+                                       <PlayIcon
+                                          onClick={() =>
+                                             dispatch(setCurrentSong(item))
+                                          }
+                                       />
+                                    )
+                                 ) : (
+                                    <PlayIcon
+                                       onClick={() =>
+                                          dispatch(setCurrentSong(item))
+                                       }
+                                    />
+                                 )
+                              ) : (
+                                 <Box className="text-xs">{index + 1}</Box>
                               )}
                            </Table.RowHeaderCell>
                            <Table.Cell>
