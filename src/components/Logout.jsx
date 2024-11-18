@@ -17,8 +17,8 @@ const Logout = ({ className }) => {
          className={`w-full ${className} select-none`}
          onClick={logout}
       >
-         <Text className="">Logout</Text>
          <LogoutIcon className="mr-2" />
+         <Text className="">Logout</Text>
       </Flex>
    )
 }

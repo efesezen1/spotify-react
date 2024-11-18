@@ -2,6 +2,7 @@ import { Box, Tooltip } from '@radix-ui/themes'
 import usePrevious from '../hook/prevId'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Switch from '@radix-ui/react-switch'
+import * as ContextMenu from '@radix-ui/react-context-menu'
 import * as Popover from '@radix-ui/react-popover'
 import { motion } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
@@ -12,6 +13,7 @@ import {
    ArrowLeftIcon,
    Cross2Icon,
    PlusIcon,
+   TrashIcon,
    ValueNoneIcon,
 } from '@radix-ui/react-icons'
 
@@ -21,10 +23,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const navigate = useNavigate()
-
+   const queryClient = useQueryClient()
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
-
+   const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
    const { token, spotifyApi } = useSpotifyInstance()
 
    const { data: userPlaylists, isLoading } = useQuery({
@@ -65,7 +67,10 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             </Flex>
             {!sidebarClosed && (
                <Flex gap="3" className={``}>
-                  <CreatePlaylist />
+                  <CreatePlaylist
+                     modalState={openCreatePlaylistModal}
+                     setModalState={setOpenCreatePlaylistModal}
+                  />
                   <Tooltip content="Minimize Sidebar" className="">
                      <Button
                         variant="ghost"
@@ -85,51 +90,76 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
          >
             {userPlaylists &&
                userPlaylists?.map((playlist) => {
-                  console.log(playlist)
                   return (
-                     <Flex
-                        direction={'row'}
-                        key={playlist?.id}
-                        onClick={() => {
-                           navigate('/playlist/' + playlist?.id)
-                        }}
-                        className={`${
-                           playlist?.id === id ? 'bg-red-100' : ''
-                        } ${playlist?.id !== id ? 'hover:bg-red-50' : ''} ${
-                           !sidebarClosed && 'pr-3'
-                        } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
-                     >
-                        <Flex justify="" align="center" className="w-full">
-                           <Box>
-                              {playlist?.images?.at(0)?.url ? (
-                                 <img
-                                    className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
-                                    src={playlist?.images?.at(0)?.url}
-                                    alt=""
-                                 />
-                              ) : (
-                                 <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
-                                    {' '}
-                                    <ValueNoneIcon />
-                                 </Box>
-                              )}
-                           </Box>
-
-                           {!sidebarClosed && (
+                     <ContextMenu.Root key={playlist?.id}>
+                        <ContextMenu.Trigger>
+                           <Flex
+                              direction={'row'}
+                              key={playlist?.id}
+                              onClick={() => {
+                                 navigate('/playlist/' + playlist?.id)
+                              }}
+                              className={`${
+                                 playlist?.id === id ? 'bg-red-100' : ''
+                              } ${
+                                 playlist?.id !== id ? 'hover:bg-red-50' : ''
+                              } ${
+                                 !sidebarClosed && 'pr-3'
+                              } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
+                           >
                               <Flex
-                                 direction="column"
-                                 className="ml-2 select-none"
+                                 justify=""
+                                 align="center"
+                                 className="w-full"
                               >
-                                 <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
-                                    {playlist?.name}
-                                 </Text>
-                                 <Text color="gray" className="text-xs ">
-                                    {playlist?.owner?.display_name || 'Unknown'}
-                                 </Text>
+                                 <Box>
+                                    {playlist?.images?.at(0)?.url ? (
+                                       <img
+                                          className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
+                                          src={playlist?.images?.at(0)?.url}
+                                          alt=""
+                                       />
+                                    ) : (
+                                       <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
+                                          {' '}
+                                          <ValueNoneIcon />
+                                       </Box>
+                                    )}
+                                 </Box>
+
+                                 {!sidebarClosed && (
+                                    <Flex
+                                       direction="column"
+                                       className="ml-2 select-none"
+                                    >
+                                       <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
+                                          {playlist?.name}
+                                       </Text>
+                                       <Text color="gray" className="text-xs ">
+                                          {playlist?.owner?.display_name ||
+                                             'Unknown'}
+                                       </Text>
+                                    </Flex>
+                                 )}
                               </Flex>
-                           )}
-                        </Flex>
-                     </Flex>
+                           </Flex>
+                        </ContextMenu.Trigger>
+                        <ContextMenu.Portal>
+                           {/* <ContextMenu.Content className="popover-menu">
+                              <ContextMenu.Item
+                                 className="popover-menu-item my-1 w-[200px] flex justify-between bg-pink-300 items-center"
+                                 onClick={() => {
+                                    // setOpenCreatePlaylistModal(true)
+                                 }}
+                              >
+                                 <PlusIcon />
+                                 <Text className="select-none">
+                                    {/* Create Playlist 
+                                 </Text>
+                              </ContextMenu.Item>
+                           </ContextMenu.Content> */}
+                        </ContextMenu.Portal>
+                     </ContextMenu.Root>
                   )
                })}
          </Box>
@@ -137,7 +167,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    )
 }
 
-const CreatePlaylist = ({ children, className }) => {
+const CreatePlaylist = ({ children, className, modalState, setModalState }) => {
    const queryClient = useQueryClient()
    const navigate = useNavigate()
    const { spotifyApi, token } = useSpotifyInstance()
@@ -175,8 +205,9 @@ const CreatePlaylist = ({ children, className }) => {
    }
 
    return (
-      <Dialog.Root>
+      <Dialog.Root open={modalState} onOpenChange={setModalState}>
          <Dialog.Trigger
+            id="create-playlist"
             className={` ${className} h-[40px] w-[40px] flex justify-center items-center `}
          >
             <Tooltip content="Create Playlist" delayDuration={0}>
