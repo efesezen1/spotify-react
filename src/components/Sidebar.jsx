@@ -1,11 +1,8 @@
 import { Box, Tooltip } from '@radix-ui/themes'
-import usePrevious from '../hook/prevId'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Switch from '@radix-ui/react-switch'
-import * as ContextMenu from '@radix-ui/react-context-menu'
-import * as Popover from '@radix-ui/react-popover'
 import { motion } from 'framer-motion'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
@@ -13,7 +10,6 @@ import {
    ArrowLeftIcon,
    Cross2Icon,
    PlusIcon,
-   TrashIcon,
    ValueNoneIcon,
 } from '@radix-ui/react-icons'
 
@@ -23,7 +19,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const navigate = useNavigate()
-   const queryClient = useQueryClient()
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
    const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
@@ -32,7 +27,10 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const { data: userPlaylists, isLoading } = useQuery({
       queryKey: ['userPlaylists'],
       queryFn: async () =>
-         spotifyApi.get('me/playlists').then((res) => res?.data?.items),
+         spotifyApi
+            .get('me/playlists')
+            .then((res) => res?.data?.items)
+            .catch((err) => console.log(err)),
       enabled: !!token,
    })
 
@@ -91,75 +89,49 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             {userPlaylists &&
                userPlaylists?.map((playlist) => {
                   return (
-                     <ContextMenu.Root key={playlist?.id}>
-                        <ContextMenu.Trigger>
-                           <Flex
-                              direction={'row'}
-                              key={playlist?.id}
-                              onClick={() => {
-                                 navigate('/playlist/' + playlist?.id)
-                              }}
-                              className={`${
-                                 playlist?.id === id ? 'bg-red-100' : ''
-                              } ${
-                                 playlist?.id !== id ? 'hover:bg-red-50' : ''
-                              } ${
-                                 !sidebarClosed && 'pr-3'
-                              } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
-                           >
-                              <Flex
-                                 justify=""
-                                 align="center"
-                                 className="w-full"
-                              >
-                                 <Box>
-                                    {playlist?.images?.at(0)?.url ? (
-                                       <img
-                                          className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
-                                          src={playlist?.images?.at(0)?.url}
-                                          alt=""
-                                       />
-                                    ) : (
-                                       <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
-                                          {' '}
-                                          <ValueNoneIcon />
-                                       </Box>
-                                    )}
+                     <Flex
+                        direction={'row'}
+                        key={playlist?.id}
+                        onClick={() => {
+                           navigate('/playlist/' + playlist?.id)
+                        }}
+                        className={`${
+                           playlist?.id === id ? 'bg-red-100' : ''
+                        } ${playlist?.id !== id ? 'hover:bg-red-50' : ''} ${
+                           !sidebarClosed && 'pr-3'
+                        } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
+                     >
+                        <Flex justify="" align="center" className="w-full">
+                           <Box>
+                              {playlist?.images?.at(0)?.url ? (
+                                 <img
+                                    className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
+                                    src={playlist?.images?.at(0)?.url}
+                                    alt=""
+                                 />
+                              ) : (
+                                 <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
+                                    {' '}
+                                    <ValueNoneIcon />
                                  </Box>
+                              )}
+                           </Box>
 
-                                 {!sidebarClosed && (
-                                    <Flex
-                                       direction="column"
-                                       className="ml-2 select-none"
-                                    >
-                                       <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
-                                          {playlist?.name}
-                                       </Text>
-                                       <Text color="gray" className="text-xs ">
-                                          {playlist?.owner?.display_name ||
-                                             'Unknown'}
-                                       </Text>
-                                    </Flex>
-                                 )}
-                              </Flex>
-                           </Flex>
-                        </ContextMenu.Trigger>
-                        <ContextMenu.Portal>
-                           {/* <ContextMenu.Content className="popover-menu">
-                              <ContextMenu.Item
-                                 className="popover-menu-item my-1 w-[200px] flex justify-between bg-pink-300 items-center"
-                                 onClick={() => {
-                                    // setOpenCreatePlaylistModal(true)
-                                 }}
+                           {!sidebarClosed && (
+                              <Flex
+                                 direction="column"
+                                 className="ml-2 select-none"
                               >
-                                 <PlusIcon />
-                                 <Text className="select-none">
-                                    {/* Create Playlist 
+                                 <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
+                                    {playlist?.name}
                                  </Text>
-                              </ContextMenu.Item>
-                           </ContextMenu.Content> */}
-                        </ContextMenu.Portal>
-                     </ContextMenu.Root>
+                                 <Text color="gray" className="text-xs ">
+                                    {playlist?.owner?.display_name || 'Unknown'}
+                                 </Text>
+                              </Flex>
+                           )}
+                        </Flex>
+                     </Flex>
                   )
                })}
          </Box>
@@ -175,13 +147,13 @@ const CreatePlaylist = ({ children, className, modalState, setModalState }) => {
 
    const { data: user } = useQuery({
       queryKey: ['user'],
-      queryFn: () => spotifyApi.get('/me').then((res) => res.data),
+      queryFn: () =>
+         spotifyApi
+            .get('/me')
+            .then((res) => res.data)
+            .catch((err) => console.log(err)),
       enabled: !!token,
    })
-
-   useEffect(() => {
-      console.log(user)
-   }, [user])
 
    const { mutate: createPlaylist } = useMutation({
       mutationFn: ({ name, description, isPublic }) =>
@@ -205,7 +177,7 @@ const CreatePlaylist = ({ children, className, modalState, setModalState }) => {
    }
 
    return (
-      <Dialog.Root open={modalState} onOpenChange={setModalState}>
+      <Dialog.Root>
          <Dialog.Trigger
             id="create-playlist"
             className={` ${className} h-[40px] w-[40px] flex justify-center items-center `}

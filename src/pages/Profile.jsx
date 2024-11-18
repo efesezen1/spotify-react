@@ -3,6 +3,7 @@ import * as Popover from '@radix-ui/react-popover'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import useSpotifyInstance from '../hook/spotifyInstance'
+import { useEffect } from 'react'
 const Profile = () => {
    const navigate = useNavigate()
 
@@ -15,21 +16,26 @@ const Profile = () => {
       },
       enabled: !!token,
    })
+
    const { data: followingArtists } = useQuery({
       queryKey: ['followingArtists'],
-      queryFn: async () => {
-         const res = await spotifyApi.get('/me/following?type=artist')
-         return res.data
-      },
+      queryFn: () =>
+         spotifyApi
+            .get('/me/following?type=artist')
+            .then((res) => res.data)
+            .catch((err) => console.log(err)),
+
       enabled: !!token,
    })
 
    const { data: topItems } = useQuery({
       queryKey: ['topArtists'],
-      queryFn: async () => {
-         const res = await spotifyApi.get('/me/top/artists')
-         return res.data
-      },
+      queryFn: async () =>
+         spotifyApi
+            .get('/me/top/artists')
+            .then((res) => res.data)
+            .catch((err) => console.log(err)),
+
       enabled: !!token,
    })
 
@@ -43,9 +49,9 @@ const Profile = () => {
          <Flex direction="column" className="w-full ">
             <Flex direction="row" className=" ">
                <Flex className="p-5 ">
-                  {user?.images[1]?.url ? (
+                  {user?.images?.at(0)?.url ? (
                      <img
-                        src={user?.images[0]?.url}
+                        src={user?.images.at(0)?.url}
                         alt=""
                         className=" hero-image rounded-full object-cover  "
                      />

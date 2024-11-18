@@ -3,14 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import * as Switch from '@radix-ui/react-switch'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Box, Text, Flex, Button, Table, TextField } from '@radix-ui/themes'
-import {
-   fetchSelectedPlaylist,
-   setSelectedPlaylist,
-   setCurrentSong,
-   setIsPlaying,
-   editPlaylist,
-} from '../store/slicers/userSlice'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
+import { Link, useParams } from 'react-router-dom'
 import {
    PauseIcon,
    PlayIcon,
@@ -20,17 +14,25 @@ import {
    MagnifyingGlassIcon,
 } from '@radix-ui/react-icons'
 import usePrevious from '../hook/prevId'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 const Playlist = () => {
+   const { spotifyApi, token } = useSpotifyInstance()
+
    const { id } = useParams()
+   const { data: playlist } = useQuery({
+      queryKey: ['currentPlaylist', id],
+      queryFn: () =>
+         spotifyApi
+            .get('/playlists/' + id)
+            .then((res) => res.data)
+            .catch((err) => console.log(err)),
+      enabled: !!token,
+   })
+
    const container = useRef(null)
    const prevId = usePrevious(id)
-   const {
-      token,
-      selectedPlaylist: playlist,
-      isPlaying,
-      currentSong,
-      user,
-   } = useSelector((state) => state.user)
+   const { isPlaying, currentSong, user } = useSelector((state) => state.user)
    const [isPublic, setIsPublic] = useState(null)
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
    const [selectedTrack, setSelectedTrack] = useState(null)
@@ -43,21 +45,12 @@ const Playlist = () => {
    }, [id])
 
    useEffect(() => {
-      if ((prevId !== id || !playlist) && token) {
-         dispatch(
-            fetchSelectedPlaylist('https://api.spotify.com/v1/playlists/' + id)
-         )
-      }
-   }, [prevId, id, playlist, token])
-
-   useEffect(() => {
       if (!playlist) return
       setIsPublic(playlist.public)
    }, [playlist])
 
    useEffect(() => {
       return () => {
-         dispatch(setSelectedPlaylist(null))
          setSelectedTrack(null)
       }
    }, [])
@@ -117,7 +110,7 @@ const Playlist = () => {
                   <img
                      src={playlist?.images.at(0)?.url}
                      alt=""
-                     className="hero-image rounded object-cover w-full h-full" // Adjust to make sure the image fills the square container
+                     className="hero-image rounded object-cover w-full h-full"
                   />
                ) : (
                   <Flex
@@ -299,20 +292,29 @@ const InteractiveHeader = ({
 
    isPublic,
 }) => {
-   const dispatch = useDispatch()
-   const navigate = useNavigate()
+   const queryClient = useQueryClient()
+   const { spotifyApi } = useSpotifyInstance()
+   const { mutate: editPlaylist } = useMutation({
+      mutationFn: ({ name, description, isPublic, playlistId }) =>
+         spotifyApi.put(`/playlists/${playlistId}`, {
+            name,
+            description,
+            public: isPublic,
+         }),
+      onSuccess: (response) => {
+         console.log(response)
+         return Promise.all([
+            queryClient.setQueryData(['currentPlaylist']),
+            queryClient.setQueryData(['userPlaylists']),
+         ])
+      },
+      onError(error) {
+         console.log(error)
+      },
+   })
 
    const handleEditPlaylist = ({ name, description, isPublic }) => {
-      // console.log(user)
-      dispatch(
-         editPlaylist({ name, description, isPublic, playlistId: playlist.id })
-      )
-         .then((action) => {
-            const response = action.payload
-            if (!response?.id) return
-            navigate('/playlist/' + response?.id)
-         })
-         .catch((error) => console.log(error))
+      editPlaylist({ name, description, isPublic, playlistId: playlist.id })
    }
 
    return (
@@ -366,7 +368,9 @@ const InteractiveHeader = ({
                      '-webkit-tap-highlight-color': 'rgba(0, 0, 0, 0)',
                   }}
                >
-                  <Switch.Thumb className="block size-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]" />
+                  <Switch.Thumb
+                     className={`block size-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]`}
+                  />
                </Switch.Root>
                <div className="mt-[25px] flex justify-end">
                   <Dialog.Close asChild>

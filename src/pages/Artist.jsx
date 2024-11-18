@@ -1,33 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
-import {
-   fetchArtist,
-   setCurrentArtist,
-   setIsFollowing,
-   checkIsFollowing,
-   followOrUnfollow,
-   setCurrentSong,
-   setIsPlaying,
-} from '../store/slicers/userSlice'
-import { Box, Flex, Text, Grid, Table, Button } from '@radix-ui/themes'
-import * as Popover from '@radix-ui/react-popover'
+import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
+import { Box, Flex, Text, Table, Button } from '@radix-ui/themes'
 import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 const Artist = () => {
    const params = useParams()
    const id = params.id
-
-   const { token, currentArtist, isFollowing, isPlaying, currentSong } =
-      useSelector((state) => state.user)
-   const [followStatus, setFollowStatus] = useState(false)
+   const { isPlaying, currentSong } = useSelector((state) => state.user)
    const [hoverOnFollowBtn, setHoverOnFollowBtn] = useState(false)
-   const dispatch = useDispatch(fetchArtist)
-   const [artist, setArtist] = useState(null)
-   const [popularSongs, setPopularSongs] = useState(null)
-   const [albums, setAlbums] = useState(null)
+   const dispatch = useDispatch()
    const [selectedTrack, setSelectedTrack] = useState(null)
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
-
+   const queryClient = useQueryClient()
    let humanReadableNum = (number) => {
       let numStr = number.toString()
       let counter = 0
@@ -41,27 +28,26 @@ const Artist = () => {
       }
       return res
    }
-   useEffect(() => {
-      if (id && !token) return
 
-      dispatch(
-         checkIsFollowing({
-            type: 'artist',
-            id,
-         })
-      )
-   }, [currentArtist])
+   const { spotifyApi, token } = useSpotifyInstance()
+
+   const { data: isFollowing } = useQuery({
+      queryKey: ['isFollowing', id],
+      queryFn: () =>
+         spotifyApi
+            .get(`/me/following/contains?type=artist&ids=${id}`)
+            .then((res) => res?.data?.at(0))
+            .catch((err) => console.log(err)),
+   })
 
    useEffect(() => {
-      if (isFollowing.length === 0) return
+      console.log(isFollowing)
+      // if (isFollowing.length === 0) return
    }, [isFollowing])
 
    const hoverClass = (item) =>
       selectedTrack !== item.id ? 'hover:backdrop-brightness-95' : ''
-   useEffect(() => {
-      if (!token || !id) return
-      dispatch(fetchArtist({ token, id }))
-   }, [token, id])
+
    const activeClass = (item) =>
       selectedTrack === item.id ? 'backdrop-brightness-90' : ''
    const formatDuration = (ms) => {
@@ -70,24 +56,65 @@ const Artist = () => {
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
    }
 
-   useEffect(() => {
-      if (!currentArtist) return
-      const { artist, popularSongs, albums } = currentArtist
-      setArtist(artist)
-      setPopularSongs(popularSongs.tracks)
-      setAlbums(albums)
+   const { data: popularSongs } = useQuery({
+      queryKey: ['popularSongs', id],
+      queryFn: () =>
+         spotifyApi
+            .get(`/artists/${id}/top-tracks`)
+            .then((res) => res.data)
+            .catch((err) => console.log(err)),
+      enabled: !!token,
+   })
 
-      return () => {
-         dispatch(setCurrentArtist(null))
-         setSelectedTrack(null)
-      }
-   }, [currentArtist])
+   const { data: albums } = useQuery({
+      queryKey: ['albums', id],
+      queryFn: () =>
+         spotifyApi
+            .get(`/artists/${id}/albums`)
+            .then((res) => res.data)
+            .catch((err) => console.log(err)),
+      enabled: !!token,
+   })
+   const { data: artist } = useQuery({
+      queryKey: ['artist', id],
+      queryFn: () =>
+         spotifyApi
+            .get(`/artists/${id}`)
+            .then((res) => res.data)
+            .catch((err) => console.log(err)),
+      enabled: !!token,
+   })
+
+   const { mutate: followOrUnfollow } = useMutation({
+      mutationFn: ({ action }) => {
+         if (action === 'follow') {
+            return spotifyApi
+               .put(`/me/following?type=artist`, {
+                  ids: [id],
+               })
+               .then((res) => res.data)
+         }
+
+         return spotifyApi
+            .delete(`/me/following?type=artist`, {
+               data: {
+                  ids: [id],
+               },
+            })
+            .then((res) => res.data)
+      },
+      onSuccess: (res) => {
+         console.log(res)
+         queryClient.invalidateQueries(['isFollowing'])
+      },
+      onError: (err) => {
+         console.log(err)
+      },
+   })
 
    useEffect(() => {
-      return () => {
-         dispatch(setIsFollowing(false))
-      }
-   }, [])
+      console.log(artist)
+   }, [artist])
 
    return (
       <Flex
@@ -141,7 +168,7 @@ const Artist = () => {
                               )} Followers`}
                         </Text>
                         {/* follow status */}
-                        {/* <Box>
+                        <Box>
                            {isFollowing ? (
                               hoverOnFollowBtn ? (
                                  <Button
@@ -151,13 +178,9 @@ const Artist = () => {
                                        setHoverOnFollowBtn(false)
                                     }
                                     onClick={() => {
-                                       dispatch(
-                                          followOrUnfollow({
-                                             type: 'artist',
-                                             id,
-                                             action: 'unfollow',
-                                          })
-                                       )
+                                       followOrUnfollow({
+                                          action: 'unfollow',
+                                       })
                                     }}
                                  >
                                     Unfollow
@@ -178,19 +201,15 @@ const Artist = () => {
                                  variant="outline"
                                  color="blue"
                                  onClick={() =>
-                                    dispatch(
-                                       followOrUnfollow({
-                                          type: 'artist',
-                                          id,
-                                          action: 'follow',
-                                       })
-                                    )
+                                    followOrUnfollow({
+                                       action: 'follow',
+                                    })
                                  }
                               >
                                  Follow
                               </Button>
                            )}
-                        </Box> */}
+                        </Box>
                      </Flex>
                   </Flex>
                </Flex>
@@ -227,17 +246,14 @@ const Artist = () => {
                </Table.Header> */}
 
                <Table.Body>
-                  {popularSongs?.map((item, index) => {
-                     // console.log(item)
+                  {popularSongs?.tracks?.map((item, index) => {
                      return (
                         <Table.Row
                            key={item?.id}
                            onClick={() => {
-                              // console.log(item)
                               setSelectedTrack(item)
                            }}
                            onMouseEnter={() => {
-                              // console.log(item)
                               setCurrentUserIdOnHover(item.id)
                            }}
                            onMouseLeave={() => setCurrentUserIdOnHover(null)}
@@ -246,17 +262,6 @@ const Artist = () => {
                            )} ${activeClass(item)}`}
                         >
                            <Table.RowHeaderCell>
-                              {/* {currentUserIdOnHover === item.id ||
-                              selectedTrack === item.id ? (
-                                 <PlayIcon
-                                    onClick={() => {
-                                       setSelectedTrack(item)
-                                    }}
-                                 />
-                              ) : (
-                                 index + 1
-                              )} */}
-
                               {currentUserIdOnHover === item.id ||
                               selectedTrack === item.id ? (
                                  isPlaying ? (

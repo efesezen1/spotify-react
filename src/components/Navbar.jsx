@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
    MagnifyingGlassIcon,
    HomeIcon,
@@ -14,10 +14,26 @@ import { Link, useNavigation, useNavigate, useLocation } from 'react-router-dom'
 import Logout from './Logout'
 import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
+import useSpotifyInstance from '../hook/spotifyInstance'
 const Navbar = () => {
-   const user = useSelector((state) => state.user)
+   // const user = useSelector((state) => state.user)
+   const { spotifyApi, token } = useSpotifyInstance()
+   const { data: user } = useQuery({
+      queryKey: ['user'],
+      queryFn: () => spotifyApi.get('/me').then((res) => res.data),
+      enabled: !!token,
+   })
+
+   useEffect(() => {
+      console.log(user)
+   }, [user])
+
    const navigate = useNavigate()
    const location = useLocation()
+
+
+
    return (
       <Flex
          direction="row"
@@ -96,10 +112,10 @@ const Navbar = () => {
                </Button>
             </Tooltip>
 
-            <Box className="mr-2">{user?.display_name}</Box>
+            {/* <Box className="mr-2">{user?.display_name}</Box> */}
             <Popover.Root>
                <Tooltip
-                  content={user?.user?.display_name}
+                  content={user?.display_name}
                   delayDuration={0}
                   className=""
                >
@@ -107,7 +123,7 @@ const Navbar = () => {
                      <Avatar.Root className="AvatarRoot">
                         <Avatar.Image
                            className="AvatarImage"
-                           src={user.profilePicture}
+                           src={user?.images?.at(1)?.url}
                            alt="Colm Tuite"
                         />
                         <Avatar.Fallback
