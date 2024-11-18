@@ -13,21 +13,6 @@ import ItemRow from '../components/ItemRow'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useQuery, QueryClient } from '@tanstack/react-query'
 
-export const loader = (queryClient, token) => {
-   return queryClient.ensureQueryData({
-      queryKey: ['user'],
-      queryFn: async () => {
-         const response = await spotifyApi?.get(
-            '/browse/featured-playlists?limit=10'
-         )
-
-         return response.data
-      },
-      enabled: !!token,
-      refetchOnWindowFocus: false,
-   })
-}
-
 const Browse = ({ className }) => {
    const { spotifyApi, token } = useSpotifyInstance()
 
