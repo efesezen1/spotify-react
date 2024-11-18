@@ -1,25 +1,66 @@
 import React, { useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useLoaderData } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+
 import {
    fetchPlaylistRecommendations,
    fetchUser,
 } from '../store/slicers/userSlice'
-import { Flex, Text, Box, Grid } from '@radix-ui/themes'
+import { Flex, Text, Box, Grid, Spinner } from '@radix-ui/themes'
 import Slider from 'react-slick'
 import { motion } from 'framer-motion'
 import ItemRow from '../components/ItemRow'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import { useQuery, QueryClient } from '@tanstack/react-query'
+
+export const loader = (queryClient, token) => {
+   return queryClient.ensureQueryData({
+      queryKey: ['user'],
+      queryFn: async () => {
+         const response = await spotifyApi?.get(
+            '/browse/featured-playlists?limit=10'
+         )
+
+         return response.data
+      },
+      enabled: !!token,
+      refetchOnWindowFocus: false,
+   })
+}
 
 const Browse = ({ className }) => {
-   const dispatch = useDispatch()
-   const { playlistRecommendations, credentials } = useSelector(
-      (state) => state.user
-   )
+   const { spotifyApi, token } = useSpotifyInstance()
+
+   const { data: playlistRecommendations, isLoading } = useQuery({
+      queryKey: ['user'],
+      queryFn: async () => {
+         const response = await spotifyApi?.get(
+            '/browse/featured-playlists?limit=10'
+         )
+
+         return response.data
+      },
+      enabled: !!token,
+      refetchOnWindowFocus: false,
+   })
 
    useEffect(() => {
-      if (!credentials) return
-      dispatch(fetchPlaylistRecommendations(credentials))
-   }, [credentials])
+      console.log(playlistRecommendations)
+   }, [playlistRecommendations])
+
+   if (isLoading) {
+      return (
+         <Flex
+            direction="column"
+            align={'center'}
+            justify={'center'}
+            className={` h-full ${className} `}
+         >
+            <Spinner />
+            Loading...
+         </Flex>
+      )
+   }
 
    return (
       <Flex direction="column" className={` h-full ${className} `}>
