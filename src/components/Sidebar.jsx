@@ -5,7 +5,7 @@ import * as Switch from '@radix-ui/react-switch'
 import * as Popover from '@radix-ui/react-popover'
 import { motion } from 'framer-motion'
 import React, { useEffect, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
 import {
@@ -14,45 +14,25 @@ import {
    PlusIcon,
    ValueNoneIcon,
 } from '@radix-ui/react-icons'
-import {
-   fetchSelectedPlaylist,
-   fetchUserPlaylists,
-   createPlaylist,
-} from '../store/slicers/userSlice'
-import {
-   useLocation,
-   useNavigate,
-   useNavigation,
-   useSearchParams,
-} from 'react-router-dom'
+
+import { useNavigate } from 'react-router-dom'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
-   const dispatch = useDispatch()
    const navigate = useNavigate()
-   const location = useLocation()
 
-   const { userPlaylists, credentials } = useSelector((state) => state.user)
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
-   // const searchParams = useSearchParams()
 
-   useEffect(() => {
-      const loc = location.pathname.split('/').filter((x) => x !== '')
-      if (loc?.at(0) === 'playlist') {
-         const currentLocation = loc?.at(1)
-         const isCurrentIdNotIncludedInPlaylist = userPlaylists.some((item) => {
-            return item?.id === currentLocation
-         })
-         if (!isCurrentIdNotIncludedInPlaylist) {
-            dispatch(fetchUserPlaylists(credentials))
-         }
-      }
-   }, [location.pathname])
+   const { token, spotifyApi } = useSpotifyInstance()
 
-   useEffect(() => {
-      if (!credentials) return
-      dispatch(fetchUserPlaylists(credentials))
-   }, [credentials])
+   const { data: userPlaylists, isLoading } = useQuery({
+      queryKey: ['userPlaylists'],
+      queryFn: async () =>
+         spotifyApi.get('me/playlists').then((res) => res?.data?.items),
+      enabled: !!token,
+   })
 
    return (
       <Flex direction={'column'}>
@@ -103,76 +83,95 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
          <Box
             className={`${className} overflow-y-scroll m-2 relative rounded-lg `}
          >
-            {userPlaylists?.map((playlist) => (
-               <Flex
-                  direction={'row'}
-                  key={playlist?.id}
-                  onClick={() => {
-                     dispatch(fetchSelectedPlaylist(playlist?.href)).then(
-                        () => {
+            {userPlaylists &&
+               userPlaylists?.map((playlist) => {
+                  console.log(playlist)
+                  return (
+                     <Flex
+                        direction={'row'}
+                        key={playlist?.id}
+                        onClick={() => {
                            navigate('/playlist/' + playlist?.id)
-                        }
-                     )
-                  }}
-                  className={`${playlist?.id === id ? 'bg-red-100' : ''} ${
-                     playlist?.id !== id ? 'hover:bg-red-50' : ''
-                  } ${
-                     !sidebarClosed && 'pr-3'
-                  } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
-               >
-                  <Flex justify="" align="center" className="w-full">
-                     <Box>
-                        {playlist?.images?.at(0)?.url ? (
-                           <img
-                              className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
-                              src={playlist?.images?.at(0)?.url}
-                              alt=""
-                           />
-                        ) : (
-                           <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
-                              {' '}
-                              <ValueNoneIcon />
+                        }}
+                        className={`${
+                           playlist?.id === id ? 'bg-red-100' : ''
+                        } ${playlist?.id !== id ? 'hover:bg-red-50' : ''} ${
+                           !sidebarClosed && 'pr-3'
+                        } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
+                     >
+                        <Flex justify="" align="center" className="w-full">
+                           <Box>
+                              {playlist?.images?.at(0)?.url ? (
+                                 <img
+                                    className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
+                                    src={playlist?.images?.at(0)?.url}
+                                    alt=""
+                                 />
+                              ) : (
+                                 <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
+                                    {' '}
+                                    <ValueNoneIcon />
+                                 </Box>
+                              )}
                            </Box>
-                        )}
-                     </Box>
 
-                     {!sidebarClosed && (
-                        <Flex direction="column" className="ml-2 select-none">
-                           <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
-                              {playlist?.name}
-                           </Text>
-                           <Text color="gray" className="text-xs ">
-                              {playlist?.owner?.display_name || 'Unknown'}
-                           </Text>
+                           {!sidebarClosed && (
+                              <Flex
+                                 direction="column"
+                                 className="ml-2 select-none"
+                              >
+                                 <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
+                                    {playlist?.name}
+                                 </Text>
+                                 <Text color="gray" className="text-xs ">
+                                    {playlist?.owner?.display_name || 'Unknown'}
+                                 </Text>
+                              </Flex>
+                           )}
                         </Flex>
-                     )}
-                  </Flex>
-               </Flex>
-            ))}
+                     </Flex>
+                  )
+               })}
          </Box>
       </Flex>
    )
 }
 
 const CreatePlaylist = ({ children, className }) => {
-   const dispatch = useDispatch()
+   const queryClient = useQueryClient()
    const navigate = useNavigate()
-
+   const { spotifyApi, token } = useSpotifyInstance()
    const [isPublic, setIsPublic] = useState(false)
 
-   // useEffect(() => {
-   //    console.log(isPublic)
-   // }, [isPublic])
+   const { data: user } = useQuery({
+      queryKey: ['user'],
+      queryFn: () => spotifyApi.get('/me').then((res) => res.data),
+      enabled: !!token,
+   })
+
+   useEffect(() => {
+      console.log(user)
+   }, [user])
+
+   const { mutate: createPlaylist } = useMutation({
+      mutationFn: ({ name, description, isPublic }) =>
+         spotifyApi.post(`/users/${user.id}/playlists`, {
+            name,
+            description: description || '',
+            isPublic,
+         }),
+      onSuccess: (res) => {
+         queryClient.invalidateQueries(['userPlaylists'])
+         const id = res.data.id
+         navigate('/playlist/' + id)
+      },
+      onError: (error) => {
+         console.log(error)
+      },
+   })
 
    const handleCreatePlaylist = ({ name, description, isPublic }) => {
-      // console.log(user)
-      dispatch(createPlaylist({ name, description, isPublic }))
-         .then((action) => {
-            const response = action.payload
-            if (!response?.id) return
-            navigate('/playlist/' + response?.id)
-         })
-         .catch((error) => console.log(error))
+      createPlaylist({ name, description, isPublic })
    }
 
    return (
