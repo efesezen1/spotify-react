@@ -115,7 +115,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
                <audio
                   ref={audioRef}
                   src={
-                     currentSong?.track?.preview_url || currentSong?.preview_url
+                     currentSong?.preview_url || currentSong?.preview_url
                   }
                   loop={isOnLoop}
                />
@@ -127,15 +127,15 @@ const Player = ({ className, previewUrl, parentRef }) => {
                >
                   <img
                      className="sidebar-image"
-                     src={currentSong?.track?.album?.images?.at(-1)?.url}
+                     src={currentSong?.album?.images?.at(-1)?.url}
                      alt=""
                   />
                   <Flex direction="column" pl="2">
-                     <Link to={`/album/${currentSong?.track?.album?.id}`}>
-                        {currentSong?.track?.name}
+                     <Link to={`/album/${currentSong?.album?.id}`}>
+                        {currentSong?.name}
                      </Link>
                      <Box className=" whitespace-nowrap text-ellipsis text-sm">
-                        {currentSong?.track?.artists
+                        {currentSong?.artists
                            .map((artist) => (
                               <Link
                                  to={`/artist/${artist.id}`}

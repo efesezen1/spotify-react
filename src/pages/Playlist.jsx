@@ -212,14 +212,14 @@ const Playlist = () => {
                                     ) : (
                                        <PlayIcon
                                           onClick={() =>
-                                             dispatch(setCurrentSong(item))
+                                             dispatch(setCurrentSong(item.track))
                                           }
                                        />
                                     )
                                  ) : (
                                     <PlayIcon
                                        onClick={() =>
-                                          dispatch(setCurrentSong(item))
+                                          dispatch(setCurrentSong(item.track))
                                        }
                                     />
                                  )
