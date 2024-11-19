@@ -256,7 +256,7 @@ const Artist = () => {
                         <Table.Row
                            key={item?.id}
                            onClick={() => {
-                              setSelectedTrack(item)
+                              setSelectedTrack(item.id)
                            }}
                            onMouseEnter={() => {
                               setCurrentUserIdOnHover(item.id)
@@ -266,14 +266,14 @@ const Artist = () => {
                               item
                            )} ${activeClass(item)}`}
                         >
-                           <Table.Cell>
+                           <Table.RowHeaderCell>
                               <TrackStatus
                                  item={item}
                                  index={index}
                                  currentUserIdOnHover={currentUserIdOnHover}
                                  selectedTrack={selectedTrack}
                               />
-                           </Table.Cell>
+                           </Table.RowHeaderCell>
                            <Table.Cell>
                               <Flex direction={'column'}>
                                  {/* Song Title */}

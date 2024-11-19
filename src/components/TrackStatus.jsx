@@ -23,7 +23,9 @@ const TrackStatus = ({ item, index, currentUserIdOnHover, selectedTrack }) => {
                         dispatch(setIsPlaying(false))
                      }}
                   />
-               ) : null
+               ) : (
+                  <PlayIcon onClick={() => dispatch(setCurrentSong(item))} />
+               )
             ) : (
                <PlayIcon onClick={() => dispatch(setCurrentSong(item))} />
             )
