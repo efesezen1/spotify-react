@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
 import { Box, Flex, Text, Table, Button } from '@radix-ui/themes'
-import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
+import { PauseIcon, PlayIcon } from '@radix-ui/react-icons'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 const Artist = () => {
@@ -134,7 +134,11 @@ const Artist = () => {
                         className=" hero-image rounded-full object-cover  "
                      />
                   ) : (
-                     <></>
+                     <Flex
+                        className="hero-image bg-gray-200 rounded-full"
+                        align={'center'}
+                        justify={'center'}
+                     ></Flex>
                   )}
                </Flex>
 
@@ -173,7 +177,7 @@ const Artist = () => {
                               hoverOnFollowBtn ? (
                                  <Button
                                     variant="solid"
-                                    color="blue"
+                                    color="red"
                                     onMouseLeave={() =>
                                        setHoverOnFollowBtn(false)
                                     }
