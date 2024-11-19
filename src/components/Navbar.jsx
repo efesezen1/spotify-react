@@ -32,8 +32,6 @@ const Navbar = () => {
    const navigate = useNavigate()
    const location = useLocation()
 
-
-
    return (
       <Flex
          direction="row"
@@ -87,6 +85,7 @@ const Navbar = () => {
                   onClick={() => {
                      navigate('/')
                   }}
+                  variant="soft"
                >
                   <HomeIcon height="30" width="30" />
                </Button>

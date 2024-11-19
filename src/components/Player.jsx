@@ -13,6 +13,7 @@ import {
    ShuffleIcon,
    SpeakerOffIcon,
 } from '@radix-ui/react-icons'
+import { motion, useDragControls } from 'framer-motion'
 import QueueIcon from './icon/QueueIcon'
 import MicrophoneIcon from './icon/MicrophoneIcon'
 import DevicesIcon from './icon/DevicesIcon'
@@ -24,10 +25,11 @@ import {
 } from '../store/slicers/userSlice'
 import { Link } from 'react-router-dom'
 
-const Player = ({ previewUrl }) => {
+const Player = ({ className, previewUrl, parentRef }) => {
    const dispatch = useDispatch()
    const [volume, setVolume] = useState(50)
    const audioRef = useRef(null)
+   const controls = useDragControls()
    const [currentTime, setCurrentTime] = useState(0)
    const { currentSong, isPlaying, isOnLoop, isShuffled } = useSelector(
       (state) => state.user
@@ -84,7 +86,22 @@ const Player = ({ previewUrl }) => {
    }, [currentSong])
 
    return (
-      <Flex direction="row" className="w-full">
+      <motion.div
+         drag
+         dragConstraints={parentRef}
+         className={` flex flex-row ${className} w-10/12 rounded-full backdrop-blur-2xl backdrop-brightness-95  p-10 `}
+         dragControls={controls}
+         // dragElastic={0.2}
+         dragListener={false}
+         onPointerDown={(e) => {
+            if (e.target.role === 'slider') {
+               console.log(e.target.role)
+               console.log(e.target.role === 'slider')
+            } else {
+               controls.start(e)
+            }
+         }}
+      >
          <audio
             ref={audioRef}
             src={currentSong?.track?.preview_url || currentSong?.preview_url}
@@ -148,6 +165,7 @@ const Player = ({ previewUrl }) => {
                   />
                </Flex>
                <Slider
+                  type="range"
                   value={[currentTime]}
                   onValueChange={(value) =>
                      (audioRef.current.currentTime =
@@ -174,6 +192,7 @@ const Player = ({ previewUrl }) => {
                <Flex className="w-4/12" direction="row" align="center">
                   <SpeakerModerateIcon />
                   <Slider
+                     type="range"
                      value={[volume]}
                      onValueChange={(value) => setVolume(value[0])}
                      variant="soft"
@@ -184,7 +203,7 @@ const Player = ({ previewUrl }) => {
                <PlayerBox children={<SizeIcon />} className={'ml-2'} />
             </Flex>
          </Flex>
-      </Flex>
+      </motion.div>
    )
 }
 

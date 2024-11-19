@@ -172,7 +172,7 @@ const Artist = () => {
                            {isFollowing ? (
                               hoverOnFollowBtn ? (
                                  <Button
-                                    variant="outline"
+                                    variant="solid"
                                     color="blue"
                                     onMouseLeave={() =>
                                        setHoverOnFollowBtn(false)
@@ -187,7 +187,7 @@ const Artist = () => {
                                  </Button>
                               ) : (
                                  <Button
-                                    variant="outline"
+                                    variant="solid"
                                     color="blue"
                                     onMouseEnter={() =>
                                        setHoverOnFollowBtn(true)
@@ -198,7 +198,7 @@ const Artist = () => {
                               )
                            ) : (
                               <Button
-                                 variant="outline"
+                                 variant="solid"
                                  color="blue"
                                  onClick={() =>
                                     followOrUnfollow({
