@@ -202,7 +202,7 @@ const Playlist = () => {
                               {currentUserIdOnHover === item.track.id ||
                               selectedTrack === item.track.id ? (
                                  isPlaying ? (
-                                    currentSong?.track?.id ===
+                                    currentSong?.id ===
                                     item?.track?.id ? (
                                        <PauseIcon
                                           onClick={() => {

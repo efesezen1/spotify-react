@@ -1,7 +1,7 @@
 import { Box, Text, Flex } from '@radix-ui/themes'
 import React from 'react'
 import Slider from 'react-slick'
-import { fetchSelectedPlaylist } from '../store/slicers/userSlice'
+
 import { useDispatch, useSelector } from 'react-redux'
 import _ from 'lodash'
 import axios from 'axios'
@@ -39,15 +39,7 @@ const ItemRow = ({ playlistRecommendations }) => {
             <Slider {...carouselSettings}>
                {playlistRecommendations?.playlists?.items.map((playlist) => (
                   <Box
-                     onClick={
-                        () =>
-                           dispatch(fetchSelectedPlaylist(playlist.href)).then(
-                              () => {
-                                 navigate(`/playlist/${playlist.id}`)
-                              }
-                           )
-                        // fetchPlaylist(playlist.href)
-                     }
+                     onClick={() => navigate(`/playlist/${playlist.id}`)}
                      key={playlist.id}
                      className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded p-1  transition-all duration-200 "
                   >
