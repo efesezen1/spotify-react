@@ -131,7 +131,6 @@ const Playlist = () => {
             </Flex>
 
             <Flex direction="column" justify="end" className="my-5 flex-grow">
-               {user?.id} - {playlist?.owner?.id}
                {user?.id === playlist?.owner?.id ? (
                   <InteractiveHeader
                      setIsPublic={setIsPublic}
