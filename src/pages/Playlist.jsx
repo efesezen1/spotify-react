@@ -160,7 +160,7 @@ const Playlist = () => {
                className="overflow-y-scroll"
                onClick={(e) => e.stopPropagation()}
             >
-               <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10">
+               <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10 ">
                   <Table.Row>
                      <Table.ColumnHeaderCell>
                         <Box className="text-xs">#</Box>
