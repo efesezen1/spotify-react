@@ -214,25 +214,35 @@ const Playlist = () => {
                               />
                            </Table.RowHeaderCell>
                            <Table.Cell>
+                              {console.log()}
                               <Flex direction={'column'}>
-                                 <Text size="2">{item.track.name}</Text>
-                                 <Text size="1">
-                                    {item.track.artists
-                                       .map((artist) => (
-                                          <Link
-                                             to={`/artist/${artist.id}`}
-                                             key={artist.id}
-                                             className="hover:underline"
-                                          >
-                                             {artist.name}
-                                          </Link>
-                                       ))
-                                       .reduce((prev, curr) => [
-                                          prev,
-                                          ', ',
-                                          curr,
-                                       ])}
-                                 </Text>
+                                 <Flex direction={'row'} align={'center'}>
+                                    <img
+                                       src={item.track.album.images.at(-1).url}
+                                       alt=""
+                                       className={`w-[32px] h-[32px] mr-2 rounded`}
+                                    />
+                                    <Flex direction={'column'}>
+                                       <Text size="2">{item.track.name}</Text>
+                                       <Text size="1">
+                                          {item.track.artists
+                                             .map((artist) => (
+                                                <Link
+                                                   to={`/artist/${artist.id}`}
+                                                   key={artist.id}
+                                                   className="hover:underline"
+                                                >
+                                                   {artist.name}
+                                                </Link>
+                                             ))
+                                             .reduce((prev, curr) => [
+                                                prev,
+                                                ', ',
+                                                curr,
+                                             ])}
+                                       </Text>
+                                    </Flex>
+                                 </Flex>
                               </Flex>
                            </Table.Cell>
                            <Table.Cell>

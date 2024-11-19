@@ -33,6 +33,7 @@ const userSlice = createSlice({
       setCurrentSong: (state, action) => {
          console.log('setCurrentSong fired', action.payload)
          state.currentSong = action.payload
+         state.isPlaying = true
       },
       removeUser: (state) => {
          state.user = null

@@ -25,9 +25,9 @@ const Navbar = () => {
       enabled: !!token,
    })
 
-   useEffect(() => {
-      console.log(user)
-   }, [user])
+   // useEffect(() => {
+   //    console.log(user)
+   // }, [user])
 
    const navigate = useNavigate()
    const location = useLocation()

@@ -27,18 +27,78 @@ import {
    setVolume,
 } from '../store/slicers/userSlice'
 import { Link } from 'react-router-dom'
-
+import useSpotifyInstance from '../hook/spotifyInstance'
 const Player = ({ className, previewUrl, parentRef }) => {
-   const [snapToOrigin, setSnapToOrigin] = useState(false)
+   // const [snapToOrigin, setSnapToOrigin] = useState(false)
    const dispatch = useDispatch()
    // const [volume, setVolume] = useState(50)
    const audioRef = useRef(null)
    const controls = useDragControls()
    const [currentTime, setCurrentTime] = useState(0)
+   // const { token, spotifyApi } = useSpotifyInstance()
    const { currentSong, isPlaying, isOnLoop, isShuffled, volume } = useSelector(
       (state) => state.user
    )
-   // Toggle play/pause
+
+   // const loadScript = () => {
+   //    const script = document.createElement('script')
+   //    script.id = 'spotify-player'
+   //    script.type = 'text/javascript'
+   //    script.async = 'async'
+   //    script.defer = 'defer'
+   //    script.src = 'https://sdk.scdn.co/spotify-player.js'
+   //    document.body.appendChild(script)
+   // }
+
+   // useEffect(() => {
+   //    loadScript()
+   // }, [])
+
+   // const initPlayer = () => {
+   //    window.onSpotifyWebPlaybackSDKReady = () => {
+   //       const player = new Spotify.Player({
+   //          name: 'SPOTIFY CLONE PLAYER',
+   //          getOAuthToken: (cb) => {
+   //             cb(token)
+   //          },
+   //          volume: 0.5,
+   //       })
+
+   //       // Ready
+   //       player.addListener('ready', ({ device_id }) => {
+   //          console.log('Ready with Device ID', device_id)
+   //       })
+
+   //       // Not Ready
+   //       player.addListener('not_ready', ({ device_id }) => {
+   //          console.log('Device ID has gone offline', device_id)
+   //       })
+
+   //       player.addListener('initialization_error', ({ message }) => {
+   //          console.error(message)
+   //       })
+
+   //       player.addListener('authentication_error', ({ message }) => {
+   //          console.error(message)
+   //       })
+
+   //       player.addListener('account_error', ({ message }) => {
+   //          console.error(message)
+   //       })
+
+   //       // document.getElementById('togglePlay').onclick = function () {
+   //       //    player.togglePlay()
+   //       // }
+
+   //       player.connect().then((success) => {
+   //          if (success) {
+   //             console.log(
+   //                'The Web Playback SDK successfully connected to Spotify!'
+   //             )
+   //          }
+   //       })
+   //    }
+   // }
 
    const togglePlayPause = () => {
       if (isPlaying) {
@@ -81,6 +141,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
 
    useEffect(() => {
       !isPlaying && audioRef?.current?.pause()
+      isPlaying && audioRef?.current?.play()
    }, [isPlaying, currentSong])
 
    useEffect(() => {

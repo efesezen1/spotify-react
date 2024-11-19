@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Box, Flex } from '@radix-ui/themes'
 import { useDispatch, useSelector } from 'react-redux'
 import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
@@ -23,9 +23,7 @@ const TrackStatus = ({ item, index, currentUserIdOnHover, selectedTrack }) => {
                         dispatch(setIsPlaying(false))
                      }}
                   />
-               ) : (
-                  <PlayIcon onClick={() => dispatch(setCurrentSong(item))} />
-               )
+               ) : null
             ) : (
                <PlayIcon onClick={() => dispatch(setCurrentSong(item))} />
             )

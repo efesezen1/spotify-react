@@ -9,6 +9,7 @@ import React, {
 } from 'react'
 
 import { useSelector } from 'react-redux'
+import useSpotifyInstance from '../hook/spotifyInstance'
 
 function reqWithToken(endpoint, access_token) {
    let source = axios.CancelToken.source()
@@ -87,7 +88,7 @@ const postWithToken = (enpoint, access_token) => {
 }
 
 function Player({ handleMaximize, isFullScreen }) {
-   const { token } = useSelector((state) => state.user)
+   const { token } = useSpotifyInstance()
    const { currentTrack, setCurrentTrack } = /*  useContext(TrackContext) */ [
       1,
       () => 2,
@@ -184,6 +185,7 @@ function Player({ handleMaximize, isFullScreen }) {
          console.log('Device ID has gone offline', device_id)
       })
       // Connect the player!
+      console.log('connetion success')
       fireyPlayer.connect()
    }
 
@@ -408,7 +410,7 @@ function Player({ handleMaximize, isFullScreen }) {
 
    return (
       <>
-         <div>
+         <div className="bg-white">
             currentTrack - {currentTrack}
             <button onClick={() => setCurrentTrack()}>setCurrentTrack</button>
             <div>
