@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import PlayerBox from './PlayerBox'
 import { Flex, Box, Slider } from '@radix-ui/themes'
 import {
    LoopIcon,
@@ -14,6 +15,7 @@ import {
    ShuffleIcon,
    SpeakerOffIcon,
 } from '@radix-ui/react-icons'
+// import AnimatedSlider from './AnimatedSlider'
 import { AnimatePresence, motion, useDragControls } from 'framer-motion'
 import QueueIcon from './icon/QueueIcon'
 import MicrophoneIcon from './icon/MicrophoneIcon'
@@ -200,7 +202,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
                >
                   <Flex className="w-full flex-row justify-evenly items-center p-3 ">
                      <PlayerBox children={<QueueIcon />} />
-                     <PlayerBox children={<MicrophoneIcon />} />
+                     {/* <PlayerBox children={<MicrophoneIcon />} /> */}
                      <PlayerBox children={<DevicesIcon />} className={'mr-2'} />
 
                      <Flex className="w-4/12" direction="row" align="center">
@@ -213,6 +215,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
                            highContrast
                            size="1"
                         />
+                        {/* <AnimatedSlider /> */}
                      </Flex>
                      <PlayerBox children={<SizeIcon />} className={'ml-2'} />
                   </Flex>
@@ -220,17 +223,6 @@ const Player = ({ className, previewUrl, parentRef }) => {
             </motion.div>
          ) : null}
       </AnimatePresence>
-   )
-}
-
-const PlayerBox = ({ children, className, onClick }) => {
-   return (
-      <Box
-         onClick={onClick}
-         className={`hover:bg-red-300 active:bg-red-500 rounded-full p-2 transition-all duration-300 hover:text-white active:text-white ${className}`}
-      >
-         {children}
-      </Box>
    )
 }
 
