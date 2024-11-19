@@ -100,7 +100,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
                animate={{ opacity: 1, scale: 1 }}
                drag
                dragConstraints={parentRef}
-               className={` flex flex-row ${className} w-10/12 rounded-full backdrop-blur-2xl backdrop-brightness-95  p-10 z-20 `}
+               className={` flex flex-row ${className} w-10/12 rounded-full   p-10 z-20 bg-slate-200 `}
                dragControls={controls}
                dragListener={false}
                onPointerDown={(e) => {
@@ -114,9 +114,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
             >
                <audio
                   ref={audioRef}
-                  src={
-                     currentSong?.preview_url || currentSong?.preview_url
-                  }
+                  src={currentSong?.preview_url || currentSong?.preview_url}
                   loop={isOnLoop}
                />
 
