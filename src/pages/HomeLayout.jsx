@@ -30,8 +30,8 @@ const HomeLayout = () => {
                ref={mainRef}
             >
                <Outlet />
-               <Flex className="h-20  absolute bottom-24 my-auto w-full ">
-                  <Player className="mx-auto" parentRef={mainRef} />
+               <Flex className="  absolute bottom-24 my-auto w-full ">
+                  <Player className="mx-auto " parentRef={mainRef} />
                </Flex>
             </Box>
          </Flex>

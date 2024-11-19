@@ -24,17 +24,18 @@ import {
    setIsPlaying,
    setIsShuffled,
    setIsOnLoop,
+   setVolume,
 } from '../store/slicers/userSlice'
 import { Link } from 'react-router-dom'
 
 const Player = ({ className, previewUrl, parentRef }) => {
    const [snapToOrigin, setSnapToOrigin] = useState(false)
    const dispatch = useDispatch()
-   const [volume, setVolume] = useState(50)
+   // const [volume, setVolume] = useState(50)
    const audioRef = useRef(null)
    const controls = useDragControls()
    const [currentTime, setCurrentTime] = useState(0)
-   const { currentSong, isPlaying, isOnLoop, isShuffled } = useSelector(
+   const { currentSong, isPlaying, isOnLoop, isShuffled, volume } = useSelector(
       (state) => state.user
    )
    // Toggle play/pause
@@ -102,7 +103,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
                animate={{ opacity: 1, scale: 1 }}
                drag
                dragConstraints={parentRef}
-               className={` flex flex-row ${className} w-10/12 rounded-full   p-10 z-20 bg-slate-200 `}
+               className={` flex flex-row ${className} w-10/12 rounded-lg p-2 z-20 bg-slate-300 min-h-full `}
                dragControls={controls}
                dragListener={false}
                onPointerDown={(e) => {
@@ -126,12 +127,12 @@ const Player = ({ className, previewUrl, parentRef }) => {
                   align="center"
                >
                   <img
-                     className="sidebar-image"
+                     className="sidebar-image "
                      src={currentSong?.album?.images?.at(-1)?.url}
                      alt=""
                   />
                   <Flex direction="column" pl="2">
-                     <Link to={`/album/${currentSong?.album?.id}`}>
+                     <Link to={`/album/${currentSong?.album?.id}`} className="">
                         {currentSong?.name}
                      </Link>
                      <Box className=" whitespace-nowrap text-ellipsis text-sm">
@@ -216,7 +217,9 @@ const Player = ({ className, previewUrl, parentRef }) => {
                         <Slider
                            type="range"
                            value={[volume]}
-                           onValueChange={(value) => setVolume(value[0])}
+                           onValueChange={(value) =>
+                              dispatch(setVolume(value[0]))
+                           }
                            variant="soft"
                            highContrast
                            size="1"

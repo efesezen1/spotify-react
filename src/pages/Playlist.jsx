@@ -16,6 +16,7 @@ import {
 import usePrevious from '../hook/prevId'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import TrackStatus from '../components/TrackStatus'
 const Playlist = () => {
    const { spotifyApi, token } = useSpotifyInstance()
 
@@ -32,7 +33,13 @@ const Playlist = () => {
 
    const container = useRef(null)
    const prevId = usePrevious(id)
-   const { isPlaying, currentSong, user } = useSelector((state) => state.user)
+   const { isPlaying, currentSong } = useSelector((state) => state.user)
+   const { data: user } = useQuery({
+      queryKey: ['user'],
+      queryFn: () => spotifyApi.get('/me').then((res) => res.data),
+      enabled: !!token,
+   })
+
    const [isPublic, setIsPublic] = useState(null)
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
    const [selectedTrack, setSelectedTrack] = useState(null)
@@ -110,7 +117,7 @@ const Playlist = () => {
                   <img
                      src={playlist?.images.at(0)?.url}
                      alt=""
-                     className="hero-image rounded object-cover w-full h-full"
+                     className="hero-image rounded object-cover w-full h-full "
                   />
                ) : (
                   <Flex
@@ -124,6 +131,7 @@ const Playlist = () => {
             </Flex>
 
             <Flex direction="column" justify="end" className="my-5 flex-grow">
+               {user?.id} - {playlist?.owner?.id}
                {user?.id === playlist?.owner?.id ? (
                   <InteractiveHeader
                      setIsPublic={setIsPublic}
@@ -199,33 +207,12 @@ const Playlist = () => {
                         ${activeClass(item)}`}
                         >
                            <Table.RowHeaderCell>
-                              {currentUserIdOnHover === item.track.id ||
-                              selectedTrack === item.track.id ? (
-                                 isPlaying ? (
-                                    currentSong?.id ===
-                                    item?.track?.id ? (
-                                       <PauseIcon
-                                          onClick={() => {
-                                             dispatch(setIsPlaying(false))
-                                          }}
-                                       />
-                                    ) : (
-                                       <PlayIcon
-                                          onClick={() =>
-                                             dispatch(setCurrentSong(item.track))
-                                          }
-                                       />
-                                    )
-                                 ) : (
-                                    <PlayIcon
-                                       onClick={() =>
-                                          dispatch(setCurrentSong(item.track))
-                                       }
-                                    />
-                                 )
-                              ) : (
-                                 <Box className="text-xs">{index + 1}</Box>
-                              )}
+                              <TrackStatus
+                                 index={index}
+                                 item={item.track}
+                                 currentUserIdOnHover={currentUserIdOnHover}
+                                 selectedTrack={selectedTrack}
+                              />
                            </Table.RowHeaderCell>
                            <Table.Cell>
                               <Flex direction={'column'}>

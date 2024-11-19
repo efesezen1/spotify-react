@@ -6,10 +6,11 @@ import { Box, Flex, Text, Table, Button } from '@radix-ui/themes'
 import { PauseIcon, PlayIcon } from '@radix-ui/react-icons'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import TrackStatus from '../components/TrackStatus'
 const Artist = () => {
    const params = useParams()
    const id = params.id
-   const { isPlaying, currentSong } = useSelector((state) => state.user)
+
    const [hoverOnFollowBtn, setHoverOnFollowBtn] = useState(false)
    const dispatch = useDispatch()
    const [selectedTrack, setSelectedTrack] = useState(null)
@@ -265,34 +266,14 @@ const Artist = () => {
                               item
                            )} ${activeClass(item)}`}
                         >
-                           <Table.RowHeaderCell>
-                              {currentUserIdOnHover === item.id ||
-                              selectedTrack === item.id ? (
-                                 isPlaying ? (
-                                    currentSong.id === item.id ? (
-                                       <PauseIcon
-                                          onClick={() => {
-                                             dispatch(setIsPlaying(false))
-                                          }}
-                                       />
-                                    ) : (
-                                       <PlayIcon
-                                          onClick={() =>
-                                             dispatch(setCurrentSong(item))
-                                          }
-                                       />
-                                    )
-                                 ) : (
-                                    <PlayIcon
-                                       onClick={() =>
-                                          dispatch(setCurrentSong(item))
-                                       }
-                                    />
-                                 )
-                              ) : (
-                                 <Box className="text-xs">{index + 1}</Box>
-                              )}
-                           </Table.RowHeaderCell>
+                           <Table.Cell>
+                              <TrackStatus
+                                 item={item}
+                                 index={index}
+                                 currentUserIdOnHover={currentUserIdOnHover}
+                                 selectedTrack={selectedTrack}
+                              />
+                           </Table.Cell>
                            <Table.Cell>
                               <Flex direction={'column'}>
                                  {/* Song Title */}

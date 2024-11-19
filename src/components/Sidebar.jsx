@@ -1,4 +1,5 @@
 import { Box, Tooltip } from '@radix-ui/themes'
+// import EmbedPlayer from './EmbedPlayer'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Switch from '@radix-ui/react-switch'
 import { motion } from 'framer-motion'
@@ -35,7 +36,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    })
 
    return (
-      <Flex direction={'column'}>
+      <Flex direction={'column'} className="relative">
          <Flex
             direction="row"
             align="center"
@@ -105,7 +106,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                            <Box>
                               {playlist?.images?.at(0)?.url ? (
                                  <img
-                                    className="sidebar-image object-cover w-10 h-10 max-w-fit" // Set fixed width and height here
+                                    className="sidebar-image object-cover w-10 h-10 max-w-fit "
                                     src={playlist?.images?.at(0)?.url}
                                     alt=""
                                  />
@@ -134,6 +135,9 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                      </Flex>
                   )
                })}
+            {/* <EmbedPlayer
+
+            /> */}
          </Box>
       </Flex>
    )
