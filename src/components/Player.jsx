@@ -11,14 +11,13 @@ import {
    SizeIcon,
    SpeakerQuietIcon,
    SpeakerModerateIcon,
-   MaskOnIcon,
    ShuffleIcon,
    SpeakerOffIcon,
 } from '@radix-ui/react-icons'
 // import AnimatedSlider from './AnimatedSlider'
 import { AnimatePresence, motion, useDragControls } from 'framer-motion'
 import QueueIcon from './icon/QueueIcon'
-import MicrophoneIcon from './icon/MicrophoneIcon'
+
 import DevicesIcon from './icon/DevicesIcon'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -39,6 +38,7 @@ const Player = ({ className, previewUrl, parentRef }) => {
       (state) => state.user
    )
    // Toggle play/pause
+
    const togglePlayPause = () => {
       if (isPlaying) {
          audioRef.current.pause()
@@ -205,8 +205,14 @@ const Player = ({ className, previewUrl, parentRef }) => {
                      {/* <PlayerBox children={<MicrophoneIcon />} /> */}
                      <PlayerBox children={<DevicesIcon />} className={'mr-2'} />
 
-                     <Flex className="w-4/12" direction="row" align="center">
-                        <SpeakerModerateIcon />
+                     <Flex
+                        className="w-4/12"
+                        direction="row"
+                        align="center"
+                        gap="2"
+                     >
+                        {/* <SpeakerModerateIcon /> */}
+                        <SpeakerIcon volume={volume} className={'text-4xl'} />
                         <Slider
                            type="range"
                            value={[volume]}
@@ -224,6 +230,18 @@ const Player = ({ className, previewUrl, parentRef }) => {
          ) : null}
       </AnimatePresence>
    )
+}
+
+const SpeakerIcon = ({ volume, className }) => {
+   if (volume > 50) {
+      return <SpeakerLoudIcon className={className} />
+   } else if (volume > 20) {
+      return <SpeakerModerateIcon className={className} />
+   } else if (volume > 0) {
+      return <SpeakerQuietIcon className={className} />
+   } else if (volume === 0) {
+      return <SpeakerOffIcon className={className} />
+   }
 }
 
 export default Player
