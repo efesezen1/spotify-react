@@ -15,7 +15,7 @@ const handleClick = () => {
 const Login = () => {
    const TRANSITION = {
       ease: 'easeInOut',
-      duration: 0.5,
+      duration: 0.4,
    }
    const scope = useMotionTimeline([
       ['#logo', { scale: 1, opacity: 1, translateY: 0 }, TRANSITION],
@@ -45,7 +45,7 @@ const Login = () => {
             </motion.div>
             <motion.div
                initial={{ scale: 0, opacity: 0, translateY: 100 }}
-               animate={{ scale: 1 }}
+               animate={{ scale: 0 }}
                id="header"
                // initial={{
                //    opacity: 0,
@@ -64,7 +64,7 @@ const Login = () => {
 
             <motion.button
                initial={{ scale: 0, opacity: 0, translateY: 100 }}
-               animate={{ scale: 1 }}
+               animate={{ scale: 0 }}
                id="button"
                className="w-full cursor-pointer"
                onClick={handleClick}
