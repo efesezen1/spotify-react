@@ -146,7 +146,6 @@ const Player = ({ className, previewUrl, parentRef }) => {
 
    useEffect(() => {
       if (!currentSong) return
-      console.log(currentSong)
       audioRef.current.pause()
       dispatch(setIsPlaying(false))
       audioRef.current.play()
@@ -169,8 +168,6 @@ const Player = ({ className, previewUrl, parentRef }) => {
                dragListener={false}
                onPointerDown={(e) => {
                   if (e.target.role === 'slider') {
-                     console.log(e.target.role)
-                     console.log(e.target.role === 'slider')
                   } else {
                      controls.start(e)
                   }

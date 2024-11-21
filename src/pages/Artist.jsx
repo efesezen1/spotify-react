@@ -5,8 +5,10 @@ import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
 import { Box, Flex, Text, Table, Button } from '@radix-ui/themes'
 import { PauseIcon, PlayIcon } from '@radix-ui/react-icons'
 import useSpotifyInstance from '../hook/spotifyInstance'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
 import TrackStatus from '../components/TrackStatus'
+
 const Artist = () => {
    const params = useParams()
    const id = params.id
@@ -30,19 +32,51 @@ const Artist = () => {
       return res
    }
 
-   const { spotifyApi, token } = useSpotifyInstance()
+   const { token, spotifyApi } = useSpotifyInstance()
 
-   const { data: isFollowing } = useQuery({
+   const followMutation = useMutation({
+      mutationFn: async () => {
+         const res = await spotifyApi.put(`/me/following?type=artist&ids=${id}`)
+         return res.data
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ['isFollowing', id] })
+      },
+   })
+
+   const unfollowMutation = useMutation({
+      mutationFn: async () => {
+         const res = await spotifyApi.delete(
+            `/me/following?type=artist&ids=${id}`
+         )
+         return res.data
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ['isFollowing', id] })
+      },
+   })
+
+   const { data: isFollowing } = useSpotifyQuery({
       queryKey: ['isFollowing', id],
-      queryFn: () =>
-         spotifyApi
-            .get(`/me/following/contains?type=artist&ids=${id}`)
-            .then((res) => res?.data?.at(0))
-            .catch((err) => console.log(err)),
+      endpoint: `/me/following/contains?type=artist&ids=${id}`
+   })
+
+   const { data: popularSongs } = useSpotifyQuery({
+      queryKey: ['popularSongs', id],
+      endpoint: `/artists/${id}/top-tracks`
+   })
+
+   const { data: albums } = useSpotifyQuery({
+      queryKey: ['albums', id],
+      endpoint: `/artists/${id}/albums`
+   })
+
+   const { data: artist } = useSpotifyQuery({
+      queryKey: ['artist', id],
+      endpoint: `/artists/${id}`
    })
 
    useEffect(() => {
-      console.log(isFollowing)
       // if (isFollowing.length === 0) return
    }, [isFollowing])
 
@@ -56,66 +90,6 @@ const Artist = () => {
       const seconds = ((ms % 60000) / 1000).toFixed(0)
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
    }
-
-   const { data: popularSongs } = useQuery({
-      queryKey: ['popularSongs', id],
-      queryFn: () =>
-         spotifyApi
-            .get(`/artists/${id}/top-tracks`)
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-      enabled: !!token,
-   })
-
-   const { data: albums } = useQuery({
-      queryKey: ['albums', id],
-      queryFn: () =>
-         spotifyApi
-            .get(`/artists/${id}/albums`)
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-      enabled: !!token,
-   })
-   const { data: artist } = useQuery({
-      queryKey: ['artist', id],
-      queryFn: () =>
-         spotifyApi
-            .get(`/artists/${id}`)
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-      enabled: !!token,
-   })
-
-   const { mutate: followOrUnfollow } = useMutation({
-      mutationFn: ({ action }) => {
-         if (action === 'follow') {
-            return spotifyApi
-               .put(`/me/following?type=artist`, {
-                  ids: [id],
-               })
-               .then((res) => res.data)
-         }
-
-         return spotifyApi
-            .delete(`/me/following?type=artist`, {
-               data: {
-                  ids: [id],
-               },
-            })
-            .then((res) => res.data)
-      },
-      onSuccess: (res) => {
-         console.log(res)
-         queryClient.invalidateQueries(['isFollowing'])
-      },
-      onError: (err) => {
-         console.log(err)
-      },
-   })
-
-   useEffect(() => {
-      console.log(artist)
-   }, [artist])
 
    return (
       <Flex
@@ -182,11 +156,7 @@ const Artist = () => {
                                     onMouseLeave={() =>
                                        setHoverOnFollowBtn(false)
                                     }
-                                    onClick={() => {
-                                       followOrUnfollow({
-                                          action: 'unfollow',
-                                       })
-                                    }}
+                                    onClick={() => unfollowMutation.mutate()}
                                  >
                                     Unfollow
                                  </Button>
@@ -205,11 +175,7 @@ const Artist = () => {
                               <Button
                                  variant="solid"
                                  color="blue"
-                                 onClick={() =>
-                                    followOrUnfollow({
-                                       action: 'follow',
-                                    })
-                                 }
+                                 onClick={() => followMutation.mutate()}
                               >
                                  Follow
                               </Button>

@@ -5,6 +5,7 @@ import { Box, Flex } from '@radix-ui/themes'
 
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
+import SpotifyPlayer from '../components/SpotifyPlayer'
 // import FireyPlayer from '../components/FireyPlayer'
 const HomeLayout = () => {
    const mainRef = useRef(null)
@@ -31,7 +32,8 @@ const HomeLayout = () => {
             >
                <Outlet />
                <Flex className="  absolute bottom-24 my-auto w-full ">
-                  <Player className="mx-auto " parentRef={mainRef} />
+                  {/* <Player className="mx-auto " parentRef={mainRef} /> */}
+                  <SpotifyPlayer />
                   {/* <FireyPlayer /> */}
                </Flex>
             </Box>

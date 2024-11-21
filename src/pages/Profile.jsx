@@ -1,42 +1,29 @@
 import { Box, Flex, Text, Grid } from '@radix-ui/themes'
 import * as Popover from '@radix-ui/react-popover'
 import { Link, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useEffect } from 'react'
+
 const Profile = () => {
    const navigate = useNavigate()
 
-   const { token, spotifyApi } = useSpotifyInstance()
-   const { data: user } = useQuery({
+   const { token } = useSpotifyInstance()
+
+   const { data: user } = useSpotifyQuery({
       queryKey: ['user'],
-      queryFn: async () => {
-         const res = await spotifyApi.get('/me')
-         return res.data
-      },
-      enabled: !!token,
+      endpoint: '/me'
    })
 
-   const { data: followingArtists } = useQuery({
+   const { data: followingArtists } = useSpotifyQuery({
       queryKey: ['followingArtists'],
-      queryFn: () =>
-         spotifyApi
-            .get('/me/following?type=artist')
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-
-      enabled: !!token,
+      endpoint: '/me/following',
+      params: { type: 'artist' }
    })
 
-   const { data: topItems } = useQuery({
+   const { data: topItems } = useSpotifyQuery({
       queryKey: ['topArtists'],
-      queryFn: async () =>
-         spotifyApi
-            .get('/me/top/artists')
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-
-      enabled: !!token,
+      endpoint: '/me/top/artists'
    })
 
    return (

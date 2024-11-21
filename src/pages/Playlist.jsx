@@ -15,35 +15,32 @@ import {
 } from '@radix-ui/react-icons'
 import usePrevious from '../hook/prevId'
 import useSpotifyInstance from '../hook/spotifyInstance'
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import TrackStatus from '../components/TrackStatus'
-const Playlist = () => {
-   const { spotifyApi, token } = useSpotifyInstance()
 
+const Playlist = () => {
    const { id } = useParams()
-   const { data: playlist } = useQuery({
-      queryKey: ['currentPlaylist', id],
-      queryFn: () =>
-         spotifyApi
-            .get('/playlists/' + id)
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-      enabled: !!token,
+   const dispatch = useDispatch()
+   const queryClient = useQueryClient()
+   const { token, spotifyApi } = useSpotifyInstance()
+   const [isPublic, setIsPublic] = useState(null)
+   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
+   const [selectedTrack, setSelectedTrack] = useState(null)
+   const { isPlaying, currentSong } = useSelector((state) => state.user)
+
+   const { data: playlist } = useSpotifyQuery({
+      queryKey: ['playlist', id],
+      endpoint: `/playlists/${id}`
+   })
+
+   const { data: user } = useSpotifyQuery({
+      queryKey: ['user'],
+      endpoint: '/me'
    })
 
    const container = useRef(null)
    const prevId = usePrevious(id)
-   const { isPlaying, currentSong } = useSelector((state) => state.user)
-   const { data: user } = useQuery({
-      queryKey: ['user'],
-      queryFn: () => spotifyApi.get('/me').then((res) => res.data),
-      enabled: !!token,
-   })
-
-   const [isPublic, setIsPublic] = useState(null)
-   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
-   const [selectedTrack, setSelectedTrack] = useState(null)
-   const dispatch = useDispatch()
 
    useEffect(() => {
       return () => {
@@ -214,7 +211,6 @@ const Playlist = () => {
                               />
                            </Table.RowHeaderCell>
                            <Table.Cell>
-                              {console.log()}
                               <Flex direction={'column'}>
                                  <Flex direction={'row'} align={'center'}>
                                     <img
@@ -298,15 +294,9 @@ const InteractiveHeader = ({
             public: isPublic,
          }),
       onSuccess: (response) => {
-         console.log(response)
-         return Promise.all([
-            queryClient.setQueryData(['currentPlaylist']),
-            queryClient.setQueryData(['userPlaylists']),
-         ])
+         queryClient.invalidateQueries(['playlist', playlistId])
       },
-      onError(error) {
-         console.log(error)
-      },
+      onError: (error) => {},
    })
 
    const handleEditPlaylist = ({ name, description, isPublic }) => {

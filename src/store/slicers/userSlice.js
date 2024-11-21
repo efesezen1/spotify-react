@@ -31,7 +31,6 @@ const userSlice = createSlice({
          state.profilePicture = action.payload.images[0].url
       },
       setCurrentSong: (state, action) => {
-         console.log('setCurrentSong fired', action.payload)
          state.currentSong = action.payload
          state.isPlaying = true
       },

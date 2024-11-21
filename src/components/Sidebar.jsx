@@ -1,22 +1,17 @@
-import { Box, Tooltip } from '@radix-ui/themes'
-// import EmbedPlayer from './EmbedPlayer'
+import { Box, Spinner, Switch, Tooltip } from '@radix-ui/themes'
 import * as Dialog from '@radix-ui/react-dialog'
-import * as Switch from '@radix-ui/react-switch'
 import { motion } from 'framer-motion'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
+
 import Library from './icon/Library'
-import {
-   ArrowLeftIcon,
-   Cross2Icon,
-   PlusIcon,
-   ValueNoneIcon,
-} from '@radix-ui/react-icons'
+import { ArrowLeftIcon, Cross2Icon, PlusIcon, ValueNoneIcon } from '@radix-ui/react-icons'
 
 import { useNavigate } from 'react-router-dom'
 import useSpotifyInstance from '../hook/spotifyInstance'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const navigate = useNavigate()
@@ -24,15 +19,33 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const id = selectedPlaylist?.id
    const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
    const { token, spotifyApi } = useSpotifyInstance()
+   const queryClient = useQueryClient()
 
-   const { data: userPlaylists, isLoading } = useQuery({
+   const { data: userPlaylists, isLoading } = useSpotifyQuery({
       queryKey: ['userPlaylists'],
-      queryFn: async () =>
-         spotifyApi
-            .get('me/playlists')
-            .then((res) => res?.data?.items)
-            .catch((err) => console.log(err)),
-      enabled: !!token,
+      endpoint: '/me/playlists',
+   })
+   useEffect(() => {
+      if (userPlaylists) {
+         fetch(userPlaylists.items.at(0).tracks.href, {
+            headers: {
+               Authorization: `Bearer ${token}`,
+            },
+         })
+            .then((res) => res.json())
+            .then((res) => {
+               // dispatch(setCurrentSong(res.items.at(0)))
+            })
+
+         // fetch(userPlaylists[0].tracks.href).then((res) => {
+         //    console.log(res)
+         // })
+      }
+   }, [userPlaylists])
+
+   const { data: user } = useSpotifyQuery({
+      queryKey: ['user'],
+      endpoint: '/me',
    })
 
    return (
@@ -87,8 +100,12 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
          <Box
             className={`${className} overflow-y-scroll m-2 relative rounded-lg `}
          >
-            {userPlaylists &&
-               userPlaylists?.map((playlist) => {
+            {isLoading ? (
+               <Flex justify={'center'} align={'center'}>
+                  <Spinner />
+               </Flex>
+            ) : (
+               userPlaylists?.items?.map((playlist) => {
                   return (
                      <Flex
                         direction={'row'}
@@ -134,7 +151,8 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                         </Flex>
                      </Flex>
                   )
-               })}
+               })
+            )}
             {/* <EmbedPlayer
 
             /> */}
@@ -149,14 +167,9 @@ const CreatePlaylist = ({ children, className, modalState, setModalState }) => {
    const { spotifyApi, token } = useSpotifyInstance()
    const [isPublic, setIsPublic] = useState(false)
 
-   const { data: user } = useQuery({
+   const { data: user } = useSpotifyQuery({
       queryKey: ['user'],
-      queryFn: () =>
-         spotifyApi
-            .get('/me')
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-      enabled: !!token,
+      endpoint: '/me',
    })
 
    const { mutate: createPlaylist } = useMutation({
@@ -171,9 +184,7 @@ const CreatePlaylist = ({ children, className, modalState, setModalState }) => {
          const id = res.data.id
          navigate('/playlist/' + id)
       },
-      onError: (error) => {
-         console.log(error)
-      },
+      onError: (error) => {}
    })
 
    const handleCreatePlaylist = ({ name, description, isPublic }) => {

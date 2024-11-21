@@ -1,35 +1,31 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
    MagnifyingGlassIcon,
    HomeIcon,
    BellIcon,
-   CaretLeftIcon,
-   CaretRightIcon,
+   ChevronLeftIcon,
+   ChevronRightIcon,
 } from '@radix-ui/react-icons'
 import * as Avatar from '@radix-ui/react-avatar'
 import * as Popover from '@radix-ui/react-popover'
-import { Button, Flex, Box, TextField, Text, Tooltip } from '@radix-ui/themes'
+import { Button, Flex, Box, TextField, Text, Tooltip, DropdownMenu } from '@radix-ui/themes'
 import SpotifyIcon from './icon/SpotifyIcon'
-import { Link, useNavigation, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Logout from './Logout'
-import { useSelector } from 'react-redux'
-import { motion } from 'framer-motion'
-import { useQuery } from '@tanstack/react-query'
+import { useDispatch, useSelector } from 'react-redux'
 import useSpotifyInstance from '../hook/spotifyInstance'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
+import { motion } from 'framer-motion'
+
 const Navbar = () => {
-   // const user = useSelector((state) => state.user)
-   const { spotifyApi, token } = useSpotifyInstance()
-   const { data: user } = useQuery({
+   const navigate = useNavigate()
+   const { token } = useSpotifyInstance()
+
+   const { data: user } = useSpotifyQuery({
       queryKey: ['user'],
-      queryFn: () => spotifyApi.get('/me').then((res) => res.data),
-      enabled: !!token,
+      endpoint: '/me'
    })
 
-   // useEffect(() => {
-   //    console.log(user)
-   // }, [user])
-
-   const navigate = useNavigate()
    const location = useLocation()
 
    return (
@@ -62,7 +58,7 @@ const Navbar = () => {
                disabled={!location.key}
                className={`color-white  h-[20px] w-[20px] rounded  `}
             >
-               <CaretLeftIcon />
+               <ChevronLeftIcon />
             </Button>
             <Button
                className={`color-white  h-[20px] w-[20px] rounded  `}
@@ -73,7 +69,7 @@ const Navbar = () => {
                   navigate(1)
                }}
             >
-               <CaretRightIcon
+               <ChevronRightIcon
                // height="30" width="30"
                />
             </Button>

@@ -7,7 +7,6 @@ const Logout = ({ className }) => {
       localStorage.removeItem('accessToken')
 
       navigate('/login')
-      console.log('Logout successful.')
    }
    return (
       <Flex

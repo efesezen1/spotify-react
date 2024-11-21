@@ -126,26 +126,25 @@ function Player({ handleMaximize, isFullScreen }) {
    }
 
    const InitializePlayer = () => {
-      console.log('initializing firey spotify 👾')
       let { Player } = window.Spotify
       fireyPlayer = new Player({
-         name: 'Firey Spotify🔥',
+         name: 'Firey Spotify',
          getOAuthToken: (cb) => {
             cb(token)
          },
       })
       // Error handling
       fireyPlayer.addListener('initialization_error', ({ message }) => {
-         console.log(message)
+         // console.log(message)
       })
       fireyPlayer.addListener('authentication_error', ({ message }) => {
-         console.log(message)
+         // console.log(message)
       })
       fireyPlayer.addListener('account_error', ({ message }) => {
-         console.log(message)
+         // console.log(message)
       })
       fireyPlayer.addListener('playback_error', ({ message }) => {
-         console.log(message)
+         // console.log(message)
       })
       // Playback status updates
       fireyPlayer.addListener('player_state_changed', (state) => {
@@ -173,19 +172,19 @@ function Player({ handleMaximize, isFullScreen }) {
                }))
             }
          } catch (error) {
-            console.log(error)
+            // console.log(error)
          }
       })
       // Ready
       fireyPlayer.addListener('ready', ({ device_id }) => {
-         console.log('Ready with Device ID', device_id)
+         // console.log('Ready with Device ID', device_id)
       })
       // Not Ready
       fireyPlayer.addListener('not_ready', ({ device_id }) => {
-         console.log('Device ID has gone offline', device_id)
+         // console.log('Device ID has gone offline', device_id)
       })
       // Connect the player!
-      console.log('connetion success')
+      // console.log('connetion success')
       fireyPlayer.connect()
    }
 
@@ -223,14 +222,14 @@ function Player({ handleMaximize, isFullScreen }) {
                   progress: progress_ms,
                }))
             } else if (response.status === 204) {
-               setFlash(
-                  'Please select a device to start listening on FIREY SPOTIFY 🔥'
-               )
+               // setFlash(
+               //    'Please select a device to start listening on FIREY SPOTIFY '
+               // )
             } else {
-               setFlash('Error from Spotify Server')
+               // setFlash('Error from Spotify Server')
             }
          } catch (error) {
-            console.log(error)
+            // console.log(error)
          }
       }
       getFunc()
@@ -280,11 +279,11 @@ function Player({ handleMaximize, isFullScreen }) {
                setPlaybackState((state) => ({ ...state, play: !state.play }))
                updateState()
             } else {
-               setFlash('Opps, something went wrong!')
+               // setFlash('Opps, something went wrong!')
                return
             }
          } catch (error) {
-            console.log(error)
+            // console.log(error)
          }
       }
 
@@ -305,15 +304,15 @@ function Player({ handleMaximize, isFullScreen }) {
                   ...state,
                   shuffle: !state.shuffle,
                }))
-               setFlash(
-                  `Shuffle ${playbackState.shuffle ? 'disabled' : 'enabled'}`
-               )
+               // setFlash(
+               //    `Shuffle ${playbackState.shuffle ? 'disabled' : 'enabled'}`
+               // )
             } else {
-               setFlash('Opps, something went wrong!')
+               // setFlash('Opps, something went wrong!')
                return
             }
          } catch (error) {
-            console.log(error)
+            // console.log(error)
          }
       }
 
@@ -330,11 +329,11 @@ function Player({ handleMaximize, isFullScreen }) {
          try {
             const response = await request()
             if (response.status !== 204) {
-               setFlash('Opps, something went wrong!')
+               // setFlash('Opps, something went wrong!')
                return
             }
          } catch (error) {
-            console.log(error)
+            // console.log(error)
          }
       }
 
@@ -351,11 +350,11 @@ function Player({ handleMaximize, isFullScreen }) {
          try {
             const response = await request()
             if (response.status !== 204) {
-               setFlash('Opps, something went wrong!')
+               // setFlash('Opps, something went wrong!')
                return
             }
          } catch (error) {
-            console.log(error)
+            // console.log(error)
          }
       }
 
@@ -378,15 +377,15 @@ function Player({ handleMaximize, isFullScreen }) {
                   ...state,
                   repeat: !state.repeat,
                }))
-               setFlash(
-                  `Repeat mode ${playbackState.repeat ? 'disabled' : 'enabled'}`
-               )
+               // setFlash(
+               //    `Repeat mode ${playbackState.repeat ? 'disabled' : 'enabled'}`
+               // )
             } else {
-               setFlash('Opps, something went wrong!')
+               // setFlash('Opps, something went wrong!')
                return
             }
          } catch (error) {
-            console.log(error)
+            // console.log(error)
          }
       }
 
@@ -397,7 +396,7 @@ function Player({ handleMaximize, isFullScreen }) {
       // initialize script
 
       if (!token) return
-      console.log('token', token)
+      // console.log('token', token)
       loadScript()
       getPlayerInfo()
       window.onSpotifyWebPlaybackSDKReady = () => InitializePlayer()

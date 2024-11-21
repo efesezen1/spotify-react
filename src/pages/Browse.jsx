@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 // import { useNavigate, useLocation, useLoaderData } from 'react-router-dom'
 // import { useDispatch, useSelector } from 'react-redux'
 
@@ -6,30 +6,25 @@ import React, { useEffect } from 'react'
 //    fetchPlaylistRecommendations,
 //    fetchUser,
 // } from '../store/slicers/userSlice'
-import { Flex, Text, Box, Grid, Spinner } from '@radix-ui/themes'
+import { Box, Flex, Text, Grid } from '@radix-ui/themes'
+import { Link } from 'react-router-dom'
 import Slider from 'react-slick'
 import { motion } from 'framer-motion'
 import ItemRow from '../components/ItemRow'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useQuery } from '@tanstack/react-query'
 
-const Browse = ({ className }) => {
-   const { spotifyApi, token } = useSpotifyInstance()
+const Browse = () => {
+   const { token } = useSpotifyInstance()
 
-   const { data: playlistRecommendations, isLoading } = useQuery({
+   const { data: playlistRecommendations, isLoading } = useSpotifyQuery({
       queryKey: ['playlistRecommendations'],
-      queryFn: () =>
-         spotifyApi
-            .get('/browse/featured-playlists?limit=10')
-            .then((res) => res.data)
-            .catch((err) => console.log(err)),
-
-      enabled: !!token,
-      refetchOnWindowFocus: false,
+      endpoint: '/browse/featured-playlists'
    })
 
    return (
-      <Flex direction="column" className={` h-full ${className} `}>
+      <Flex direction="column" className={` h-full `}>
          <Box className="  overflow-y-scroll overflow-x-hidden">
             <ItemRow playlistRecommendations={playlistRecommendations} />
             <ItemRow playlistRecommendations={playlistRecommendations} />
