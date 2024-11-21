@@ -60,25 +60,43 @@ const SongInfo = () => {
    } = playbackState
 
    return (
-      <Flex align="center" gap="3">
-         <Box className="relative w-14 aspect-square">
-            <img
-               src={current_track.album.images[0].url}
-               alt={current_track.album.name}
-               className="absolute inset-0 w-full h-full object-contain rounded"
-            />
-         </Box>
-         <Flex direction="column" gap="1" className="min-w-0 max-w-full">
-            <ScrollingText
-               text={current_track.name}
-               className="font-semibold text-sm"
-            />
-            <ScrollingText
-               text={current_track.artists[0].name}
-               className="text-sm text-gray-500"
-            />
+      <motion.div
+         initial={{ opacity: 0, x: -20 }}
+         animate={{ opacity: 1, x: 0 }}
+         transition={{ duration: 0.2 }}
+         key={current_track.id}
+      >
+         <Flex align="center" gap="3">
+            <motion.div 
+               className="relative w-[56px] h-[56px] flex-shrink-0"
+               initial={{ scale: 0.8, opacity: 0 }}
+               animate={{ scale: 1, opacity: 1 }}
+               transition={{ 
+                  duration: 0.2,
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 25
+               }}
+               key={current_track.album.images[0].url}
+            >
+               <img
+                  src={current_track.album.images[0].url}
+                  alt={current_track.album.name}
+                  className="absolute inset-0 w-full h-full object-cover rounded"
+               />
+            </motion.div>
+            <Flex direction="column" gap="1" className="min-w-0 max-w-full">
+               <ScrollingText
+                  text={current_track.name}
+                  className="font-semibold text-sm"
+               />
+               <ScrollingText
+                  text={current_track.artists[0].name}
+                  className="text-sm text-gray-500"
+               />
+            </Flex>
          </Flex>
-      </Flex>
+      </motion.div>
    )
 }
 
