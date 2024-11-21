@@ -1,24 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
-import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
-import { Box, Flex, Text, Table, Button } from '@radix-ui/themes'
+import { Box, Flex, Text, Button } from '@radix-ui/themes'
 import { PauseIcon, PlayIcon } from '@radix-ui/react-icons'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
-import TrackStatus from '../components/TrackStatus'
+import TrackTable from '../components/TrackTable'
 
 const Artist = () => {
    const params = useParams()
    const id = params.id
-
    const [hoverOnFollowBtn, setHoverOnFollowBtn] = useState(false)
    const dispatch = useDispatch()
-   const [selectedTrack, setSelectedTrack] = useState(null)
-   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
    const queryClient = useQueryClient()
-   let humanReadableNum = (number) => {
+
+   const humanReadableNum = (number) => {
       let numStr = number.toString()
       let counter = 0
       let res = ''
@@ -76,11 +73,10 @@ const Artist = () => {
       endpoint: `/artists/${id}`,
    })
 
-   const hoverClass = (item) =>
-      selectedTrack !== item.id ? 'hover:backdrop-brightness-95' : ''
+   const hoverClass = (item) => ''
 
-   const activeClass = (item) =>
-      selectedTrack === item.id ? 'backdrop-brightness-90' : ''
+   const activeClass = (item) => ''
+
    const formatDuration = (ms) => {
       const minutes = Math.floor(ms / 60000)
       const seconds = ((ms % 60000) / 1000).toFixed(0)
@@ -92,7 +88,6 @@ const Artist = () => {
          className="rounded bg-gradient-to-b from-lime-500 via-white via-50% to-slate-white h-full w-full overflow-y-scroll"
          direction="column"
          align={'center'}
-         onClick={() => setSelectedTrack(null)}
       >
          {/* USER INFO */}
          <Flex direction="column" className="w-full ">
@@ -186,138 +181,12 @@ const Artist = () => {
                   Popular
                </Text>
             )}
-            <Table.Root
-               size="2"
-               layout=""
-               className="overflow-y-scroll"
-               onClick={(e) => e.stopPropagation()}
-            >
-               {/* <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10">
-                  <Table.Row>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">#</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Title</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Album</Box>
-                     </Table.ColumnHeaderCell>
-
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">
-                           <TimerIcon />
-                        </Box>
-                     </Table.ColumnHeaderCell>
-                  </Table.Row>
-               </Table.Header> */}
-
-               <Table.Body>
-                  {popularSongs?.tracks?.map((item, index) => {
-                     return (
-                        <Table.Row
-                           key={item?.id}
-                           onClick={() => {
-                              setSelectedTrack(item.id)
-                           }}
-                           onMouseEnter={() => {
-                              setCurrentUserIdOnHover(item.id)
-                           }}
-                           onMouseLeave={() => setCurrentUserIdOnHover(null)}
-                           className={`select-none active:backdrop-brightness-90 ${hoverClass(
-                              item
-                           )} ${activeClass(item)}`}
-                        >
-                           <Table.RowHeaderCell>
-                              <TrackStatus
-                                 item={item}
-                                 index={index}
-                                 currentUserIdOnHover={currentUserIdOnHover}
-                                 selectedTrack={selectedTrack}
-                              />
-                           </Table.RowHeaderCell>
-                           <Table.Cell>
-                              <Flex direction={'column'}>
-                                 {/* Song Title */}
-                                 <Text size="2">{item?.name}</Text>
-                                 {/* Artists */}
-                                 {/* <Text size="1">
-                                    {item.artists
-                                       .map((artist) => artist?.name)
-                                       .join(', ')}
-                                 </Text> */}
-                              </Flex>
-                           </Table.Cell>
-                           <Table.Cell>
-                              {/* Album Name */}
-                              <Text size="2">{item?.album?.name}</Text>
-                           </Table.Cell>
-
-                           <Table.Cell>
-                              <Text size="2">
-                                 {formatDuration(item?.duration_ms)}
-                              </Text>
-                           </Table.Cell>
-                        </Table.Row>
-                     )
-                  })}
-               </Table.Body>
-            </Table.Root>
-            {/* <Flex
-               direction="column"
-               align={{ xs: 'center', md: 'start' }}
-               className="overflow-y-scroll overflow-x-hidden"
-            >
-               <Box pl="1" className="w-full">
-                  <Text
-                     size="5"
-                     weight="bold"
-                     className="hover:underline select-none w-full  "
-                  ></Text>
-               </Box>
-               <Box className=" w-full overflow-y-scroll">
-                  <Grid
-                     columns={{
-                        initial: '1',
-                        xs: '2',
-                        sm: '3',
-                        md: '5',
-                        lg: '7',
-                        xl: '9',
-                     }}
-                     align="center"
-                     className="w-full "
-                  >
-                     {topItems?.items.map((artist) => (
-                        <Flex
-                           align={'center'}
-                           direction={'column'}
-                           key={artist.id}
-                           onClick={() => navigate(`/artist/${artist.id}`)}
-                           className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded   transition-all duration-200   p-3 "
-                        >
-                           <img
-                              src={artist.images[0].url}
-                              alt="artist"
-                              className="  object-cover rounded-lg  w-[10rem] h-[10rem] mx-auto "
-                           />
-                           <Flex
-                              direction="column"
-                              p="1"
-                              className="w-[10rem]  justify-center "
-                           >
-                              <Text size="2" weight="bold " className="">
-                                 {artist.name}
-                              </Text>
-                              <Text size="1" weight="" color="gray">
-                                 {artist.type}
-                              </Text>
-                           </Flex>
-                        </Flex>
-                     ))}
-                  </Grid>
-               </Box>
-            </Flex> */}
+            {popularSongs?.tracks && (
+               <TrackTable
+                  tracks={popularSongs.tracks}
+                  isPlaylist={false}
+               />
+            )}
          </Flex>
       </Flex>
    )

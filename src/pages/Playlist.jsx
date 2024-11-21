@@ -2,13 +2,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import * as Switch from '@radix-ui/react-switch'
 import * as Dialog from '@radix-ui/react-dialog'
-import { Box, Text, Flex, Button, Table, TextField } from '@radix-ui/themes'
-import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
+import { Box, Text, Flex, Button, TextField } from '@radix-ui/themes'
 import { Link, useParams } from 'react-router-dom'
 import {
-   PauseIcon,
-   PlayIcon,
-   TimerIcon,
    ValueNoneIcon,
    Cross2Icon,
    MagnifyingGlassIcon,
@@ -18,6 +14,7 @@ import useSpotifyInstance from '../hook/spotifyInstance'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import TrackStatus from '../components/TrackStatus'
+import TrackTable from '../components/TrackTable'
 
 const Playlist = () => {
    const { id } = useParams()
@@ -25,9 +22,8 @@ const Playlist = () => {
    const queryClient = useQueryClient()
    const { token, spotifyApi } = useSpotifyInstance()
    const [isPublic, setIsPublic] = useState(null)
-   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
-   const [selectedTrack, setSelectedTrack] = useState(null)
-   const { isPlaying, currentSong } = useSelector((state) => state.user)
+   const container = useRef(null)
+   const prevId = usePrevious(id)
 
    const { data: playlist } = useSpotifyQuery({
       queryKey: ['playlist', id],
@@ -39,25 +35,10 @@ const Playlist = () => {
       endpoint: '/me'
    })
 
-   const container = useRef(null)
-   const prevId = usePrevious(id)
-
-   useEffect(() => {
-      return () => {
-         setSelectedTrack(null)
-      }
-   }, [id])
-
    useEffect(() => {
       if (!playlist) return
       setIsPublic(playlist.public)
    }, [playlist])
-
-   useEffect(() => {
-      return () => {
-         setSelectedTrack(null)
-      }
-   }, [])
 
    const gradient_color =
       playlist?.primary_color === '#FFFFFF'
@@ -74,11 +55,6 @@ const Playlist = () => {
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
    }
 
-   const hoverClass = (item) =>
-      selectedTrack !== item.track.id ? 'hover:backdrop-brightness-95' : ''
-
-   const activeClass = (item) =>
-      selectedTrack === item.track.id ? 'backdrop-brightness-90' : ''
    const timeAgo = (date) => {
       const now = new Date()
       const diff = now - new Date(date)
@@ -106,7 +82,6 @@ const Playlist = () => {
          direction="column"
          className={` rounded bg-gradient-to-b ${gradient_color} via-white via-50%  to-slate-white h-full `}
          ref={container}
-         onClick={() => setSelectedTrack(null)}
       >
          <Flex direction="row" className="w-full">
             <Flex className="p-5  h-full items-center aspect-square">
@@ -158,120 +133,12 @@ const Playlist = () => {
          </Flex>
 
          {playlist?.tracks?.items?.length !== 0 ? (
-            <Table.Root
-               size="2"
-               layout=""
-               className="overflow-y-scroll"
-               onClick={(e) => e.stopPropagation()}
-            >
-               <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10 ">
-                  <Table.Row>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">#</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Title</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Album</Box>
-                     </Table.ColumnHeaderCell>
-
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Date Added</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">
-                           <TimerIcon />
-                        </Box>
-                     </Table.ColumnHeaderCell>
-                  </Table.Row>
-               </Table.Header>
-
-               <Table.Body>
-                  {playlist?.tracks?.items?.map((item, index) => {
-                     return (
-                        <Table.Row
-                           key={item.track.id}
-                           onClick={() => setSelectedTrack(item.track.id)}
-                           onMouseEnter={() =>
-                              setCurrentUserIdOnHover(item.track.id)
-                           }
-                           onMouseLeave={() => setCurrentUserIdOnHover(null)}
-                           className={`select-none   active:backdrop-brightness-90
-                        ${hoverClass(item)}
-                        
-                        ${activeClass(item)}`}
-                        >
-                           <Table.RowHeaderCell>
-                              <TrackStatus
-                                 index={index}
-                                 item={item.track}
-                                 currentUserIdOnHover={currentUserIdOnHover}
-                                 selectedTrack={selectedTrack}
-                              />
-                           </Table.RowHeaderCell>
-                           <Table.Cell>
-                              <Flex direction={'column'}>
-                                 <Flex direction={'row'} align={'center'}>
-                                    <img
-                                       src={item.track.album.images.at(-1).url}
-                                       alt=""
-                                       className={`w-[32px] h-[32px] mr-2 rounded`}
-                                    />
-                                    <Flex direction={'column'}>
-                                       <Text size="2">{item.track.name}</Text>
-                                       <Text size="1">
-                                          {item.track.artists
-                                             .map((artist) => (
-                                                <Link
-                                                   to={`/artist/${artist.id}`}
-                                                   key={artist.id}
-                                                   className="hover:underline"
-                                                >
-                                                   {artist.name}
-                                                </Link>
-                                             ))
-                                             .reduce((prev, curr) => [
-                                                prev,
-                                                ', ',
-                                                curr,
-                                             ])}
-                                       </Text>
-                                    </Flex>
-                                 </Flex>
-                              </Flex>
-                           </Table.Cell>
-                           <Table.Cell>
-                              <Text size="2">{item.track.album.name}</Text>
-                           </Table.Cell>
-                           <Table.Cell>
-                              <Text className="text-nowrap" size="2">
-                                 {timeAgo(item.added_at)}
-                              </Text>
-                           </Table.Cell>
-                           <Table.Cell>
-                              <Text size="2">
-                                 {formatDuration(item.track.duration_ms)}
-                              </Text>
-                           </Table.Cell>
-                        </Table.Row>
-                     )
-                  })}
-               </Table.Body>
-            </Table.Root>
+            <TrackTable
+               tracks={playlist?.tracks?.items}
+               isPlaylist={true}
+            />
          ) : (
-            <Flex className="p-5" direction="column" gap="3">
-               <Text size="5">Let's find something for your playlist</Text>
-               <TextField.Root
-                  placeholder="Search for songs and episodes"
-                  className="w-1/2"
-                  variant="soft"
-               >
-                  <TextField.Slot>
-                     <MagnifyingGlassIcon height="16" width="16" />
-                  </TextField.Slot>
-               </TextField.Root>
-            </Flex>
+            <Text className="text-center mt-10">No tracks in this playlist</Text>
          )}
       </Flex>
    )
