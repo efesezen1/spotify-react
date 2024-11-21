@@ -7,6 +7,7 @@ import {
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { Box, Flex, Slider } from '@radix-ui/themes'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import {
    PlayIcon,
    PauseIcon,
@@ -16,7 +17,7 @@ import {
    ShuffleIcon,
 } from '@radix-ui/react-icons'
 
-const ScrollingText = ({ text, className }) => {
+const ScrollingText = ({ text, className, onClick }) => {
    const containerRef = useRef(null)
    const textRef = useRef(null)
    const [shouldScroll, setShouldScroll] = useState(false)
@@ -32,7 +33,8 @@ const ScrollingText = ({ text, className }) => {
    return (
       <div
          ref={containerRef}
-         className={`relative overflow-hidden ${className}`}
+         className={`relative overflow-hidden ${className} ${onClick ? 'cursor-pointer hover:underline' : ''}`}
+         onClick={onClick}
       >
          <div
             ref={textRef}
@@ -52,12 +54,17 @@ const ScrollingText = ({ text, className }) => {
 
 const SongInfo = () => {
    const playbackState = usePlaybackState()
+   const navigate = useNavigate()
 
    if (!playbackState) return null
 
    const {
       track_window: { current_track },
    } = playbackState
+
+   const handleArtistClick = () => {
+      navigate(`/artist/${current_track.artists[0].uri.split(':')[2]}`)
+   }
 
    return (
       <motion.div
@@ -93,6 +100,7 @@ const SongInfo = () => {
                <ScrollingText
                   text={current_track.artists[0].name}
                   className="text-sm text-gray-500"
+                  onClick={handleArtistClick}
                />
             </Flex>
          </Flex>

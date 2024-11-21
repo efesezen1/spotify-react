@@ -58,27 +58,23 @@ const Artist = () => {
 
    const { data: isFollowing } = useSpotifyQuery({
       queryKey: ['isFollowing', id],
-      endpoint: `/me/following/contains?type=artist&ids=${id}`
+      endpoint: `/me/following/contains?type=artist&ids=${id}`,
    })
 
    const { data: popularSongs } = useSpotifyQuery({
       queryKey: ['popularSongs', id],
-      endpoint: `/artists/${id}/top-tracks`
+      endpoint: `/artists/${id}/top-tracks`,
    })
 
    const { data: albums } = useSpotifyQuery({
       queryKey: ['albums', id],
-      endpoint: `/artists/${id}/albums`
+      endpoint: `/artists/${id}/albums`,
    })
 
    const { data: artist } = useSpotifyQuery({
       queryKey: ['artist', id],
-      endpoint: `/artists/${id}`
+      endpoint: `/artists/${id}`,
    })
-
-   useEffect(() => {
-      // if (isFollowing.length === 0) return
-   }, [isFollowing])
 
    const hoverClass = (item) =>
       selectedTrack !== item.id ? 'hover:backdrop-brightness-95' : ''
@@ -148,7 +144,7 @@ const Artist = () => {
                         </Text>
                         {/* follow status */}
                         <Box>
-                           {isFollowing ? (
+                           {isFollowing?.at(0) ? (
                               hoverOnFollowBtn ? (
                                  <Button
                                     variant="solid"
