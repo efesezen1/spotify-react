@@ -19,7 +19,7 @@ const HomeLayout = () => {
             className="h-[calc(100vh-56px)]"
             style={{ width: '100%' }}
          >
-            <Box className={`transition-all duration-300 ${sidebarClosed ? 'w-[72px]' : 'w-[240px]'}`}>
+            <Box className={`transition-all duration-300 ${sidebarClosed ? 'w-[80px]' : 'w-[240px]'}`}>
                <Sidebar
                   sidebarClosed={sidebarClosed}
                   setSidebarClosed={setSidebarClosed}
