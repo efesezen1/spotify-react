@@ -6,7 +6,7 @@ import {
 } from 'react-spotify-web-playback-sdk'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { Box, Flex, Slider } from '@radix-ui/themes'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useDragControls } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
    PlayIcon,
@@ -33,12 +33,16 @@ const ScrollingText = ({ text, className, onClick }) => {
    return (
       <div
          ref={containerRef}
-         className={`relative overflow-hidden ${className} ${onClick ? 'cursor-pointer hover:underline' : ''}`}
+         className={`relative overflow-hidden ${className} ${
+            onClick ? 'cursor-pointer hover:underline' : ''
+         }`}
          onClick={onClick}
       >
          <div
             ref={textRef}
-            className={`whitespace-nowrap ${shouldScroll ? 'animate-scrolling' : ''}`}
+            className={`whitespace-nowrap ${
+               shouldScroll ? 'animate-scrolling' : ''
+            }`}
          >
             {text}
          </div>
@@ -74,15 +78,15 @@ const SongInfo = () => {
          key={current_track.id}
       >
          <Flex align="center" gap="3">
-            <motion.div 
+            <motion.div
                className="relative w-[56px] h-[56px] flex-shrink-0"
                initial={{ scale: 0.8, opacity: 0 }}
                animate={{ scale: 1, opacity: 1 }}
-               transition={{ 
+               transition={{
                   duration: 0.2,
-                  type: "spring",
+                  type: 'spring',
                   stiffness: 400,
-                  damping: 25
+                  damping: 25,
                }}
                key={current_track.album.images[0].url}
             >
@@ -184,11 +188,11 @@ const Controls = () => {
             >
                <motion.div
                   animate={{ rotate: isPlaying ? 180 : 0 }}
-                  transition={{ 
+                  transition={{
                      duration: 0.15,
-                     type: "spring",
+                     type: 'spring',
                      stiffness: 400,
-                     damping: 25
+                     damping: 25,
                   }}
                >
                   {!isPlaying ? (
@@ -257,9 +261,11 @@ const styles = `
 }
 `
 
-const PlayerSpotify = () => {
+const PlayerSpotify = ({ parentRef }) => {
    const { token } = useSpotifyInstance()
    const getOAuthToken = useCallback((callback) => callback(token), [token])
+   const controls = useDragControls()
+   const [snapToOrigin, setSnapToOrigin] = useState(false)
 
    useEffect(() => {
       // Add styles to head
@@ -269,8 +275,30 @@ const PlayerSpotify = () => {
       return () => styleSheet.remove()
    }, [])
 
+   const handleSnapToggle = () => {
+      setSnapToOrigin(true)
+      // Reset to false after animation completes
+      setTimeout(() => setSnapToOrigin(false), 300)
+   }
+
    return (
-      <Box className="w-10/12 bg-red-200 rounded-lg p-4 mx-auto">
+      <motion.div
+         dragSnapToOrigin={snapToOrigin}
+         exit={{ opacity: 0, scale: 1.1 }}
+         initial={{ opacity: 0, scale: 0.95 }}
+         animate={{ opacity: 1, scale: 1 }}
+         drag
+         dragConstraints={parentRef}
+         dragControls={controls}
+         dragListener={false}
+         onPointerDown={(e) => {
+            if (e.target.role === 'slider') {
+            } else {
+               controls.start(e)
+            }
+         }}
+         className="w-10/12 bg-red-200 rounded-lg p-4 mx-auto"
+      >
          <WebPlaybackSDK
             initialDeviceName="Spotify Web Player"
             getOAuthToken={getOAuthToken}
@@ -290,7 +318,7 @@ const PlayerSpotify = () => {
                <ProgressBar />
             </Flex>
          </WebPlaybackSDK>
-      </Box>
+      </motion.div>
    )
 }
 
