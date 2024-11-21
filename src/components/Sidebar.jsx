@@ -103,6 +103,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                            variant="ghost"
                            className="color-white h-[30px] w-[20px] rounded"
                            color="white"
+                           onClick={() => setOpenCreatePlaylistModal(true)}
                         >
                            <PlusIcon />
                         </Button>
