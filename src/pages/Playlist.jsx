@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Box, Text, Flex, Button, TextField, Skeleton } from '@radix-ui/themes'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import {
    ValueNoneIcon,
    Cross2Icon,
@@ -13,16 +13,19 @@ import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import TrackStatus from '../components/TrackStatus'
 import TrackTable from '../components/TrackTable'
-import InteractiveHeader from '../components/InteractiveHeader'
+import PlaylistDialog from '../components/PlaylistDialog'
 
 const Playlist = () => {
    const { id } = useParams()
    const dispatch = useDispatch()
    const queryClient = useQueryClient()
    const { token, spotifyApi } = useSpotifyInstance()
-   const [isPublic, setIsPublic] = useState(null)
+   const [searchQuery, setSearchQuery] = useState('')
+   const [isPublic, setIsPublic] = useState(false)
+   const [editModalOpen, setEditModalOpen] = useState(false)
    const container = useRef(null)
    const prevId = usePrevious(id)
+   const navigate = useNavigate()
 
    const { data: playlist, isLoading: isPlaylistLoading } = useSpotifyQuery({
       queryKey: ['playlist', id],
@@ -123,12 +126,23 @@ const Playlist = () => {
                ) : (
                   <>
                      {user?.id === playlist?.owner?.id ? (
-                        <InteractiveHeader
-                           playlist={playlist}
-                           size="8"
-                           setIsPublic={setIsPublic}
+                        <PlaylistDialog
+                           modalState={editModalOpen}
+                           setModalState={setEditModalOpen}
                            isPublic={isPublic}
-                        />
+                           setIsPublic={setIsPublic}
+                           initialValues={{
+                              name: playlist?.name,
+                              description: playlist?.description,
+                           }}
+                           mode="edit"
+                           playlistId={playlist?.id}
+                           onSuccess={(id) => navigate('/playlist/' + id)}
+                        >
+                           <Text size="8" weight="bold" className="cursor-pointer hover:underline">
+                              {playlist?.name}
+                           </Text>
+                        </PlaylistDialog>
                      ) : (
                         <Text size="8" className="font-bold">
                            {playlist?.name}

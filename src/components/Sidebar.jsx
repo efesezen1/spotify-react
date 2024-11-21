@@ -6,13 +6,18 @@ import { useSelector } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 
 import Library from './icon/Library'
-import { ArrowLeftIcon, Cross2Icon, PlusIcon, ValueNoneIcon } from '@radix-ui/react-icons'
+import {
+   ArrowLeftIcon,
+   Cross2Icon,
+   PlusIcon,
+   ValueNoneIcon,
+} from '@radix-ui/react-icons'
 
 import { useNavigate, useLocation } from 'react-router-dom'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import CreatePlaylist from './CreatePlaylist'
+import PlaylistDialog from './PlaylistDialog'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const navigate = useNavigate()
@@ -20,6 +25,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
    const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
+   const [isPublic, setIsPublic] = useState(false)
    const { token, spotifyApi } = useSpotifyInstance()
    const queryClient = useQueryClient()
 
@@ -51,7 +57,10 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    })
 
    return (
-      <Flex direction={'column'} className="relative transition-all duration-300">
+      <Flex
+         direction={'column'}
+         className="relative transition-all duration-300"
+      >
          <Flex
             direction="row"
             align="center"
@@ -81,16 +90,24 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             </Flex>
             {!sidebarClosed && (
                <Flex gap="3" className={``}>
-                  <Tooltip content="Create Playlist" delayDuration={0}>
-                     <Button
-                        variant="ghost"
-                        className="color-white h-[30px] w-[20px] rounded"
-                        color="white"
-                        onClick={() => setOpenCreatePlaylistModal(true)}
-                     >
-                        <PlusIcon />
-                     </Button>
-                  </Tooltip>
+                  <PlaylistDialog
+                     modalState={openCreatePlaylistModal}
+                     setModalState={setOpenCreatePlaylistModal}
+                     isPublic={isPublic}
+                     setIsPublic={setIsPublic}
+                     mode="create"
+                     onSuccess={(id) => navigate('/playlist/' + id)}
+                  >
+                     <Tooltip content="Create Playlist">
+                        <Button
+                           variant="ghost"
+                           className="color-white h-[30px] w-[20px] rounded"
+                           color="white"
+                        >
+                           <PlusIcon />
+                        </Button>
+                     </Tooltip>
+                  </PlaylistDialog>
                   <Tooltip content="Minimize Sidebar" className="">
                      <Button
                         variant="ghost"
@@ -108,96 +125,97 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
          <Box
             className={`${className} overflow-y-scroll m-2 relative rounded-lg h-[calc(100vh-120px)]`}
          >
-            {isLoading ? (
-               // Skeleton loading state for playlists
-               Array.from({ length: 20 }).map((_, index) => (
-                  <Flex
-                     direction={'row'}
-                     key={`skeleton-${index}`}
-                     className={`${!sidebarClosed && 'pr-3'} rounded-md overflow-hidden mb-2 pl-3`}
-                  >
-                     <Flex justify="" align="center" className="w-full">
-                        <Skeleton className="w-12 h-12" />
-                        {!sidebarClosed && (
-                           <Flex
-                              direction="column"
-                              className="ml-2"
-                              gap="1"
-                           >
-                              <Skeleton>
-                                 <Text className="text-sm">Playlist Name</Text>
-                              </Skeleton>
-                              <Skeleton>
-                                 <Text className="text-xs">Creator Name</Text>
-                              </Skeleton>
-                           </Flex>
-                        )}
-                     </Flex>
-                  </Flex>
-               ))
-            ) : (
-               userPlaylists?.items?.map((playlist) => {
-                  return (
-                     <Flex
-                        direction={'row'}
-                        key={playlist?.id}
-                        onClick={() => {
-                           navigate('/playlist/' + playlist?.id)
-                        }}
-                        className={`${
-                           (playlist?.id === id || (location.pathname.startsWith('/playlist/') && location.pathname.split('/')[2] === playlist?.id)) 
-                           ? 'bg-red-100' 
-                           : ''
-                        } ${
-                           (playlist?.id !== id && (!location.pathname.startsWith('/playlist/') || location.pathname.split('/')[2] !== playlist?.id))
-                           ? 'hover:bg-red-50' 
-                           : ''
-                        } ${
-                           !sidebarClosed && 'pr-3'
-                        } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
-                     >
-                        <Flex justify="" align="center" className="w-full">
-                           <Box>
-                              {playlist?.images?.at(0)?.url ? (
-                                 <img
-                                    className="sidebar-image object-cover w-10 h-10 max-w-fit "
-                                    src={playlist?.images?.at(0)?.url}
-                                    alt=""
-                                 />
-                              ) : (
-                                 <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
-                                    {' '}
-                                    <ValueNoneIcon />
-                                 </Box>
-                              )}
-                           </Box>
+            {isLoading
+               ? // Skeleton loading state for playlists
+                 Array.from({ length: 20 }).map((_, index) => (
+                    <Flex
+                       direction={'row'}
+                       key={`skeleton-${index}`}
+                       className={`${
+                          !sidebarClosed && 'pr-3'
+                       } rounded-md overflow-hidden mb-2 pl-3`}
+                    >
+                       <Flex justify="" align="center" className="w-full">
+                          <Skeleton className="w-12 h-12" />
+                          {!sidebarClosed && (
+                             <Flex direction="column" className="ml-2" gap="1">
+                                <Skeleton>
+                                   <Text className="text-sm">
+                                      Playlist Name
+                                   </Text>
+                                </Skeleton>
+                                <Skeleton>
+                                   <Text className="text-xs">Creator Name</Text>
+                                </Skeleton>
+                             </Flex>
+                          )}
+                       </Flex>
+                    </Flex>
+                 ))
+               : userPlaylists?.items?.map((playlist) => {
+                    return (
+                       <Flex
+                          direction={'row'}
+                          key={playlist?.id}
+                          onClick={() => {
+                             navigate('/playlist/' + playlist?.id)
+                          }}
+                          className={`${
+                             playlist?.id === id ||
+                             (location.pathname.startsWith('/playlist/') &&
+                                location.pathname.split('/')[2] ===
+                                   playlist?.id)
+                                ? 'bg-red-100'
+                                : ''
+                          } ${
+                             playlist?.id !== id &&
+                             (!location.pathname.startsWith('/playlist/') ||
+                                location.pathname.split('/')[2] !==
+                                   playlist?.id)
+                                ? 'hover:bg-red-50'
+                                : ''
+                          } ${
+                             !sidebarClosed && 'pr-3'
+                          } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
+                       >
+                          <Flex justify="" align="center" className="w-full">
+                             <Box>
+                                {playlist?.images?.at(0)?.url ? (
+                                   <img
+                                      className="sidebar-image object-cover w-10 h-10 max-w-fit "
+                                      src={playlist?.images?.at(0)?.url}
+                                      alt=""
+                                   />
+                                ) : (
+                                   <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
+                                      {' '}
+                                      <ValueNoneIcon />
+                                   </Box>
+                                )}
+                             </Box>
 
-                           {!sidebarClosed && (
-                              <Flex
-                                 direction="column"
-                                 className="ml-2 select-none"
-                              >
-                                 <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
-                                    {playlist?.name}
-                                 </Text>
-                                 <Text color="gray" className="text-xs ">
-                                    {playlist?.owner?.display_name || 'Unknown'}
-                                 </Text>
-                              </Flex>
-                           )}
-                        </Flex>
-                     </Flex>
-                  )
-               })
-            )}
+                             {!sidebarClosed && (
+                                <Flex
+                                   direction="column"
+                                   className="ml-2 select-none"
+                                >
+                                   <Text className="text-sm text-ellipsis whitespace-nowrap overflow-hidden max-w-[150px]">
+                                      {playlist?.name}
+                                   </Text>
+                                   <Text color="gray" className="text-xs ">
+                                      {playlist?.owner?.display_name ||
+                                         'Unknown'}
+                                   </Text>
+                                </Flex>
+                             )}
+                          </Flex>
+                       </Flex>
+                    )
+                 })}
             {/* <EmbedPlayer
 
             /> */}
          </Box>
-         <CreatePlaylist
-            modalState={openCreatePlaylistModal}
-            setModalState={setOpenCreatePlaylistModal}
-         />
       </Flex>
    )
 }
