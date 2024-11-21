@@ -1,5 +1,5 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { Box, Flex, Text, Grid, Skeleton } from '@radix-ui/themes'
 import { useDispatch } from 'react-redux'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
@@ -39,17 +39,17 @@ const Album = () => {
          {/* Album Info */}
          <Flex direction="column" className="w-full">
             <Flex direction="row">
-               <Flex className="p-5">
+               <Flex className="p-5 h-full items-center aspect-square">
                   {isAlbumLoading ? (
-                     <Skeleton className="w-[200px] h-[200px]" />
+                     <Skeleton width="100%" height="100%" className="rounded" />
                   ) : album?.images[0]?.url ? (
                      <img
                         src={album.images[0].url}
                         alt={album.name}
-                        className="w-[200px] h-[200px] object-cover shadow-lg rounded"
+                        className="hero-image rounded object-cover w-full h-full"
                      />
                   ) : (
-                     <Box className="w-[200px] h-[200px] bg-gray-200" />
+                     <Box className="hero-image rounded bg-gray-200 w-full h-full" />
                   )}
                </Flex>
 
@@ -86,23 +86,23 @@ const Album = () => {
                         <Flex gap="2" align="center" className="mt-2">
                            {album?.artists?.map((artist, index) => (
                               <React.Fragment key={artist.id}>
-                                 <Text
-                                    size="2"
-                                    className="hover:underline cursor-pointer"
-                                    as="a"
-                                    href={`/artist/${artist.id}`}
+                                 <Link
+                                    to={`/artist/${artist.id}`}
+                                    className="hover:underline"
                                  >
-                                    {artist.name}
-                                 </Text>
+                                    <Text size="2" color="gray">
+                                       {artist.name}
+                                    </Text>
+                                 </Link>
                                  {index < album.artists.length - 1 && (
-                                    <Text size="2">,</Text>
+                                    <Text size="2" color="gray">,</Text>
                                  )}
                               </React.Fragment>
                            ))}
-                           <Text size="2" className="ml-1">
+                           <Text size="2" color="gray" className="ml-1">
                               • {album?.release_date?.split('-')[0]}
                            </Text>
-                           <Text size="2">
+                           <Text size="2" color="gray">
                               • {album?.total_tracks} songs,{' '}
                               {formatDuration(totalDuration)}
                            </Text>
