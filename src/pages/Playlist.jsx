@@ -80,7 +80,7 @@ const Playlist = () => {
    return (
       <Flex
          direction="column"
-         className={` rounded bg-gradient-to-b ${gradient_color} via-white via-50%  to-slate-white h-full `}
+         className={`rounded bg-gradient-to-b ${gradient_color} via-white via-50% to-slate-white h-full w-full overflow-y-scroll`}
          ref={container}
       >
          <Flex direction="row" className="w-full">

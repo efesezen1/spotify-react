@@ -19,15 +19,16 @@ const HomeLayout = () => {
             className="h-[calc(100vh-56px)]"
             style={{ width: '100%' }}
          >
-            <Sidebar
-               // className="w-1/4 lg:w-1/6"
-               sidebarClosed={sidebarClosed}
-               setSidebarClosed={setSidebarClosed}
-            />
+            <Box className={`transition-all duration-300 ${sidebarClosed ? 'w-[72px]' : 'w-[240px]'}`}>
+               <Sidebar
+                  sidebarClosed={sidebarClosed}
+                  setSidebarClosed={setSidebarClosed}
+               />
+            </Box>
             <Box
-               className={`relative ${
-                  sidebarClosed ? 'w-[95%]' : 'w-full mx-auto'
-               }   h-full max-w-[1955px]  rounded `}
+               className={`relative transition-all duration-300 ${
+                  sidebarClosed ? 'w-[calc(100%-72px)]' : 'w-[calc(100%-240px)]'
+               } h-full max-w-[1955px] rounded`}
                p="3"
                ref={mainRef}
             >

@@ -50,7 +50,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    })
 
    return (
-      <Flex direction={'column'} className={`relative ${!sidebarClosed ? 'w-[240px]' : 'w-[72px]'} transition-all duration-300`}>
+      <Flex direction={'column'} className="relative transition-all duration-300">
          <Flex
             direction="row"
             align="center"
@@ -99,7 +99,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             )}
          </Flex>
          <Box
-            className={`${className} overflow-y-scroll m-2 relative rounded-lg `}
+            className={`${className} overflow-y-scroll m-2 relative rounded-lg h-[calc(100vh-120px)]`}
          >
             {isLoading ? (
                // Skeleton loading state for playlists
