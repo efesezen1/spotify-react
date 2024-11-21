@@ -105,15 +105,10 @@ const Playlist = () => {
             </Flex>
             <Flex direction="column" className="p-5 justify-end" gap="3">
                {isPlaylistLoading ? (
-                  <Skeleton>
-                     <Text size="1">PLAYLIST</Text>
-                  </Skeleton>
-               ) : (
-                  <Text size="1">PLAYLIST</Text>
-               )}
-
-               {isPlaylistLoading ? (
                   <>
+                     <Skeleton>
+                        <Text size="1">PLAYLIST</Text>
+                     </Skeleton>
                      <Skeleton>
                         <Text size="8" className="font-bold">
                            Playlist Title
@@ -123,14 +118,23 @@ const Playlist = () => {
                         <Text>Playlist Description</Text>
                      </Skeleton>
                      <Skeleton>
-                        <Text size="2">User • 0 songs</Text>
+                        <Text>Playlist Info</Text>
                      </Skeleton>
                   </>
                ) : (
                   <>
-                     <Text size="8" className="font-bold">
-                        {playlist?.name}
-                     </Text>
+                     {user?.id === playlist?.owner?.id ? (
+                        <InteractiveHeader
+                           playlist={playlist}
+                           size="8"
+                           setIsPublic={setIsPublic}
+                           isPublic={isPublic}
+                        />
+                     ) : (
+                        <Text size="8" className="font-bold">
+                           {playlist?.name}
+                        </Text>
+                     )}
                      <Text>{playlist?.description}</Text>
                      <Text size="2">
                         {playlist?.owner?.display_name} •{' '}
