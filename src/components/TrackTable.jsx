@@ -7,6 +7,7 @@ import TrackStatus from './TrackStatus'
 import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
 import { Reorder, AnimatePresence, motion } from 'framer-motion'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
+import useSpotifyMutation from '../hook/useSpotifyMutation'
 
 const TrackTable = ({
    tracks,
@@ -24,6 +25,12 @@ const TrackTable = ({
    const { data: user } = useSpotifyQuery({
       queryKey: ['user'],
       endpoint: '/me',
+   })
+
+   const reorderTracksMutation = useSpotifyMutation({
+      mutationKey: ['reorderTracks', playlist?.id],
+      endpoint: `/playlists/${playlist?.id}/tracks`,
+      method: 'put',
    })
 
    // Check if current user is the playlist owner
@@ -83,8 +90,52 @@ const TrackTable = ({
    }
 
    const handleReorder = (newOrder) => {
+      console.log('New Order:', newOrder.map(item => ({
+         id: item.track.id,
+         name: item.track.name,
+         position: newOrder.indexOf(item)
+      })))
+      
       setItems(newOrder)
-      onReorder?.(newOrder)
+      
+      if (!playlist?.id) return
+
+      // Find the indices of the moved item in both old and new arrays
+      const movedItemId = newOrder[0].track.id
+      const oldIndex = tracks.findIndex(track => track.track.id === movedItemId)
+      const newIndex = newOrder.findIndex(item => item.track.id === movedItemId)
+
+      // Calculate the range_start and insert_before based on drag direction
+      const range_start = oldIndex
+      const insert_before = newIndex
+
+      console.log('Reorder Parameters:', {
+         range_start,
+         insert_before,
+         range_length: 1,
+         movedTrack: {
+            id: movedItemId,
+            name: newOrder[0].track.name,
+            oldPosition: oldIndex,
+            newPosition: newIndex
+         }
+      })
+
+      reorderTracksMutation.mutate({
+         range_start,
+         insert_before,
+         range_length: 1,
+      }, {
+         onSuccess: () => {
+            console.log('Track reorder successful')
+            onReorder?.(newOrder)
+         },
+         onError: (error) => {
+            // Revert the optimistic update on error
+            console.error('Failed to reorder tracks:', error)
+            setItems(tracks)
+         }
+      })
    }
 
    return (
