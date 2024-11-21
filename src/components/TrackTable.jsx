@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Box, Flex, Text, Skeleton } from '@radix-ui/themes';
+import { Box, Flex, Text, Skeleton } from '@radix-ui/themes';
 import { TimerIcon, PauseIcon, PlayIcon } from '@radix-ui/react-icons';
 import { Link } from 'react-router-dom';
 import TrackStatus from './TrackStatus';
 import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice';
+import { Reorder, AnimatePresence, motion } from 'framer-motion';
 
 const TrackTable = ({
   tracks,
   isPlaylist = false,
   isLoading = false,
+  onReorder,
 }) => {
   const dispatch = useDispatch();
   const { currentSong, isPlaying } = useSelector((state) => state.user);
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null);
+  const [items, setItems] = useState(tracks || []);
+
+  // Update items when tracks prop changes
+  React.useEffect(() => {
+    setItems(tracks || []);
+  }, [tracks]);
 
   const formatDuration = (ms) => {
     const minutes = Math.floor(ms / 60000);
@@ -45,12 +53,12 @@ const TrackTable = ({
   };
 
   const hoverClass = (item) =>
-    selectedTrack !== (isPlaylist ? item.track.id : item.id)
+    selectedTrack !== (isPlaylist ? item.track?.id : item.id)
       ? 'hover:backdrop-brightness-95'
       : '';
 
   const activeClass = (item) =>
-    selectedTrack === (isPlaylist ? item.track.id : item.id)
+    selectedTrack === (isPlaylist ? item.track?.id : item.id)
       ? 'backdrop-brightness-90'
       : '';
 
@@ -63,56 +71,49 @@ const TrackTable = ({
     }
   };
 
-  return (
-    <Table.Root
-      size="2"
-      layout=""
-      className="overflow-y-scroll"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <Table.Header className="sticky top-0 left-0 backdrop-brightness-100 backdrop-blur-3xl z-10">
-        <Table.Row>
-          <Table.ColumnHeaderCell>
-            <Box className="text-xs">
-              {isLoading ? <Skeleton>00</Skeleton> : '#'}
-            </Box>
-          </Table.ColumnHeaderCell>
-          <Table.ColumnHeaderCell>
-            <Box className="text-xs">
-              {isLoading ? <Skeleton>Title Here</Skeleton> : 'Title'}
-            </Box>
-          </Table.ColumnHeaderCell>
-          <Table.ColumnHeaderCell>
-            <Box className="text-xs">
-              {isLoading ? <Skeleton>Album Here</Skeleton> : 'Album'}
-            </Box>
-          </Table.ColumnHeaderCell>
-          {isPlaylist && (
-            <Table.ColumnHeaderCell>
-              <Box className="text-xs">
-                {isLoading ? <Skeleton>Date Added Here</Skeleton> : 'Date Added'}
-              </Box>
-            </Table.ColumnHeaderCell>
-          )}
-          <Table.ColumnHeaderCell>
-            <Box className="text-xs">
-              {isLoading ? <Skeleton><TimerIcon /></Skeleton> : <TimerIcon />}
-            </Box>
-          </Table.ColumnHeaderCell>
-        </Table.Row>
-      </Table.Header>
+  const handleReorder = (newOrder) => {
+    setItems(newOrder);
+    onReorder?.(newOrder);
+  };
 
-      <Table.Body>
+  return (
+    <motion.div className="w-full overflow-y-scroll">
+      {/* Header */}
+      <motion.div className={`sticky top-0 left-0 backdrop-brightness-100 backdrop-blur-3xl z-10 grid ${isPlaylist ? 'grid-cols-[48px_1fr_1fr_120px_120px]' : 'grid-cols-[48px_1fr_1fr_120px]'} gap-4 p-2 px-4 text-sm font-medium`}>
+        <motion.div className="text-xs">
+          {isLoading ? <Skeleton>00</Skeleton> : '#'}
+        </motion.div>
+        <motion.div className="text-xs">
+          {isLoading ? <Skeleton>Title Here</Skeleton> : 'Title'}
+        </motion.div>
+        <motion.div className="text-xs">
+          {isLoading ? <Skeleton>Album Here</Skeleton> : 'Album'}
+        </motion.div>
+        {isPlaylist && (
+          <motion.div className="text-xs">
+            {isLoading ? <Skeleton>Date Added Here</Skeleton> : 'Date Added'}
+          </motion.div>
+        )}
+        <motion.div className="text-xs">
+          {isLoading ? <Skeleton><TimerIcon /></Skeleton> : <TimerIcon />}
+        </motion.div>
+      </motion.div>
+
+      {/* Track List */}
+      <Reorder.Group axis="y" values={items} onReorder={handleReorder} className="w-full">
         {isLoading ? (
           // Skeleton loading state
           Array.from({ length: 10 }).map((_, index) => (
-            <Table.Row key={`skeleton-${index}`}>
-              <Table.Cell>
+            <motion.div
+              key={`skeleton-${index}`}
+              className={`grid ${isPlaylist ? 'grid-cols-[48px_1fr_1fr_120px_120px]' : 'grid-cols-[48px_1fr_1fr_120px]'} gap-4 p-2 px-4 items-center`}
+            >
+              <motion.div>
                 <Skeleton>
                   <Box className="w-4">{index + 1}</Box>
                 </Skeleton>
-              </Table.Cell>
-              <Table.Cell>
+              </motion.div>
+              <motion.div>
                 <Flex gap="3" align="center">
                   <Skeleton className="w-10 h-10" />
                   <Flex direction="column" gap="1">
@@ -120,113 +121,119 @@ const TrackTable = ({
                     <Skeleton><Text size="1" color="gray">Artist Name</Text></Skeleton>
                   </Flex>
                 </Flex>
-              </Table.Cell>
-              <Table.Cell>
+              </motion.div>
+              <motion.div>
                 <Skeleton><Text>Album Name</Text></Skeleton>
-              </Table.Cell>
+              </motion.div>
               {isPlaylist && (
-                <Table.Cell>
+                <motion.div>
                   <Skeleton><Text>Date Added</Text></Skeleton>
-                </Table.Cell>
+                </motion.div>
               )}
-              <Table.Cell>
+              <motion.div>
                 <Skeleton><Text>0:00</Text></Skeleton>
-              </Table.Cell>
-            </Table.Row>
+              </motion.div>
+            </motion.div>
           ))
         ) : (
-          tracks?.map((item, index) => {
+          items?.map((item, index) => {
             const track = isPlaylist ? item.track : item;
-            const trackId = isPlaylist ? item.track.id : item.id;
+            const trackId = isPlaylist ? item.track?.id : item.id;
             
             return (
-              <Table.Row
+              <Reorder.Item
                 key={trackId}
-                onClick={() => setSelectedTrack(trackId)}
-                onMouseEnter={() => setCurrentUserIdOnHover(trackId)}
-                onMouseLeave={() => setCurrentUserIdOnHover(null)}
-                className={`select-none active:backdrop-brightness-90 ${hoverClass(
-                  item
-                )} ${activeClass(item)}`}
+                value={item}
+                whileDrag={{ 
+                  scale: 1.02,
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  cursor: "grabbing"
+                }}
               >
-                <Table.Cell>
-                  <Flex align="center" gap="3">
-                    {currentUserIdOnHover === trackId ? (
-                      <button
-                        className="w-4"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePlay(track);
-                        }}
-                      >
-                        {currentSong?.id === trackId && isPlaying ? (
-                          <PauseIcon />
-                        ) : (
-                          <PlayIcon />
-                        )}
-                      </button>
-                    ) : (
-                      <Text size="2" className="w-4">
-                        {index + 1}
-                      </Text>
-                    )}
-                  </Flex>
-                </Table.Cell>
-
-                <Table.Cell>
-                  <Flex align="center" gap="3">
-                    {track?.album?.images[0]?.url && (
-                      <img
-                        src={track.album.images[0].url}
-                        className="w-10 h-10 rounded"
-                        alt=""
-                      />
-                    )}
-                    <Flex direction="column">
-                      <Text>{track?.name}</Text>
-                      <Text size="1" color="gray">
-                        {track?.artists?.map((artist) => (
-                          <Link
-                            to={`/artist/${artist.id}`}
-                            key={artist.id}
-                            className="hover:underline"
-                          >
-                            {artist.name}
-                          </Link>
-                        )).reduce((prev, curr) => [prev, ', ', curr])}
-                      </Text>
+                <motion.div
+                  onClick={() => setSelectedTrack(trackId)}
+                  onMouseEnter={() => setCurrentUserIdOnHover(trackId)}
+                  onMouseLeave={() => setCurrentUserIdOnHover(null)}
+                  className={`grid ${isPlaylist ? 'grid-cols-[48px_1fr_1fr_120px_120px]' : 'grid-cols-[48px_1fr_1fr_120px]'} gap-4 p-2 px-4 items-center select-none active:backdrop-brightness-90 ${hoverClass(item)} ${activeClass(item)} cursor-grab active:cursor-grabbing`}
+                >
+                  <motion.div>
+                    <Flex align="center" gap="3">
+                      {currentUserIdOnHover === trackId ? (
+                        <button
+                          className="w-4"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlay(track);
+                          }}
+                        >
+                          {currentSong?.id === trackId && isPlaying ? (
+                            <PauseIcon />
+                          ) : (
+                            <PlayIcon />
+                          )}
+                        </button>
+                      ) : (
+                        <Text size="2" className="w-4">
+                          {index + 1}
+                        </Text>
+                      )}
                     </Flex>
-                    {currentSong?.id === trackId && (
-                      <TrackStatus isPlaying={isPlaying} />
-                    )}
-                  </Flex>
-                </Table.Cell>
+                  </motion.div>
 
-                <Table.Cell>
-                  <Text size="2" color="gray">
-                    {track?.album?.name}
-                  </Text>
-                </Table.Cell>
+                  <motion.div>
+                    <Flex align="center" gap="3">
+                      {track?.album?.images[0]?.url && (
+                        <img
+                          src={track.album.images[0].url}
+                          className="w-10 h-10 rounded"
+                          alt=""
+                        />
+                      )}
+                      <Flex direction="column">
+                        <Text>{track?.name}</Text>
+                        <Text size="1" color="gray">
+                          {track?.artists?.map((artist) => (
+                            <Link
+                              to={`/artist/${artist.id}`}
+                              key={artist.id}
+                              className="hover:underline"
+                            >
+                              {artist.name}
+                            </Link>
+                          )).reduce((prev, curr) => [prev, ', ', curr])}
+                        </Text>
+                      </Flex>
+                      {currentSong?.id === trackId && (
+                        <TrackStatus isPlaying={isPlaying} />
+                      )}
+                    </Flex>
+                  </motion.div>
 
-                {isPlaylist && (
-                  <Table.Cell>
-                    <Text size="2" color="gray">
-                      {timeAgo(item?.added_at)}
-                    </Text>
-                  </Table.Cell>
-                )}
+                  <motion.div>
+                    <Link
+                      to={`/album/${track?.album?.id}`}
+                      className="hover:underline"
+                    >
+                      {track?.album?.name}
+                    </Link>
+                  </motion.div>
 
-                <Table.Cell>
-                  <Text size="2" color="gray">
-                    {formatDuration(track?.duration_ms)}
-                  </Text>
-                </Table.Cell>
-              </Table.Row>
+                  {isPlaylist && (
+                    <motion.div>
+                      <Text size="2">{timeAgo(item?.added_at)}</Text>
+                    </motion.div>
+                  )}
+
+                  <motion.div>
+                    <Text size="2">{formatDuration(track?.duration_ms)}</Text>
+                  </motion.div>
+                </motion.div>
+              </Reorder.Item>
             );
           })
         )}
-      </Table.Body>
-    </Table.Root>
+      </Reorder.Group>
+    </motion.div>
   );
 };
 
