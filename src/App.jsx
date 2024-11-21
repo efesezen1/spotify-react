@@ -5,6 +5,7 @@ import { Theme, ThemePanel } from '@radix-ui/themes'
 import { Provider } from 'react-redux'
 import store from './store'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const App = () => {
    const queryClient = new QueryClient()
@@ -21,6 +22,7 @@ const App = () => {
                {/* <ThemePanel /> */}
             </Theme>
          </Provider>
+         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
    )
 }

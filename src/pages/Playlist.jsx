@@ -163,6 +163,7 @@ const Playlist = () => {
          </Flex>
          <Box className="p-5">
             <TrackTable
+               playlist={playlist}
                tracks={playlist?.tracks?.items}
                isPlaylist={true}
                isLoading={isPlaylistLoading}
