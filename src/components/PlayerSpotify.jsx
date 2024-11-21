@@ -34,16 +34,12 @@ const ScrollingText = ({ text, className }) => {
          ref={containerRef}
          className={`relative overflow-hidden ${className}`}
       >
-         <motion.div
+         <div
             ref={textRef}
             className={`whitespace-nowrap ${shouldScroll ? 'animate-scrolling' : ''}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            key={text}
          >
             {text}
-         </motion.div>
+         </div>
          {shouldScroll && (
             <>
                <div className="absolute left-0 top-0 w-8 h-full bg-gradient-to-r from-transparent to-transparent z-10" />
@@ -65,19 +61,13 @@ const SongInfo = () => {
 
    return (
       <Flex align="center" gap="3">
-         <motion.div
-            className="relative w-14 aspect-square"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            key={current_track.album.images[0].url}
-         >
+         <Box className="relative w-14 aspect-square">
             <img
                src={current_track.album.images[0].url}
                alt={current_track.album.name}
                className="absolute inset-0 w-full h-full object-contain rounded"
             />
-         </motion.div>
+         </Box>
          <Flex direction="column" gap="1" className="min-w-0 max-w-full">
             <ScrollingText
                text={current_track.name}
@@ -166,21 +156,21 @@ const Controls = () => {
                className="p-2 rounded-full bg-white cursor-pointer"
                onClick={handlePlayPause}
             >
-               <AnimatePresence mode="wait">
-                  <motion.div
-                     key={isPlaying ? 'pause' : 'play'}
-                     initial={{ opacity: 0, scale: 0.5 }}
-                     animate={{ opacity: 1, scale: 1 }}
-                     exit={{ opacity: 0, scale: 0.5 }}
-                     transition={{ duration: 0.15 }}
-                  >
-                     {isPlaying ? (
-                        <PauseIcon className="text-black" />
-                     ) : (
-                        <PlayIcon className="text-black" />
-                     )}
-                  </motion.div>
-               </AnimatePresence>
+               <motion.div
+                  animate={{ rotate: isPlaying ? 180 : 0 }}
+                  transition={{ 
+                     duration: 0.15,
+                     type: "spring",
+                     stiffness: 400,
+                     damping: 25
+                  }}
+               >
+                  {!isPlaying ? (
+                     <PlayIcon className="text-black" />
+                  ) : (
+                     <PauseIcon className="text-black" />
+                  )}
+               </motion.div>
             </Box>
          </motion.div>
          <motion.div
