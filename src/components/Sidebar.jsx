@@ -124,7 +124,9 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             )}
          </Flex>
          <Box
-            className={`${className} overflow-y-scroll m-2 relative rounded-lg h-[calc(100vh-120px)]`}
+            className={`${className} overflow-y-scroll  relative rounded-lg h-[calc(100vh-120px)] ${
+               isLoading ? 'pl-2' : 'pl-3'
+            } `}
          >
             {isLoading
                ? // Skeleton loading state for playlists
@@ -134,10 +136,11 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                        key={`skeleton-${index}`}
                        className={`${
                           !sidebarClosed && 'pr-3'
-                       } rounded-md overflow-hidden mb-2 pl-3`}
+                       } rounded-md overflow-hidden mb-2 `}
                     >
                        <Flex justify="" align="center" className="w-full">
-                          <Skeleton className="w-12 h-12" />
+                          {/* <Skeleton className="sidebar-image object-cover w-10 h-10 max-w-fit" /> */}
+                          <Skeleton className="w-12 h-12 sidebar-image object-cover " />
                           {!sidebarClosed && (
                              <Flex direction="column" className="ml-2" gap="1">
                                 <Skeleton>
@@ -179,7 +182,11 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                              !sidebarClosed && 'pr-3'
                           } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
                        >
-                          <Flex justify="" align="center" className="w-full">
+                          <Flex
+                             justify=""
+                             align="center"
+                             className={`w-full ${sidebarClosed && 'mx-auto'}`}
+                          >
                              <Box>
                                 {playlist?.images?.at(0)?.url ? (
                                    <img

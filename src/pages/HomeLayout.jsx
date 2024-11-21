@@ -1,16 +1,16 @@
-import React, { useState, useRef } from 'react'
-import { Outlet } from 'react-router-dom'
-import Player from '../components/Player'
+import React, { useState } from 'react'
 import { Box, Flex } from '@radix-ui/themes'
-
+import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import SpotifyPlayer from '../components/SpotifyPlayer'
 import PlayerSpotify from '../components/PlayerSpotify'
-// import FireyPlayer from '../components/FireyPlayer'
+import { motion, AnimatePresence } from 'framer-motion'
+
 const HomeLayout = () => {
-   const mainRef = useRef(null)
    const [sidebarClosed, setSidebarClosed] = useState(false)
+   const location = useLocation()
+
    return (
       <Flex direction="column" className="h-screen overflow-hidden ">
          <Navbar />
@@ -30,14 +30,21 @@ const HomeLayout = () => {
                   sidebarClosed ? 'w-[calc(100%-72px)]' : 'w-[calc(100%-240px)]'
                } h-full max-w-[1955px] rounded`}
                p="3"
-               ref={mainRef}
             >
-               <Outlet />
+               <AnimatePresence mode="wait">
+                  <motion.div
+                     key={location.pathname}
+                     initial={{ opacity: 0 }}
+                     animate={{ opacity: 1 }}
+                     exit={{ opacity: 0 }}
+                     transition={{ duration: 0.15 }}
+                     className="flex-1 overflow-y-auto"
+                  >
+                     <Outlet />
+                  </motion.div>
+               </AnimatePresence>
                <Flex className="  absolute bottom-24 my-auto w-full ">
-                  {/* <Player className="mx-auto " parentRef={mainRef} /> */}
-                  {/* <SpotifyPlayer /> */}
                   <PlayerSpotify />
-                  {/* <FireyPlayer /> */}
                </Flex>
             </Box>
          </Flex>

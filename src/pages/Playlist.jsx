@@ -139,7 +139,11 @@ const Playlist = () => {
                            playlistId={playlist?.id}
                            onSuccess={(id) => navigate('/playlist/' + id)}
                         >
-                           <Text size="8" weight="bold" className="cursor-pointer hover:underline">
+                           <Text
+                              size="8"
+                              weight="bold"
+                              className="cursor-pointer hover:underline"
+                           >
                               {playlist?.name}
                            </Text>
                         </PlaylistDialog>
