@@ -75,10 +75,18 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
    return (
       <Flex direction="column">
          <Box pl="1">
-            {playlistRecommendations?.message && (
-               <Text size="5" weight="bold" mb="4">
-                  {playlistRecommendations?.message}
-               </Text>
+            {isLoading ? (
+               <Skeleton>
+                  <Text size="5" weight="bold" mb="4">
+                     Featured Playlists
+                  </Text>
+               </Skeleton>
+            ) : (
+               playlistRecommendations?.message && (
+                  <Text size="5" weight="bold" mb="4">
+                     {playlistRecommendations?.message}
+                  </Text>
+               )
             )}
          </Box>
          <Flex direction="column" className="w-[100%]" gap="3">
@@ -119,25 +127,22 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                   <Flex className="gap-4 w-full">
                      <div className="grid auto-cols-max grid-flow-col gap-4 px-4">
                         {isLoading
-                           ? Array.from({ length: 5 }).map((_, index) => (
+                           ? Array.from({ length: 8 }).map((_, index) => (
                                 <div
                                    key={`skeleton-${index}`}
                                    className="w-[150px] initial:w-[300px] xs:w-[230px] sm:w-[220px] md:w-[170px] lg:w-[150px] xl:w-[150px]"
                                 >
-                                   <Skeleton className="w-[80px] h-[80px] rounded" />
-                                   <Flex
-                                      direction="column"
-                                      p="1"
-                                      gap="1"
-                                      className="w-[80px]"
-                                   >
+                                   <Box className="w-full aspect-square">
+                                      <Skeleton className="w-full h-full rounded-md" />
+                                   </Box>
+                                   <Flex direction="column" p="2" gap="2">
                                       <Skeleton>
-                                         <Text size="2" weight="bold">
-                                            Playlist Name
+                                         <Text size="2" weight="bold" className="w-full">
+                                            Playlist Name That Is Long
                                          </Text>
                                       </Skeleton>
                                       <Skeleton>
-                                         <Text size="1" color="gray">
+                                         <Text size="1" color="gray" className="w-3/4">
                                             Creator Name
                                          </Text>
                                       </Skeleton>
