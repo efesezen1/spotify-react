@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import CreatePlaylist from './CreatePlaylist'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const navigate = useNavigate()
@@ -80,10 +81,16 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             </Flex>
             {!sidebarClosed && (
                <Flex gap="3" className={``}>
-                  <CreatePlaylist
-                     modalState={openCreatePlaylistModal}
-                     setModalState={setOpenCreatePlaylistModal}
-                  />
+                  <Tooltip content="Create Playlist" delayDuration={0}>
+                     <Button
+                        variant="ghost"
+                        className="color-white h-[30px] w-[20px] rounded"
+                        color="white"
+                        onClick={() => setOpenCreatePlaylistModal(true)}
+                     >
+                        <PlusIcon />
+                     </Button>
+                  </Tooltip>
                   <Tooltip content="Minimize Sidebar" className="">
                      <Button
                         variant="ghost"
@@ -117,10 +124,10 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                               className="ml-2"
                               gap="1"
                            >
-                              <Skeleton className="w-[140px]">
+                              <Skeleton>
                                  <Text className="text-sm">Playlist Name</Text>
                               </Skeleton>
-                              <Skeleton className="w-[100px]">
+                              <Skeleton>
                                  <Text className="text-xs">Creator Name</Text>
                               </Skeleton>
                            </Flex>
@@ -187,141 +194,11 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
 
             /> */}
          </Box>
+         <CreatePlaylist
+            modalState={openCreatePlaylistModal}
+            setModalState={setOpenCreatePlaylistModal}
+         />
       </Flex>
-   )
-}
-
-const CreatePlaylist = ({ children, className, modalState, setModalState }) => {
-   const queryClient = useQueryClient()
-   const navigate = useNavigate()
-   const { spotifyApi, token } = useSpotifyInstance()
-   const [isPublic, setIsPublic] = useState(false)
-
-   const { data: user } = useSpotifyQuery({
-      queryKey: ['user'],
-      endpoint: '/me',
-   })
-
-   const { mutate: createPlaylist } = useMutation({
-      mutationFn: ({ name, description, isPublic }) =>
-         spotifyApi.post(`/users/${user.id}/playlists`, {
-            name,
-            description: description || '',
-            isPublic,
-         }),
-      onSuccess: (res) => {
-         queryClient.invalidateQueries(['userPlaylists'])
-         const id = res.data.id
-         navigate('/playlist/' + id)
-      },
-      onError: (error) => {}
-   })
-
-   const handleCreatePlaylist = ({ name, description, isPublic }) => {
-      createPlaylist({ name, description, isPublic })
-   }
-
-   return (
-      <Dialog.Root>
-         <Dialog.Trigger
-            id="create-playlist"
-            className={` ${className} h-[40px] w-[40px] flex justify-center items-center `}
-         >
-            <Tooltip content="Create Playlist" delayDuration={0}>
-               <Button
-                  variant="ghost"
-                  // radius="full"
-                  className={`color-white  h-[30px] w-[20px] rounded  `}
-                  color="white"
-               >
-                  <PlusIcon />
-               </Button>
-            </Tooltip>
-         </Dialog.Trigger>
-         <Dialog.Portal>
-            <Dialog.Overlay className="fixed inset-0 bg-blackA6 data-[state=open]:animate-overlayShow" />
-            <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-[90vw] max-w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-md bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none data-[state=open]:animate-contentShow">
-               <Dialog.Title className="m-0 text-[17px] font-medium capitalize ">
-                  Create new playlist
-               </Dialog.Title>
-               <Dialog.Description className="mb-5 mt-2.5 text-[15px] leading-normal ">
-                  Create your playlist here. Click create when you're done.
-               </Dialog.Description>
-               <fieldset className="mb-[15px] flex items-center gap-5">
-                  <label
-                     className="w-[90px] text-right text-[15px] capitalize"
-                     htmlFor="playlistName"
-                  >
-                     Playlist Name
-                  </label>
-                  <input
-                     className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
-                     id="playlistName"
-                     defaultValue="My Playlist #48"
-                  />
-               </fieldset>
-               <fieldset className="mb-[15px] flex items-center gap-5">
-                  <label
-                     className="w-[90px] text-right text-[15px] "
-                     htmlFor="description"
-                  >
-                     Description
-                  </label>
-                  <input
-                     className="inline-flex h-[35px] w-full flex-1 items-center justify-center rounded px-2.5 text-[15px] leading-none  shadow-[0_0_0_1px]  outline-none focus:shadow-[0_0_0_2px] "
-                     id="description"
-                     defaultValue="New playlist description"
-                  />
-               </fieldset>
-               <form className="mb-[15px] flex items-center gap-5">
-                  <label
-                     className="w-[90px] text-right text-[15px] "
-                     htmlFor="playlist-audience"
-                  >
-                     Make private
-                  </label>
-                  <Switch.Root
-                     checked={isPublic}
-                     onCheckedChange={() => setIsPublic((prev) => !prev)}
-                     className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA6 shadow-[0_2px_10px] shadow-blackA4 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black"
-                     id="playlist-audience"
-                     style={{
-                        '-webkit-tap-highlight-color': 'rgba(0, 0, 0, 0)',
-                     }}
-                  >
-                     <Switch.Thumb className="block size-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]" />
-                  </Switch.Root>
-               </form>
-               <div className="mt-[25px] flex justify-end">
-                  <Dialog.Close asChild>
-                     <Button
-                        onClick={() => {
-                           handleCreatePlaylist({
-                              name: document.getElementById('playlistName')
-                                 .value,
-                              description:
-                                 document.getElementById('description').value,
-                              isPublic,
-                           })
-                        }}
-                        variant="soft"
-                     >
-                        Create
-                     </Button>
-                     {/* <button>efe</button> */}
-                  </Dialog.Close>
-               </div>
-               <Dialog.Close asChild>
-                  <button
-                     className="absolute right-2.5 top-2.5 inline-flex size-[25px] appearance-none items-center justify-center rounded-full  hover:bg-violet4 focus:shadow-[0_0_0_2px] focus: focus:outline-none"
-                     aria-label="Close"
-                  >
-                     <Cross2Icon />
-                  </button>
-               </Dialog.Close>
-            </Dialog.Content>
-         </Dialog.Portal>
-      </Dialog.Root>
    )
 }
 
