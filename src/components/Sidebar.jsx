@@ -8,13 +8,14 @@ import { Flex, Text, Button } from '@radix-ui/themes'
 import Library from './icon/Library'
 import { ArrowLeftIcon, Cross2Icon, PlusIcon, ValueNoneIcon } from '@radix-ui/react-icons'
 
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const navigate = useNavigate()
+   const location = useLocation()
    const { selectedPlaylist } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
    const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
@@ -114,8 +115,14 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                            navigate('/playlist/' + playlist?.id)
                         }}
                         className={`${
-                           playlist?.id === id ? 'bg-red-100' : ''
-                        } ${playlist?.id !== id ? 'hover:bg-red-50' : ''} ${
+                           (playlist?.id === id || (location.pathname.startsWith('/playlist/') && location.pathname.split('/')[2] === playlist?.id)) 
+                           ? 'bg-red-100' 
+                           : ''
+                        } ${
+                           (playlist?.id !== id && (!location.pathname.startsWith('/playlist/') || location.pathname.split('/')[2] !== playlist?.id))
+                           ? 'hover:bg-red-50' 
+                           : ''
+                        } ${
                            !sidebarClosed && 'pr-3'
                         } active:bg-red-100 transition-all duration-300  rounded-md  overflow-hidden`}
                      >
