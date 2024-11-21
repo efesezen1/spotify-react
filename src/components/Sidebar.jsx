@@ -89,7 +89,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                )}
             </Flex>
             {!sidebarClosed && (
-               <Flex gap="3" className={``}>
+               <Flex gap="2" align="center">
                   <PlaylistDialog
                      modalState={openCreatePlaylistModal}
                      setModalState={setOpenCreatePlaylistModal}
@@ -101,23 +101,24 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                      <Tooltip content="Create Playlist">
                         <Button
                            variant="ghost"
-                           className="color-white h-[30px] w-[20px] rounded"
-                           color="white"
-                           onClick={() => setOpenCreatePlaylistModal(true)}
+                           className="h-8 w-8 rounded flex items-center justify-center"
+                           color="gray"
+                           onClick={() => {
+                              setOpenCreatePlaylistModal(true)
+                           }}
                         >
-                           <PlusIcon />
+                           <PlusIcon className="h-4 w-4" />
                         </Button>
                      </Tooltip>
                   </PlaylistDialog>
-                  <Tooltip content="Minimize Sidebar" className="">
+                  <Tooltip content="Minimize Sidebar">
                      <Button
                         variant="ghost"
-                        // radius="full"
-                        color="white"
-                        className=" color-white rounded w-[20px]  h-7 mt-0.5"
+                        color="gray"
+                        className="h-8 w-8 rounded flex items-center justify-center"
                         onClick={() => setSidebarClosed(!sidebarClosed)}
                      >
-                        <ArrowLeftIcon />
+                        <ArrowLeftIcon className="h-4 w-4" />
                      </Button>
                   </Tooltip>
                </Flex>
