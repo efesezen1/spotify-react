@@ -8,6 +8,7 @@ import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
 import { Reorder, AnimatePresence, motion } from 'framer-motion'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import useSpotifyMutation from '../hook/useSpotifyMutation'
+import { useQueryClient } from '@tanstack/react-query'
 
 const TrackTable = ({
    tracks,
@@ -17,6 +18,7 @@ const TrackTable = ({
    playlist,
 }) => {
    const dispatch = useDispatch()
+   const queryClient = useQueryClient()
    const { currentSong, isPlaying } = useSelector((state) => state.user)
    const [selectedTrack, setSelectedTrack] = useState(null)
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
@@ -128,6 +130,8 @@ const TrackTable = ({
       }, {
          onSuccess: () => {
             console.log('Track reorder successful')
+            // Invalidate the playlist query to refetch the latest order
+            queryClient.invalidateQueries(['playlist', playlist.id])
             onReorder?.(newOrder)
          },
          onError: (error) => {
@@ -136,6 +140,99 @@ const TrackTable = ({
             setItems(tracks)
          }
       })
+   }
+
+   const renderTrackContent = (item, track, trackId) => {
+      return (
+         <motion.div
+            onClick={() => setSelectedTrack(trackId)}
+            onMouseEnter={() => setCurrentUserIdOnHover(trackId)}
+            onMouseLeave={() => setCurrentUserIdOnHover(null)}
+            className={`grid ${
+               isPlaylist
+                  ? 'grid-cols-[48px_1fr_1fr_120px_120px]'
+                  : 'grid-cols-[48px_1fr_1fr_120px]'
+            } gap-4 p-2 px-4 items-center select-none active:backdrop-brightness-90 ${hoverClass(
+               item
+            )} ${activeClass(item)} ${
+               canReorderTracks ? 'cursor-grab active:cursor-grabbing' : ''
+            }`}
+         >
+            <motion.div>
+               <Flex align="center" gap="3">
+                  {currentUserIdOnHover === trackId ? (
+                     <button
+                        className="w-4"
+                        onClick={(e) => {
+                           e.stopPropagation()
+                           handlePlay(track)
+                        }}
+                     >
+                        {currentSong?.id === trackId && isPlaying ? (
+                           <PauseIcon />
+                        ) : (
+                           <PlayIcon />
+                        )}
+                     </button>
+                  ) : (
+                     <Text size="2" className="w-4">
+                        {items.indexOf(item) + 1}
+                     </Text>
+                  )}
+               </Flex>
+            </motion.div>
+
+            <motion.div>
+               <Flex align="center" gap="3">
+                  {track?.album?.images[0]?.url && (
+                     <img
+                        src={track.album.images[0].url}
+                        className="w-10 h-10 rounded"
+                        alt=""
+                     />
+                  )}
+                  <Flex direction="column">
+                     <Text>{track?.name}</Text>
+                     <Text size="1" color="gray">
+                        {track?.artists
+                           ?.map((artist) => (
+                              <Link
+                                 to={`/artist/${artist.id}`}
+                                 key={artist.id}
+                                 className="hover:underline"
+                              >
+                                 {artist.name}
+                              </Link>
+                           ))
+                           .reduce((prev, curr) => [prev, ', ', curr])}
+                     </Text>
+                  </Flex>
+                  {currentSong?.id === trackId && (
+                     <TrackStatus isPlaying={isPlaying} />
+                  )}
+               </Flex>
+            </motion.div>
+
+            <motion.div>
+               <Link
+                  to={`/album/${track?.album?.id}`}
+                  className="hover:underline"
+               >
+                  {track?.album?.name}
+               </Link>
+            </motion.div>
+
+            {isPlaylist && (
+               <motion.div>
+                  <Text size="2">{timeAgo(item?.added_at)}</Text>
+               </motion.div>
+            )}
+
+            <motion.div>
+               <Text size="2">{formatDuration(track?.duration_ms)}</Text>
+            </motion.div>
+         </motion.div>
+      )
    }
 
    return (
@@ -182,181 +279,45 @@ const TrackTable = ({
             <Reorder.Group
                axis="y"
                values={items}
-               onReorder={handleReorder}
+               onReorder={setItems}
                className="w-full"
             >
-               {renderTracks()}
+               {items.map((item) => {
+                  const track = isPlaylist ? item.track : item
+                  const trackId = isPlaylist ? item.track?.id : item.id
+
+                  return (
+                     <Reorder.Item
+                        key={trackId}
+                        value={item}
+                        onDragEnd={() => handleReorder(items)}
+                        whileDrag={{
+                           scale: 1.02,
+                           backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                           cursor: 'grabbing',
+                        }}
+                     >
+                        {renderTrackContent(item, track, trackId)}
+                     </Reorder.Item>
+                  )
+               })}
             </Reorder.Group>
          ) : (
-            <motion.div className="w-full">{renderTracks()}</motion.div>
+            <motion.div className="w-full">
+               {items.map((item, index) => {
+                  const track = isPlaylist ? item.track : item
+                  const trackId = isPlaylist ? item.track?.id : item.id
+
+                  return (
+                     <motion.div key={trackId}>
+                        {renderTrackContent(item, track, trackId)}
+                     </motion.div>
+                  )
+               })}
+            </motion.div>
          )}
       </motion.div>
    )
-
-   function renderTracks() {
-      if (isLoading) {
-         return Array.from({ length: 10 }).map((_, index) => (
-            <motion.div
-               key={`skeleton-${index}`}
-               className={`grid ${
-                  isPlaylist
-                     ? 'grid-cols-[48px_1fr_1fr_120px_120px]'
-                     : 'grid-cols-[48px_1fr_1fr_120px]'
-               } gap-4 p-2 px-4 items-center`}
-            >
-               <motion.div>
-                  <Skeleton>
-                     <Box className="w-4">{index + 1}</Box>
-                  </Skeleton>
-               </motion.div>
-               <motion.div>
-                  <Flex gap="3" align="center">
-                     <Skeleton className="w-10 h-10" />
-                     <Flex direction="column" gap="1">
-                        <Skeleton>
-                           <Text>Track Title</Text>
-                        </Skeleton>
-                        <Skeleton>
-                           <Text size="1" color="gray">
-                              Artist Name
-                           </Text>
-                        </Skeleton>
-                     </Flex>
-                  </Flex>
-               </motion.div>
-               <motion.div>
-                  <Skeleton>
-                     <Text>Album Name</Text>
-                  </Skeleton>
-               </motion.div>
-               {isPlaylist && (
-                  <motion.div>
-                     <Skeleton>
-                        <Text>Date Added</Text>
-                     </Skeleton>
-                  </motion.div>
-               )}
-               <motion.div>
-                  <Skeleton>
-                     <Text>0:00</Text>
-                  </Skeleton>
-               </motion.div>
-            </motion.div>
-         ))
-      }
-
-      return items?.map((item, index) => {
-         const track = isPlaylist ? item.track : item
-         const trackId = isPlaylist ? item.track?.id : item.id
-
-         const TrackContent = (
-            <motion.div
-               onClick={() => setSelectedTrack(trackId)}
-               onMouseEnter={() => setCurrentUserIdOnHover(trackId)}
-               onMouseLeave={() => setCurrentUserIdOnHover(null)}
-               className={`grid ${
-                  isPlaylist
-                     ? 'grid-cols-[48px_1fr_1fr_120px_120px]'
-                     : 'grid-cols-[48px_1fr_1fr_120px]'
-               } gap-4 p-2 px-4 items-center select-none active:backdrop-brightness-90 ${hoverClass(
-                  item
-               )} ${activeClass(item)} ${
-                  canReorderTracks ? 'cursor-grab active:cursor-grabbing' : ''
-               }`}
-            >
-               <motion.div>
-                  <Flex align="center" gap="3">
-                     {currentUserIdOnHover === trackId ? (
-                        <button
-                           className="w-4"
-                           onClick={(e) => {
-                              e.stopPropagation()
-                              handlePlay(track)
-                           }}
-                        >
-                           {currentSong?.id === trackId && isPlaying ? (
-                              <PauseIcon />
-                           ) : (
-                              <PlayIcon />
-                           )}
-                        </button>
-                     ) : (
-                        <Text size="2" className="w-4">
-                           {index + 1}
-                        </Text>
-                     )}
-                  </Flex>
-               </motion.div>
-
-               <motion.div>
-                  <Flex align="center" gap="3">
-                     {track?.album?.images[0]?.url && (
-                        <img
-                           src={track.album.images[0].url}
-                           className="w-10 h-10 rounded"
-                           alt=""
-                        />
-                     )}
-                     <Flex direction="column">
-                        <Text>{track?.name}</Text>
-                        <Text size="1" color="gray">
-                           {track?.artists
-                              ?.map((artist) => (
-                                 <Link
-                                    to={`/artist/${artist.id}`}
-                                    key={artist.id}
-                                    className="hover:underline"
-                                 >
-                                    {artist.name}
-                                 </Link>
-                              ))
-                              .reduce((prev, curr) => [prev, ', ', curr])}
-                        </Text>
-                     </Flex>
-                     {currentSong?.id === trackId && (
-                        <TrackStatus isPlaying={isPlaying} />
-                     )}
-                  </Flex>
-               </motion.div>
-
-               <motion.div>
-                  <Link
-                     to={`/album/${track?.album?.id}`}
-                     className="hover:underline"
-                  >
-                     {track?.album?.name}
-                  </Link>
-               </motion.div>
-
-               {isPlaylist && (
-                  <motion.div>
-                     <Text size="2">{timeAgo(item?.added_at)}</Text>
-                  </motion.div>
-               )}
-
-               <motion.div>
-                  <Text size="2">{formatDuration(track?.duration_ms)}</Text>
-               </motion.div>
-            </motion.div>
-         )
-
-         return canReorderTracks ? (
-            <Reorder.Item
-               key={trackId}
-               value={item}
-               whileDrag={{
-                  scale: 1.02,
-                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                  cursor: 'grabbing',
-               }}
-            >
-               {TrackContent}
-            </Reorder.Item>
-         ) : (
-            <React.Fragment key={trackId}>{TrackContent}</React.Fragment>
-         )
-      })
-   }
 }
 
 export default TrackTable

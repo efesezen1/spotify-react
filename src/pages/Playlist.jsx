@@ -142,13 +142,13 @@ const Playlist = () => {
                            <Text
                               size="8"
                               weight="bold"
-                              className="cursor-pointer hover:underline"
+                              className="cursor-pointer hover:underline text-6xl md:text-7xl lg:text-8xl"
                            >
                               {playlist?.name}
                            </Text>
                         </PlaylistDialog>
                      ) : (
-                        <Text size="8" className="font-bold">
+                        <Text size="8" className="font-bold text-6xl md:text-7xl lg:text-8xl">
                            {playlist?.name}
                         </Text>
                      )}

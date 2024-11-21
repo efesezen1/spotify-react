@@ -139,7 +139,7 @@ const Artist = () => {
                            {artist?.type || ''}
                         </Text>
                         <Flex direction="column">
-                           <Text size="9" weight="bold" className="select-none">
+                           <Text size="9" weight="bold" className="select-none text-6xl md:text-7xl lg:text-8xl">
                               {artist?.name || ''}
                            </Text>
                            <Text
