@@ -27,12 +27,12 @@ const Playlist = () => {
 
    const { data: playlist, isLoading: isPlaylistLoading } = useSpotifyQuery({
       queryKey: ['playlist', id],
-      endpoint: `/playlists/${id}`
+      endpoint: `/playlists/${id}`,
    })
 
    const { data: user } = useSpotifyQuery({
       queryKey: ['user'],
-      endpoint: '/me'
+      endpoint: '/me',
    })
 
    useEffect(() => {
@@ -103,16 +103,21 @@ const Playlist = () => {
                   </Flex>
                )}
             </Flex>
-            <Flex
-               direction="column"
-               className="p-5 justify-end"
-               gap="3"
-            >
-               <Text size="1">PLAYLIST</Text>
+            <Flex direction="column" className="p-5 justify-end" gap="3">
+               {isPlaylistLoading ? (
+                  <Skeleton>
+                     <Text size="1">PLAYLIST</Text>
+                  </Skeleton>
+               ) : (
+                  <Text size="1">PLAYLIST</Text>
+               )}
+
                {isPlaylistLoading ? (
                   <>
                      <Skeleton>
-                        <Text size="8" className="font-bold">Playlist Title</Text>
+                        <Text size="8" className="font-bold">
+                           Playlist Title
+                        </Text>
                      </Skeleton>
                      <Skeleton>
                         <Text>Playlist Description</Text>
@@ -128,7 +133,8 @@ const Playlist = () => {
                      </Text>
                      <Text>{playlist?.description}</Text>
                      <Text size="2">
-                        {playlist?.owner?.display_name} • {playlist?.tracks?.total} songs
+                        {playlist?.owner?.display_name} •{' '}
+                        {playlist?.tracks?.total} songs
                      </Text>
                   </>
                )}

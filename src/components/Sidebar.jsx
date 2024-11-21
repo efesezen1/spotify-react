@@ -103,14 +103,14 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
          >
             {isLoading ? (
                // Skeleton loading state for playlists
-               Array.from({ length: 6 }).map((_, index) => (
+               Array.from({ length: 20 }).map((_, index) => (
                   <Flex
                      direction={'row'}
                      key={`skeleton-${index}`}
-                     className={`${!sidebarClosed && 'pr-3'} rounded-md overflow-hidden mb-2`}
+                     className={`${!sidebarClosed && 'pr-3'} rounded-md overflow-hidden mb-2 pl-3`}
                   >
                      <Flex justify="" align="center" className="w-full">
-                        <Skeleton className="w-10 h-10" />
+                        <Skeleton className="w-12 h-12" />
                         {!sidebarClosed && (
                            <Flex
                               direction="column"

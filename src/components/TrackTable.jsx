@@ -73,22 +73,30 @@ const TrackTable = ({
       <Table.Header className="sticky top-0 left-0 backdrop-brightness-100 backdrop-blur-3xl z-10">
         <Table.Row>
           <Table.ColumnHeaderCell>
-            <Box className="text-xs">#</Box>
+            <Box className="text-xs">
+              {isLoading ? <Skeleton>00</Skeleton> : '#'}
+            </Box>
           </Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>
-            <Box className="text-xs">Title</Box>
+            <Box className="text-xs">
+              {isLoading ? <Skeleton>Title Here</Skeleton> : 'Title'}
+            </Box>
           </Table.ColumnHeaderCell>
           <Table.ColumnHeaderCell>
-            <Box className="text-xs">Album</Box>
+            <Box className="text-xs">
+              {isLoading ? <Skeleton>Album Here</Skeleton> : 'Album'}
+            </Box>
           </Table.ColumnHeaderCell>
           {isPlaylist && (
             <Table.ColumnHeaderCell>
-              <Box className="text-xs">Date Added</Box>
+              <Box className="text-xs">
+                {isLoading ? <Skeleton>Date Added Here</Skeleton> : 'Date Added'}
+              </Box>
             </Table.ColumnHeaderCell>
           )}
           <Table.ColumnHeaderCell>
             <Box className="text-xs">
-              <TimerIcon />
+              {isLoading ? <Skeleton><TimerIcon /></Skeleton> : <TimerIcon />}
             </Box>
           </Table.ColumnHeaderCell>
         </Table.Row>
@@ -170,7 +178,7 @@ const TrackTable = ({
                     {track?.album?.images[0]?.url && (
                       <img
                         src={track.album.images[0].url}
-                        className="w-10 h-10"
+                        className="w-10 h-10 rounded"
                         alt=""
                       />
                     )}
