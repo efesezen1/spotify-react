@@ -1,9 +1,8 @@
 import React from 'react'
-import { useCallback, useEffect } from 'react'
-import { WebPlaybackSDK } from 'react-spotify-web-playback-sdk'
+import { useCallback } from 'react'
 import useSpotifyInstance from '../hook/spotifyInstance'
-
 import {
+   WebPlaybackSDK,
    usePlaybackState,
    useSpotifyPlayer,
 } from 'react-spotify-web-playback-sdk'
@@ -35,9 +34,6 @@ const TogglePlay = () => {
 const SpotifyPlayer = () => {
    const { token } = useSpotifyInstance()
 
-   useEffect(() => {
-   }, [token])
-   const getOAuthToken = useCallback((callback) => callback(token), [token])
 
    return (
       <div className="bg-red-500 w-10/12 rounded-lg p-2 z-20 min-h-full">
@@ -45,6 +41,7 @@ const SpotifyPlayer = () => {
             initialDeviceName="My awesome Spotify app"
             getOAuthToken={getOAuthToken}
             initialVolume={0.5}
+            connectOnInitialized={true}
          >
             <TogglePlay />
             <SongTitle />
