@@ -1,15 +1,13 @@
 import React, { useState } from 'react'
 import { Box, Flex } from '@radix-ui/themes'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
 import SpotifyPlayer from '../components/SpotifyPlayer'
 import PlayerSpotify from '../components/PlayerSpotify'
-import { motion, AnimatePresence } from 'framer-motion'
 
 const HomeLayout = () => {
    const [sidebarClosed, setSidebarClosed] = useState(false)
-   const location = useLocation()
 
    return (
       <Flex direction="column" className="h-screen overflow-hidden ">
@@ -19,7 +17,7 @@ const HomeLayout = () => {
             className="h-[calc(100vh-56px)]"
             style={{ width: '100%' }}
          >
-            <Box className={`transition-all duration-300 ${sidebarClosed ? 'w-[80px]' : 'w-[240px]'}`}>
+            <Box className={`transition-all duration-300 ${sidebarClosed ? 'w-[74px]' : 'w-[240px]'}`}>
                <Sidebar
                   sidebarClosed={sidebarClosed}
                   setSidebarClosed={setSidebarClosed}
@@ -31,19 +29,8 @@ const HomeLayout = () => {
                } h-full max-w-[1955px] rounded`}
                p="3"
             >
-               <AnimatePresence mode="wait">
-                  <motion.div
-                     key={location.pathname}
-                     initial={{ opacity: 0 }}
-                     animate={{ opacity: 1 }}
-                     exit={{ opacity: 0 }}
-                     transition={{ duration: 0.15 }}
-                     className="flex-1 overflow-y-auto"
-                  >
-                     <Outlet />
-                  </motion.div>
-               </AnimatePresence>
-               <Flex className="  absolute bottom-24 my-auto w-full ">
+               <Outlet />
+               <Flex className="absolute bottom-24 my-auto w-full">
                   <PlayerSpotify />
                </Flex>
             </Box>
