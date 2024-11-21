@@ -26,19 +26,19 @@ const Browse = () => {
    return (
       <Flex direction="column" className={` h-full `}>
          <Box className="  overflow-y-scroll overflow-x-hidden">
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
-            <ItemRow playlistRecommendations={playlistRecommendations} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
+            <ItemRow playlistRecommendations={playlistRecommendations} isLoading={isLoading} />
          </Box>
       </Flex>
    )

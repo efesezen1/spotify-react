@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import * as Switch from '@radix-ui/react-switch'
 import * as Dialog from '@radix-ui/react-dialog'
-import { Box, Text, Flex, Button, TextField } from '@radix-ui/themes'
+import { Box, Text, Flex, Button, TextField, Skeleton } from '@radix-ui/themes'
 import { Link, useParams } from 'react-router-dom'
 import {
    ValueNoneIcon,
@@ -25,7 +25,7 @@ const Playlist = () => {
    const container = useRef(null)
    const prevId = usePrevious(id)
 
-   const { data: playlist } = useSpotifyQuery({
+   const { data: playlist, isLoading: isPlaylistLoading } = useSpotifyQuery({
       queryKey: ['playlist', id],
       endpoint: `/playlists/${id}`
    })
@@ -85,7 +85,9 @@ const Playlist = () => {
       >
          <Flex direction="row" className="w-full">
             <Flex className="p-5  h-full items-center aspect-square">
-               {playlist?.images?.at(0)?.url ? (
+               {isPlaylistLoading ? (
+                  <Skeleton width="100%" height="100%" className="rounded" />
+               ) : playlist?.images?.at(0)?.url ? (
                   <img
                      src={playlist?.images.at(0)?.url}
                      alt=""
@@ -101,45 +103,44 @@ const Playlist = () => {
                   </Flex>
                )}
             </Flex>
-
-            <Flex direction="column" justify="end" className="my-5 flex-grow">
-               {user?.id === playlist?.owner?.id ? (
-                  <InteractiveHeader
-                     setIsPublic={setIsPublic}
-                     isPublic={isPublic}
-                     playlist={playlist}
-                     size={{ initial: '8', lg: '9' }}
-                  />
+            <Flex
+               direction="column"
+               className="p-5 justify-end"
+               gap="3"
+            >
+               <Text size="1">PLAYLIST</Text>
+               {isPlaylistLoading ? (
+                  <>
+                     <Skeleton>
+                        <Text size="8" className="font-bold">Playlist Title</Text>
+                     </Skeleton>
+                     <Skeleton>
+                        <Text>Playlist Description</Text>
+                     </Skeleton>
+                     <Skeleton>
+                        <Text size="2">User • 0 songs</Text>
+                     </Skeleton>
+                  </>
                ) : (
-                  <Text size="9" weight="bold" className="select-none">
-                     {playlist?.name}
-                  </Text>
+                  <>
+                     <Text size="8" className="font-bold">
+                        {playlist?.name}
+                     </Text>
+                     <Text>{playlist?.description}</Text>
+                     <Text size="2">
+                        {playlist?.owner?.display_name} • {playlist?.tracks?.total} songs
+                     </Text>
+                  </>
                )}
-               <Text
-                  className="mr-10 mt-3 ml-1 select-none"
-                  size="2"
-                  color="gray"
-               >
-                  {playlist?.description || ''}
-               </Text>
-               <Text
-                  className="mr-10 mt-3 ml-1 select-none"
-                  size="1"
-                  color="gray"
-               >
-                  {playlist?.owner.display_name}
-               </Text>
             </Flex>
          </Flex>
-
-         {playlist?.tracks?.items?.length !== 0 ? (
+         <Box className="p-5">
             <TrackTable
                tracks={playlist?.tracks?.items}
                isPlaylist={true}
+               isLoading={isPlaylistLoading}
             />
-         ) : (
-            <Text className="text-center mt-10">No tracks in this playlist</Text>
-         )}
+         </Box>
       </Flex>
    )
 }

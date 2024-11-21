@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Box, Flex, Text } from '@radix-ui/themes';
+import { Table, Box, Flex, Text, Skeleton } from '@radix-ui/themes';
 import { TimerIcon, PauseIcon, PlayIcon } from '@radix-ui/react-icons';
 import { Link } from 'react-router-dom';
 import TrackStatus from './TrackStatus';
@@ -9,6 +9,7 @@ import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice';
 const TrackTable = ({
   tracks,
   isPlaylist = false,
+  isLoading = false,
 }) => {
   const dispatch = useDispatch();
   const { currentSong, isPlaying } = useSelector((state) => state.user);
@@ -94,95 +95,128 @@ const TrackTable = ({
       </Table.Header>
 
       <Table.Body>
-        {tracks?.map((item, index) => {
-          const track = isPlaylist ? item.track : item;
-          const trackId = isPlaylist ? item.track.id : item.id;
-          
-          return (
-            <Table.Row
-              key={trackId}
-              onClick={() => setSelectedTrack(trackId)}
-              onMouseEnter={() => setCurrentUserIdOnHover(trackId)}
-              onMouseLeave={() => setCurrentUserIdOnHover(null)}
-              className={`select-none active:backdrop-brightness-90 ${hoverClass(
-                item
-              )} ${activeClass(item)}`}
-            >
+        {isLoading ? (
+          // Skeleton loading state
+          Array.from({ length: 10 }).map((_, index) => (
+            <Table.Row key={`skeleton-${index}`}>
               <Table.Cell>
-                <Flex align="center" gap="3">
-                  {currentUserIdOnHover === trackId ? (
-                    <button
-                      className="w-4"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePlay(track);
-                      }}
-                    >
-                      {currentSong?.id === trackId && isPlaying ? (
-                        <PauseIcon />
-                      ) : (
-                        <PlayIcon />
-                      )}
-                    </button>
-                  ) : (
-                    <Text size="2" className="w-4">
-                      {index + 1}
-                    </Text>
-                  )}
-                </Flex>
+                <Skeleton>
+                  <Box className="w-4">{index + 1}</Box>
+                </Skeleton>
               </Table.Cell>
-
               <Table.Cell>
-                <Flex align="center" gap="3">
-                  {track?.album?.images[0]?.url && (
-                    <img
-                      src={track.album.images[0].url}
-                      className="w-10 h-10"
-                      alt=""
-                    />
-                  )}
-                  <Flex direction="column">
-                    <Text>{track?.name}</Text>
-                    <Text size="1" color="gray">
-                      {track?.artists?.map((artist) => (
-                        <Link
-                          to={`/artist/${artist.id}`}
-                          key={artist.id}
-                          className="hover:underline"
-                        >
-                          {artist.name}
-                        </Link>
-                      )).reduce((prev, curr) => [prev, ', ', curr])}
-                    </Text>
+                <Flex gap="3" align="center">
+                  <Skeleton className="w-10 h-10" />
+                  <Flex direction="column" gap="1">
+                    <Skeleton><Text>Track Title</Text></Skeleton>
+                    <Skeleton><Text size="1" color="gray">Artist Name</Text></Skeleton>
                   </Flex>
-                  {currentSong?.id === trackId && (
-                    <TrackStatus isPlaying={isPlaying} />
-                  )}
                 </Flex>
               </Table.Cell>
-
               <Table.Cell>
-                <Text size="2" color="gray">
-                  {track?.album?.name}
-                </Text>
+                <Skeleton><Text>Album Name</Text></Skeleton>
               </Table.Cell>
-
               {isPlaylist && (
                 <Table.Cell>
-                  <Text size="2" color="gray">
-                    {timeAgo(item?.added_at)}
-                  </Text>
+                  <Skeleton><Text>Date Added</Text></Skeleton>
                 </Table.Cell>
               )}
-
               <Table.Cell>
-                <Text size="2" color="gray">
-                  {formatDuration(track?.duration_ms)}
-                </Text>
+                <Skeleton><Text>0:00</Text></Skeleton>
               </Table.Cell>
             </Table.Row>
-          );
-        })}
+          ))
+        ) : (
+          tracks?.map((item, index) => {
+            const track = isPlaylist ? item.track : item;
+            const trackId = isPlaylist ? item.track.id : item.id;
+            
+            return (
+              <Table.Row
+                key={trackId}
+                onClick={() => setSelectedTrack(trackId)}
+                onMouseEnter={() => setCurrentUserIdOnHover(trackId)}
+                onMouseLeave={() => setCurrentUserIdOnHover(null)}
+                className={`select-none active:backdrop-brightness-90 ${hoverClass(
+                  item
+                )} ${activeClass(item)}`}
+              >
+                <Table.Cell>
+                  <Flex align="center" gap="3">
+                    {currentUserIdOnHover === trackId ? (
+                      <button
+                        className="w-4"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlay(track);
+                        }}
+                      >
+                        {currentSong?.id === trackId && isPlaying ? (
+                          <PauseIcon />
+                        ) : (
+                          <PlayIcon />
+                        )}
+                      </button>
+                    ) : (
+                      <Text size="2" className="w-4">
+                        {index + 1}
+                      </Text>
+                    )}
+                  </Flex>
+                </Table.Cell>
+
+                <Table.Cell>
+                  <Flex align="center" gap="3">
+                    {track?.album?.images[0]?.url && (
+                      <img
+                        src={track.album.images[0].url}
+                        className="w-10 h-10"
+                        alt=""
+                      />
+                    )}
+                    <Flex direction="column">
+                      <Text>{track?.name}</Text>
+                      <Text size="1" color="gray">
+                        {track?.artists?.map((artist) => (
+                          <Link
+                            to={`/artist/${artist.id}`}
+                            key={artist.id}
+                            className="hover:underline"
+                          >
+                            {artist.name}
+                          </Link>
+                        )).reduce((prev, curr) => [prev, ', ', curr])}
+                      </Text>
+                    </Flex>
+                    {currentSong?.id === trackId && (
+                      <TrackStatus isPlaying={isPlaying} />
+                    )}
+                  </Flex>
+                </Table.Cell>
+
+                <Table.Cell>
+                  <Text size="2" color="gray">
+                    {track?.album?.name}
+                  </Text>
+                </Table.Cell>
+
+                {isPlaylist && (
+                  <Table.Cell>
+                    <Text size="2" color="gray">
+                      {timeAgo(item?.added_at)}
+                    </Text>
+                  </Table.Cell>
+                )}
+
+                <Table.Cell>
+                  <Text size="2" color="gray">
+                    {formatDuration(track?.duration_ms)}
+                  </Text>
+                </Table.Cell>
+              </Table.Row>
+            );
+          })
+        )}
       </Table.Body>
     </Table.Root>
   );

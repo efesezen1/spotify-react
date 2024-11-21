@@ -1,4 +1,4 @@
-import { Box, Spinner, Switch, Tooltip } from '@radix-ui/themes'
+import { Box, Skeleton, Switch, Tooltip } from '@radix-ui/themes'
 import * as Dialog from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
 import React, { useState, useEffect } from 'react'
@@ -50,7 +50,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    })
 
    return (
-      <Flex direction={'column'} className="relative">
+      <Flex direction={'column'} className={`relative ${!sidebarClosed ? 'w-[240px]' : 'w-[72px]'} transition-all duration-300`}>
          <Flex
             direction="row"
             align="center"
@@ -102,9 +102,32 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             className={`${className} overflow-y-scroll m-2 relative rounded-lg `}
          >
             {isLoading ? (
-               <Flex justify={'center'} align={'center'}>
-                  <Spinner />
-               </Flex>
+               // Skeleton loading state for playlists
+               Array.from({ length: 6 }).map((_, index) => (
+                  <Flex
+                     direction={'row'}
+                     key={`skeleton-${index}`}
+                     className={`${!sidebarClosed && 'pr-3'} rounded-md overflow-hidden mb-2`}
+                  >
+                     <Flex justify="" align="center" className="w-full">
+                        <Skeleton className="w-10 h-10" />
+                        {!sidebarClosed && (
+                           <Flex
+                              direction="column"
+                              className="ml-2"
+                              gap="1"
+                           >
+                              <Skeleton className="w-[140px]">
+                                 <Text className="text-sm">Playlist Name</Text>
+                              </Skeleton>
+                              <Skeleton className="w-[100px]">
+                                 <Text className="text-xs">Creator Name</Text>
+                              </Skeleton>
+                           </Flex>
+                        )}
+                     </Flex>
+                  </Flex>
+               ))
             ) : (
                userPlaylists?.items?.map((playlist) => {
                   return (
