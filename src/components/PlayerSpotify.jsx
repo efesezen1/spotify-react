@@ -6,7 +6,7 @@ import React, {
    useContext,
 } from 'react'
 import useSpotifyInstance from '../hook/spotifyInstance'
-import { Box, Flex, Slider } from '@radix-ui/themes'
+import { Box, Flex, Slider, Text } from '@radix-ui/themes'
 import { motion, AnimatePresence, useDragControls } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
@@ -253,73 +253,17 @@ const Controls = () => {
    )
 }
 
-const ProgressBar = () => {
-   const { player, playbackState } = usePlayer()
-   const [position, setPosition] = useState(0)
-   const [duration, setDuration] = useState(0)
-   const [isDragging, setIsDragging] = useState(false)
-   const intervalRef = useRef()
-
-   useEffect(() => {
-      if (playbackState) {
-         setDuration(playbackState.duration)
-         if (!isDragging) {
-            setPosition(playbackState.position)
-         }
-      }
-   }, [playbackState, isDragging])
-
-   useEffect(() => {
-      if (playbackState && !playbackState.paused && !isDragging) {
-         intervalRef.current = setInterval(() => {
-            setPosition((prev) => Math.min(prev + 1000, duration))
-         }, 1000)
-      }
-
-      return () => {
-         if (intervalRef.current) {
-            clearInterval(intervalRef.current)
-         }
-      }
-   }, [playbackState, isDragging, duration])
-
-   const formatTime = (ms) => {
-      const totalSeconds = Math.floor(ms / 1000)
-      const minutes = Math.floor(totalSeconds / 60)
-      const seconds = totalSeconds % 60
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`
-   }
-
-   const handleSliderChange = async (value) => {
-      setPosition(value)
-      if (player) {
-         await player.seek(value)
-      }
-   }
-
+const ProgressBar = ({ position, duration, onValueChange, onValueCommit }) => {
    return (
-      <Flex align="center" gap="2">
-         <Box className="text-xs text-gray-400 w-10">
-            {formatTime(position)}
-         </Box>
-         <Slider
-            value={[position]}
-            max={duration}
-            step={1000}
-            onValueChange={(value) => {
-               setPosition(value[0])
-               setIsDragging(true)
-            }}
-            onValueCommit={async (value) => {
-               setIsDragging(false)
-               await handleSliderChange(value[0])
-            }}
-            className="flex-1"
-         />
-         <Box className="text-xs text-gray-400 w-10">
-            {formatTime(duration)}
-         </Box>
-      </Flex>
+      <Slider
+         value={[position]}
+         max={duration}
+         step={1000}
+         onValueChange={onValueChange}
+         onValueCommit={onValueCommit}
+         className="w-full"
+         size="1"
+      />
    )
 }
 
@@ -345,6 +289,13 @@ const PlayerSpotify = ({ parentRef }) => {
    const [isReady, setIsReady] = useState(false)
    const { token, spotifyApi } = useSpotifyInstance()
    const controls = useDragControls()
+
+   // Progress bar state
+   const [position, setPosition] = useState(0)
+   const [duration, setDuration] = useState(0)
+   const [isDragging, setIsDragging] = useState(false)
+   const intervalRef = useRef()
+
    useEffect(() => {
       if (!token) return
       const script = document.createElement('script')
@@ -388,6 +339,49 @@ const PlayerSpotify = ({ parentRef }) => {
       }
    }, [token])
 
+   // Progress bar effects
+   useEffect(() => {
+      if (playbackState) {
+         setDuration(playbackState.duration)
+         if (!isDragging) {
+            setPosition(playbackState.position)
+         }
+      }
+   }, [playbackState, isDragging])
+
+   useEffect(() => {
+      if (playbackState && !playbackState.paused && !isDragging) {
+         intervalRef.current = setInterval(() => {
+            setPosition((prev) => Math.min(prev + 1000, duration))
+         }, 1000)
+      }
+
+      return () => {
+         if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+         }
+      }
+   }, [playbackState, isDragging, duration])
+
+   const handleSliderChange = (value) => {
+      setPosition(value[0])
+      setIsDragging(true)
+   }
+
+   const handleSliderCommit = async (value) => {
+      setIsDragging(false)
+      if (player) {
+         await player.seek(value[0])
+      }
+   }
+
+   const formatTime = (ms) => {
+      const totalSeconds = Math.floor(ms / 1000)
+      const minutes = Math.floor(totalSeconds / 60)
+      const seconds = totalSeconds % 60
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`
+   }
+
    if (!isReady) return null
 
    return (
@@ -408,16 +402,34 @@ const PlayerSpotify = ({ parentRef }) => {
             }}
             className={`w-10/12 bg-slate-100 rounded-lg p-4 mx-auto`}
          >
-            <Flex justify="between" align="center">
-               <Box className="w-1/3">
-                  <SongInfo />
-               </Box>
-               <Box className="w-1/3">
-                  <Controls />
-               </Box>
-               <Box className="w-1/3">
-                  <ProgressBar />
-               </Box>
+            <Flex direction="column" gap="4">
+               <Flex justify="between" align="center">
+                  <Box className="w-1/3">
+                     <SongInfo />
+                  </Box>
+                  <Box className="w-1/3">
+                     <Controls />
+                  </Box>
+                  <Box className="w-1/3" />
+               </Flex>
+               <Flex direction="column" gap="1">
+                  <Box className="w-full px-2">
+                     <ProgressBar
+                        position={position}
+                        duration={duration}
+                        onValueChange={handleSliderChange}
+                        onValueCommit={handleSliderCommit}
+                     />
+                  </Box>
+                  <Flex justify="between" px="2">
+                     <Text size="1" color="gray">
+                        {formatTime(position)}
+                     </Text>
+                     <Text size="1" color="gray">
+                        {formatTime(duration)}
+                     </Text>
+                  </Flex>
+               </Flex>
             </Flex>
          </motion.div>
       </PlayerContext.Provider>
