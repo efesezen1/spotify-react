@@ -1,9 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
-import {
-   WebPlaybackSDK,
-   usePlaybackState,
-   useSpotifyPlayer,
-} from 'react-spotify-web-playback-sdk'
+import React, {
+   useState,
+   useCallback,
+   useEffect,
+   useRef,
+   useContext,
+} from 'react'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { Box, Flex, Slider } from '@radix-ui/themes'
 import { motion, AnimatePresence, useDragControls } from 'framer-motion'
@@ -57,18 +58,32 @@ const ScrollingText = ({ text, className, onClick }) => {
    )
 }
 
+// Create a context for player and playback state
+const PlayerContext = React.createContext(null)
+
+const usePlayer = () => {
+   const context = useContext(PlayerContext)
+   if (!context) {
+      throw new Error('usePlayer must be used within a PlayerProvider')
+   }
+   return context
+}
+
 const SongInfo = () => {
-   const playbackState = usePlaybackState()
+   const { playbackState } = usePlayer()
+   const [currentTrack, setCurrentTrack] = useState(null)
    const navigate = useNavigate()
 
-   if (!playbackState) return null
+   useEffect(() => {
+      if (playbackState && playbackState.track_window) {
+         setCurrentTrack(playbackState.track_window.current_track)
+      }
+   }, [playbackState])
 
-   const {
-      track_window: { current_track },
-   } = playbackState
+   if (!currentTrack) return null
 
    const handleArtistClick = () => {
-      navigate(`/artist/${current_track.artists[0].uri.split(':')[2]}`)
+      navigate(`/artist/${currentTrack.artists[0].uri.split(':')[2]}`)
    }
 
    return (
@@ -76,7 +91,7 @@ const SongInfo = () => {
          initial={{ opacity: 0, x: -20 }}
          animate={{ opacity: 1, x: 0 }}
          transition={{ duration: 0.2 }}
-         key={current_track.id}
+         key={currentTrack.id}
       >
          <Flex align="center" gap="3">
             <motion.div
@@ -89,21 +104,21 @@ const SongInfo = () => {
                   stiffness: 400,
                   damping: 25,
                }}
-               key={current_track.album.images[0].url}
+               key={currentTrack.album.images[0].url}
             >
                <img
-                  src={current_track.album.images[0].url}
-                  alt={current_track.album.name}
+                  src={currentTrack.album.images[0].url}
+                  alt={currentTrack.album.name}
                   className="absolute inset-0 w-full h-full object-cover rounded"
                />
             </motion.div>
             <Flex direction="column" gap="1" className="min-w-0 max-w-full">
                <ScrollingText
-                  text={current_track.name}
+                  text={currentTrack.name}
                   className="font-semibold text-sm"
                />
                <ScrollingText
-                  text={current_track.artists[0].name}
+                  text={currentTrack.artists[0].name}
                   className="text-sm text-gray-500"
                   onClick={handleArtistClick}
                />
@@ -114,11 +129,11 @@ const SongInfo = () => {
 }
 
 const Controls = () => {
-   const player = useSpotifyPlayer()
-   const playbackState = usePlaybackState()
+   const { player, playbackState } = usePlayer()
    const [isPlaying, setIsPlaying] = useState(false)
    const [isShuffle, setIsShuffle] = useState(false)
    const [isRepeat, setIsRepeat] = useState(false)
+   const { spotifyApi } = useSpotifyInstance()
 
    useEffect(() => {
       if (playbackState) {
@@ -128,27 +143,34 @@ const Controls = () => {
 
    if (!player) return null
 
-   const handlePlayPause = () => {
-      player.togglePlay()
+   const handlePlayPause = async () => {
+      if (isPlaying) {
+         await player.pause()
+      } else {
+         await player.resume()
+      }
       setIsPlaying(!isPlaying)
    }
 
-   const handlePrevious = () => {
-      player.previousTrack()
+   const handlePrevious = async () => {
+      await player.previousTrack()
    }
 
-   const handleNext = () => {
-      player.nextTrack()
+   const handleNext = async () => {
+      await player.nextTrack()
    }
 
-   const handleShuffle = () => {
-      setIsShuffle(!isShuffle)
-      // Add Spotify API call to toggle shuffle
+   const handleShuffle = async () => {
+      const newState = !isShuffle
+      await spotifyApi.put(`/me/player/shuffle?state=${newState}`)
+      setIsShuffle(newState)
    }
 
-   const handleRepeat = () => {
-      setIsRepeat(!isRepeat)
-      // Add Spotify API call to toggle repeat
+   const handleRepeat = async () => {
+      const newState = !isRepeat
+      const mode = newState ? 'track' : 'off'
+      await spotifyApi.put(`/me/player/repeat?state=${mode}`)
+      setIsRepeat(newState)
    }
 
    const buttonVariants = {
@@ -157,7 +179,7 @@ const Controls = () => {
    }
 
    return (
-      <Flex align="center" gap="4">
+      <Flex align="center" gap="4" justify="center">
          <motion.div
             variants={buttonVariants}
             whileHover="hover"
@@ -187,21 +209,11 @@ const Controls = () => {
                className="p-2 rounded-full bg-white cursor-pointer"
                onClick={handlePlayPause}
             >
-               <motion.div
-                  animate={{ rotate: isPlaying ? 180 : 0 }}
-                  transition={{
-                     duration: 0.15,
-                     type: 'spring',
-                     stiffness: 400,
-                     damping: 25,
-                  }}
-               >
-                  {!isPlaying ? (
-                     <PlayIcon className="text-black" />
-                  ) : (
-                     <PauseIcon className="text-black" />
-                  )}
-               </motion.div>
+               {!isPlaying ? (
+                  <PlayIcon className="text-black" />
+               ) : (
+                  <PauseIcon className="text-black" />
+               )}
             </Box>
          </motion.div>
          <motion.div
@@ -226,91 +238,71 @@ const Controls = () => {
 }
 
 const ProgressBar = () => {
-   const playbackState = usePlaybackState()
-   const { spotifyApi } = useSpotifyInstance()
-   const [sliderPosition, setSliderPosition] = useState(0)
+   const { player, playbackState } = usePlayer()
+   const [position, setPosition] = useState(0)
+   const [duration, setDuration] = useState(0)
    const [isDragging, setIsDragging] = useState(false)
-   const lastUserPosition = useRef(null)
-   const debounceTimerRef = useRef(null)
-
-   const seekMutation = useMutation({
-      mutationFn: async (position) => {
-         await spotifyApi?.put('/me/player/seek', null, {
-            params: { position_ms: position }
-         })
-      },
-      onMutate: (position) => {
-         // Optimistic update
-         lastUserPosition.current = position
-      },
-      onError: (error, position) => {
-         console.error('Error seeking position:', error)
-         // Revert to previous position on error
-         setSliderPosition(playbackState?.position || 0)
-         lastUserPosition.current = null
-      },
-      onSettled: (_, error, position) => {
-         if (lastUserPosition.current === position) {
-            lastUserPosition.current = null
-         }
-      }
-   })
+   const intervalRef = useRef()
 
    useEffect(() => {
-      if (!playbackState || isDragging || seekMutation.isPending) return
-      setSliderPosition(playbackState.position)
-   }, [playbackState?.position, isDragging, seekMutation.isPending])
+      if (playbackState) {
+         setDuration(playbackState.duration)
+         if (!isDragging) {
+            setPosition(playbackState.position)
+         }
+      }
+   }, [playbackState, isDragging])
+
+   useEffect(() => {
+      if (playbackState && !playbackState.paused && !isDragging) {
+         intervalRef.current = setInterval(() => {
+            setPosition((prev) => Math.min(prev + 1000, duration))
+         }, 1000)
+      }
+
+      return () => {
+         if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+         }
+      }
+   }, [playbackState, isDragging, duration])
 
    const formatTime = (ms) => {
-      const minutes = Math.floor(ms / 60000)
-      const seconds = Math.floor((ms % 60000) / 1000)
+      const totalSeconds = Math.floor(ms / 1000)
+      const minutes = Math.floor(totalSeconds / 60)
+      const seconds = totalSeconds % 60
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
    }
 
-   const handleSliderChange = (value) => {
-      if (!isDragging) {
-         setIsDragging(true)
+   const handleSliderChange = async (value) => {
+      setPosition(value)
+      if (player) {
+         await player.seek(value)
       }
-      setSliderPosition(value[0])
    }
-
-   const handleSliderCommit = (value) => {
-      const newPosition = value[0]
-      setIsDragging(false)
-
-      // Clear any existing debounce timer
-      if (debounceTimerRef.current) {
-         clearTimeout(debounceTimerRef.current)
-      }
-
-      // Set new debounce timer
-      debounceTimerRef.current = setTimeout(() => {
-         seekMutation.mutate(newPosition)
-      }, 200) // 200ms debounce
-   }
-
-   if (!playbackState) return null
 
    return (
-      <Flex direction="column" gap="2">
+      <Flex align="center" gap="2">
+         <Box className="text-xs text-gray-400 w-10">
+            {formatTime(position)}
+         </Box>
          <Slider
-            size="1"
-            value={[sliderPosition]}
-            min={0}
-            max={playbackState.duration}
+            value={[position]}
+            max={duration}
             step={1000}
-            className="w-full"
-            onValueChange={handleSliderChange}
-            onValueCommit={handleSliderCommit}
+            onValueChange={(value) => {
+               setPosition(value[0])
+               setIsDragging(true)
+            }}
+            onValueCommit={async (value) => {
+               setIsDragging(false)
+               await handleSliderChange(value[0])
+            }}
+            className="flex-1"
          />
-         <Flex justify="between" className="px-2">
-            <span className="text-xs text-gray-500">
-               {formatTime(sliderPosition)}
-            </span>
-            <span className="text-xs text-gray-500">
-               {formatTime(playbackState.duration)}
-            </span>
-         </Flex>
+         <Box className="text-xs text-gray-400 w-10">
+            {formatTime(duration)}
+         </Box>
       </Flex>
    )
 }
@@ -332,63 +324,87 @@ const styles = `
 `
 
 const PlayerSpotify = ({ parentRef }) => {
-   const { token } = useSpotifyInstance()
-   const getOAuthToken = useCallback((callback) => callback(token), [token])
+   const [player, setPlayer] = useState(null)
+   const [playbackState, setPlaybackState] = useState(null)
+   const [isReady, setIsReady] = useState(false)
+   const { token, spotifyApi } = useSpotifyInstance()
    const controls = useDragControls()
-   const [snapToOrigin, setSnapToOrigin] = useState(false)
-
    useEffect(() => {
-      // Add styles to head
-      const styleSheet = document.createElement('style')
-      styleSheet.innerText = styles
-      document.head.appendChild(styleSheet)
-      return () => styleSheet.remove()
-   }, [])
+      if (!token) return
+      const script = document.createElement('script')
+      script.src = 'https://sdk.scdn.co/spotify-player.js'
+      script.async = true
 
-   const handleSnapToggle = () => {
-      setSnapToOrigin(true)
-      // Reset to false after animation completes
-      setTimeout(() => setSnapToOrigin(false), 300)
-   }
+      document.body.appendChild(script)
+
+      window.onSpotifyWebPlaybackSDKReady = () => {
+         const player = new window.Spotify.Player({
+            name: 'Spotify React Web Player',
+            getOAuthToken: (cb) => {
+               cb(token)
+            },
+            volume: 0.5,
+         })
+
+         player.addListener('ready', ({ device_id }) => {
+            console.log('Ready with Device ID', device_id)
+            setIsReady(true)
+            setPlayer(player)
+         })
+
+         player.addListener('not_ready', ({ device_id }) => {
+            console.log('Device ID has gone offline', device_id)
+         })
+
+         player.addListener('player_state_changed', (state) => {
+            if (state) {
+               setPlaybackState(state)
+            }
+         })
+
+         player.connect()
+      }
+
+      return () => {
+         if (player) {
+            player.disconnect()
+         }
+      }
+   }, [token])
+
+   if (!isReady) return null
 
    return (
-      <motion.div
-         dragSnapToOrigin={snapToOrigin}
-         exit={{ opacity: 0, scale: 1.1 }}
-         initial={{ opacity: 0, scale: 0.95 }}
-         animate={{ opacity: 1, scale: 1 }}
-         drag
-         dragConstraints={parentRef}
-         dragControls={controls}
-         dragListener={false}
-         onPointerDown={(e) => {
-            if (e.target.role === 'slider') {
-            } else {
-               controls.start(e)
-            }
-         }}
-         className="w-10/12 bg-slate-100 rounded-lg p-4 mx-auto"
-      >
-         <WebPlaybackSDK
-            initialDeviceName="Spotify Web Player"
-            getOAuthToken={getOAuthToken}
-            initialVolume={0.5}
-            connectOnInitialized={true}
+      <PlayerContext.Provider value={{ player, playbackState }}>
+         <motion.div
+            dragSnapToOrigin={true}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            drag
+            dragConstraints={parentRef}
+            dragControls={controls}
+            dragListener={false}
+            onPointerDown={(e) => {
+               if (e.target.role === 'slider') {
+               } else {
+                  controls.start(e)
+               }
+            }}
+            className={`w-10/12 bg-slate-100 rounded-lg p-4 mx-auto`}
          >
-            <Flex direction="column" gap="4">
-               <Flex justify="between" align="center">
-                  <Box className="w-1/4">
-                     <SongInfo />
-                  </Box>
-                  <Box className="flex-1 flex justify-center">
-                     <Controls />
-                  </Box>
-                  <Box className="w-1/4" /> {/* Empty box for symmetry */}
-               </Flex>
-               <ProgressBar />
+            <Flex justify="between" align="center">
+               <Box className="w-1/3">
+                  <SongInfo />
+               </Box>
+               <Box className="w-1/3">
+                  <Controls />
+               </Box>
+               <Box className="w-1/3">
+                  <ProgressBar />
+               </Box>
             </Flex>
-         </WebPlaybackSDK>
-      </motion.div>
+         </motion.div>
+      </PlayerContext.Provider>
    )
 }
 
