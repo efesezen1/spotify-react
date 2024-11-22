@@ -294,6 +294,7 @@ const PlayerSpotify = ({ parentRef }) => {
    const [position, setPosition] = useState(0)
    const [duration, setDuration] = useState(0)
    const [isDragging, setIsDragging] = useState(false)
+   const [showRemaining, setShowRemaining] = useState(true)
    const intervalRef = useRef()
 
    useEffect(() => {
@@ -382,6 +383,18 @@ const PlayerSpotify = ({ parentRef }) => {
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
    }
 
+   const toggleTimeDisplay = () => {
+      setShowRemaining(!showRemaining)
+   }
+
+   const getRightTimeDisplay = () => {
+      if (showRemaining) {
+         const remaining = duration - position
+         return `-${formatTime(remaining)}`
+      }
+      return formatTime(duration)
+   }
+
    if (!isReady) return null
 
    return (
@@ -425,8 +438,13 @@ const PlayerSpotify = ({ parentRef }) => {
                      <Text size="1" color="gray">
                         {formatTime(position)}
                      </Text>
-                     <Text size="1" color="gray">
-                        {formatTime(duration)}
+                     <Text 
+                        size="1" 
+                        color="gray" 
+                        className="cursor-pointer hover:text-gray-700"
+                        onClick={toggleTimeDisplay}
+                     >
+                        {getRightTimeDisplay()}
                      </Text>
                   </Flex>
                </Flex>
