@@ -90,20 +90,20 @@ const Artist = () => {
          align={'center'}
       >
          {/* USER INFO */}
-         <Flex direction="column" className="w-full ">
-            <Flex direction="row" className=" ">
-               <Flex className="p-5 ">
+         <Flex direction="column" className="w-full">
+            <Flex direction="row" className="mb-8">
+               <Flex className="p-5">
                   {isArtistLoading ? (
-                     <Skeleton className="w-[150px] h-[150px] rounded-full" />
+                     <Skeleton className="w-[125px] h-[125px] rounded-full" />
                   ) : artist?.images[1]?.url ? (
                      <img
                         src={artist?.images[0]?.url}
                         alt=""
-                        className=" hero-image rounded-full object-cover  "
+                        className="hero-image rounded-full object-cover w-[200px] h-[200px]"
                      />
                   ) : (
                      <Flex
-                        className="hero-image bg-gray-200 rounded-full"
+                        className="hero-image bg-gray-200 rounded-full w-[200px] h-[200px]"
                         align={'center'}
                         justify={'center'}
                      ></Flex>
@@ -113,17 +113,17 @@ const Artist = () => {
                <Flex direction="column" className="my-5" justify="end">
                   {isArtistLoading ? (
                      <>
-                        <Skeleton>
-                           <Text size="1" className="ml-1">Artist</Text>
+                        <Skeleton className="mb-2 w-16">
+                           <Text size="1">Artist</Text>
                         </Skeleton>
-                        <Skeleton>
+                        <Skeleton className="mb-4 w-96">
                            <Text size="9" className="font-bold">Artist Name</Text>
                         </Skeleton>
-                        <Skeleton>
+                        <Skeleton className="mb-4 w-32">
                            <Text size="1">1,234,567 Followers</Text>
                         </Skeleton>
-                        <Box className="mt-3">
-                           <Skeleton>
+                        <Box className="mt-2">
+                           <Skeleton className="w-24">
                               <Button variant="solid" color="blue">Follow</Button>
                            </Skeleton>
                         </Box>
@@ -143,13 +143,13 @@ const Artist = () => {
                               {artist?.name || ''}
                            </Text>
                            <Text
-                              className="mr-10  mt-3 ml-1 select-none"
+                              className="mr-10 mt-3 ml-1 select-none"
                               size="2"
                               color="gray"
                            ></Text>
-                           <Flex direction="row" className=" w-full">
+                           <Flex direction="row" className="w-full">
                               <Text
-                                 className="mr-10  mt-3 ml-1 select-none"
+                                 className="mr-10 mt-3 ml-1 select-none"
                                  size="1"
                                  color="gray"
                               >
@@ -200,16 +200,24 @@ const Artist = () => {
                </Flex>
             </Flex>
             {(popularSongs || isPopularSongsLoading) && (
-               <Text weight="bold" size="7" className="ml-3">
-                  Popular
-               </Text>
+               <Box className="px-8 mb-6">
+                  {isPopularSongsLoading ? (
+                     <Skeleton className="w-32 mb-4">
+                        <Text weight="bold" size="7">Popular</Text>
+                     </Skeleton>
+                  ) : (
+                     <Text weight="bold" size="7">Popular</Text>
+                  )}
+               </Box>
             )}
             {(popularSongs?.tracks || isPopularSongsLoading) && (
-               <TrackTable
-                  tracks={popularSongs?.tracks}
-                  isPlaylist={false}
-                  isLoading={isPopularSongsLoading}
-               />
+               <Box className="px-8">
+                  <TrackTable
+                     tracks={popularSongs?.tracks}
+                     isPlaylist={false}
+                     isLoading={isPopularSongsLoading}
+                  />
+               </Box>
             )}
          </Flex>
       </Flex>

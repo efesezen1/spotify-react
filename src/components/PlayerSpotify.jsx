@@ -153,24 +153,40 @@ const Controls = () => {
    }
 
    const handlePrevious = async () => {
-      await player.previousTrack()
+      try {
+         await spotifyApi.post('/me/player/previous')
+      } catch (error) {
+         console.error('Error skipping to previous track:', error)
+      }
    }
 
    const handleNext = async () => {
-      await player.nextTrack()
+      try {
+         await spotifyApi.post('/me/player/next')
+      } catch (error) {
+         console.error('Error skipping to next track:', error)
+      }
    }
 
    const handleShuffle = async () => {
       const newState = !isShuffle
-      await spotifyApi.put(`/me/player/shuffle?state=${newState}`)
-      setIsShuffle(newState)
+      try {
+         await spotifyApi.put(`/me/player/shuffle?state=${newState}`)
+         setIsShuffle(newState)
+      } catch (error) {
+         console.error('Error toggling shuffle:', error)
+      }
    }
 
    const handleRepeat = async () => {
       const newState = !isRepeat
       const mode = newState ? 'track' : 'off'
-      await spotifyApi.put(`/me/player/repeat?state=${mode}`)
-      setIsRepeat(newState)
+      try {
+         await spotifyApi.put(`/me/player/repeat?state=${mode}`)
+         setIsRepeat(newState)
+      } catch (error) {
+         console.error('Error toggling repeat:', error)
+      }
    }
 
    const buttonVariants = {
