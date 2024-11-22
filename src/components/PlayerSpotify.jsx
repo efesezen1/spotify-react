@@ -8,6 +8,7 @@ import useSpotifyInstance from '../hook/spotifyInstance'
 import { Box, Flex, Slider } from '@radix-ui/themes'
 import { motion, AnimatePresence, useDragControls } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import {
    PlayIcon,
    PauseIcon,
@@ -226,22 +227,91 @@ const Controls = () => {
 
 const ProgressBar = () => {
    const playbackState = usePlaybackState()
-   const [progress, setProgress] = useState(0)
+   const { spotifyApi } = useSpotifyInstance()
+   const [sliderPosition, setSliderPosition] = useState(0)
+   const [isDragging, setIsDragging] = useState(false)
+   const lastUserPosition = useRef(null)
+   const debounceTimerRef = useRef(null)
+
+   const seekMutation = useMutation({
+      mutationFn: async (position) => {
+         await spotifyApi?.put('/me/player/seek', null, {
+            params: { position_ms: position }
+         })
+      },
+      onMutate: (position) => {
+         // Optimistic update
+         lastUserPosition.current = position
+      },
+      onError: (error, position) => {
+         console.error('Error seeking position:', error)
+         // Revert to previous position on error
+         setSliderPosition(playbackState?.position || 0)
+         lastUserPosition.current = null
+      },
+      onSettled: (_, error, position) => {
+         if (lastUserPosition.current === position) {
+            lastUserPosition.current = null
+         }
+      }
+   })
 
    useEffect(() => {
-      if (!playbackState) return
-      console.log(playbackState)
-      setProgress((playbackState.position / playbackState.duration) * 100)
-   }, [playbackState?.duration])
+      if (!playbackState || isDragging || seekMutation.isPending) return
+      setSliderPosition(playbackState.position)
+   }, [playbackState?.position, isDragging, seekMutation.isPending])
+
+   const formatTime = (ms) => {
+      const minutes = Math.floor(ms / 60000)
+      const seconds = Math.floor((ms % 60000) / 1000)
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`
+   }
+
+   const handleSliderChange = (value) => {
+      if (!isDragging) {
+         setIsDragging(true)
+      }
+      setSliderPosition(value[0])
+   }
+
+   const handleSliderCommit = (value) => {
+      const newPosition = value[0]
+      setIsDragging(false)
+
+      // Clear any existing debounce timer
+      if (debounceTimerRef.current) {
+         clearTimeout(debounceTimerRef.current)
+      }
+
+      // Set new debounce timer
+      debounceTimerRef.current = setTimeout(() => {
+         seekMutation.mutate(newPosition)
+      }, 200) // 200ms debounce
+   }
+
+   if (!playbackState) return null
 
    return (
-      <Slider
-         size="1"
-         value={[progress]}
-         min={0}
-         max={100}
-         className="w-full"
-      />
+      <Flex direction="column" gap="2">
+         <Slider
+            size="1"
+            value={[sliderPosition]}
+            min={0}
+            max={playbackState.duration}
+            step={1000}
+            className="w-full"
+            onValueChange={handleSliderChange}
+            onValueCommit={handleSliderCommit}
+         />
+         <Flex justify="between" className="px-2">
+            <span className="text-xs text-gray-500">
+               {formatTime(sliderPosition)}
+            </span>
+            <span className="text-xs text-gray-500">
+               {formatTime(playbackState.duration)}
+            </span>
+         </Flex>
+      </Flex>
    )
 }
 
@@ -297,7 +367,7 @@ const PlayerSpotify = ({ parentRef }) => {
                controls.start(e)
             }
          }}
-         className="w-10/12 bg-red-200 rounded-lg p-4 mx-auto"
+         className="w-10/12 bg-slate-100 rounded-lg p-4 mx-auto"
       >
          <WebPlaybackSDK
             initialDeviceName="Spotify Web Player"
