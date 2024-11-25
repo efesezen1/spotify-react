@@ -8,6 +8,7 @@ import {
    Profile,
    Artist,
    Album,
+   Shows,
 } from './pages'
 import { ErrorElement } from './components'
 
@@ -40,6 +41,11 @@ const router = createBrowserRouter([
          {
             path: '/album/:id',
             element: <Album />,
+            errorElement: <ErrorElement />,
+         },
+         {
+            path: '/show/:id',
+            element: <Shows />,
             errorElement: <ErrorElement />,
          },
       ],

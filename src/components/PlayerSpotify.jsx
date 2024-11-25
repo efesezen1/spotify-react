@@ -86,6 +86,15 @@ const SongInfo = () => {
       navigate(`/artist/${currentTrack.artists[0].uri.split(':')[2]}`)
    }
 
+   const handleTitleClick = () => {
+      const [type, id] = currentTrack.uri.split(':').slice(1)
+      if (type === 'episode') {
+         navigate(`/show/${currentTrack.album.uri.split(':')[2]}`)
+      }
+   }
+
+   const isShow = currentTrack.uri.split(':')[1] === 'episode'
+
    return (
       <motion.div
          initial={{ opacity: 0, x: -20 }}
@@ -116,11 +125,12 @@ const SongInfo = () => {
                <ScrollingText
                   text={currentTrack.name}
                   className="font-semibold text-sm"
+                  onClick={handleTitleClick}
                />
                <ScrollingText
-                  text={currentTrack.artists[0].name}
+                  text={isShow ? currentTrack.album.name : currentTrack.artists[0].name}
                   className="text-sm text-gray-500"
-                  onClick={handleArtistClick}
+                  onClick={isShow ? handleTitleClick : handleArtistClick}
                />
             </Flex>
          </Flex>
