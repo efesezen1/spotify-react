@@ -20,7 +20,7 @@ const TrackTable = ({
    const dispatch = useDispatch()
    const queryClient = useQueryClient()
    const { currentSong, isPlaying } = useSelector((state) => state.user)
-   const [selectedTrack, setSelectedTrack] = useState(null)
+   const [selectedTrackId, setSelectedTrackId] = useState(null)
    const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
    const [items, setItems] = useState(tracks || [])
 
@@ -73,12 +73,12 @@ const TrackTable = ({
    }
 
    const hoverClass = (item) =>
-      selectedTrack !== (isPlaylist ? item.track?.id : item.id)
+      selectedTrackId !== (isPlaylist ? item.track?.id : item.id)
          ? 'hover:backdrop-brightness-95'
          : ''
 
    const activeClass = (item) =>
-      selectedTrack === (isPlaylist ? item.track?.id : item.id)
+      selectedTrackId === (isPlaylist ? item.track?.id : item.id)
          ? 'backdrop-brightness-90'
          : ''
 
@@ -92,20 +92,27 @@ const TrackTable = ({
    }
 
    const handleReorder = (newOrder) => {
-      console.log('New Order:', newOrder.map(item => ({
-         id: item.track.id,
-         name: item.track.name,
-         position: newOrder.indexOf(item)
-      })))
-      
+      console.log(
+         'New Order:',
+         newOrder.map((item) => ({
+            id: item.track.id,
+            name: item.track.name,
+            position: newOrder.indexOf(item),
+         }))
+      )
+
       setItems(newOrder)
-      
+
       if (!playlist?.id) return
 
       // Find the indices of the moved item in both old and new arrays
       const movedItemId = newOrder[0].track.id
-      const oldIndex = tracks.findIndex(track => track.track.id === movedItemId)
-      const newIndex = newOrder.findIndex(item => item.track.id === movedItemId)
+      const oldIndex = tracks.findIndex(
+         (track) => track.track.id === movedItemId
+      )
+      const newIndex = newOrder.findIndex(
+         (item) => item.track.id === movedItemId
+      )
 
       // Calculate the range_start and insert_before based on drag direction
       const range_start = oldIndex
@@ -119,33 +126,36 @@ const TrackTable = ({
             id: movedItemId,
             name: newOrder[0].track.name,
             oldPosition: oldIndex,
-            newPosition: newIndex
-         }
+            newPosition: newIndex,
+         },
       })
 
-      reorderTracksMutation.mutate({
-         range_start,
-         insert_before,
-         range_length: 1,
-      }, {
-         onSuccess: () => {
-            console.log('Track reorder successful')
-            // Invalidate the playlist query to refetch the latest order
-            queryClient.invalidateQueries(['playlist', playlist.id])
-            onReorder?.(newOrder)
+      reorderTracksMutation.mutate(
+         {
+            range_start,
+            insert_before,
+            range_length: 1,
          },
-         onError: (error) => {
-            // Revert the optimistic update on error
-            console.error('Failed to reorder tracks:', error)
-            setItems(tracks)
+         {
+            onSuccess: () => {
+               console.log('Track reorder successful')
+               // Invalidate the playlist query to refetch the latest order
+               queryClient.invalidateQueries(['playlist', playlist.id])
+               onReorder?.(newOrder)
+            },
+            onError: (error) => {
+               // Revert the optimistic update on error
+               console.error('Failed to reorder tracks:', error)
+               setItems(tracks)
+            },
          }
-      })
+      )
    }
 
-   const renderTrackContent = (item, track, trackId) => {
+   const renderTrackContent = (item, track, trackId, index) => {
       return (
          <motion.div
-            onClick={() => setSelectedTrack(trackId)}
+            onClick={() => setSelectedTrackId(trackId)}
             onMouseEnter={() => setCurrentUserIdOnHover(trackId)}
             onMouseLeave={() => setCurrentUserIdOnHover(null)}
             className={`grid ${
@@ -160,7 +170,7 @@ const TrackTable = ({
          >
             <motion.div>
                <Flex align="center" gap="3">
-                  {currentUserIdOnHover === trackId ? (
+                  {/* {currentUserIdOnHover === trackId ? (
                      <button
                         className="w-4"
                         onClick={(e) => {
@@ -178,7 +188,17 @@ const TrackTable = ({
                      <Text size="2" className="w-4">
                         {items.indexOf(item) + 1}
                      </Text>
-                  )}
+                  )} */}
+                  {/* {currentSong?.id === trackId && ( */}
+                  <TrackStatus
+                     isPlaying={isPlaying}
+                     item={track}
+                     currentUserIdOnHover={currentUserIdOnHover}
+                     selectedTrackId={selectedTrackId}
+                     index={index}
+                     currentSong={currentSong}
+                  />
+                  {/* )} */}
                </Flex>
             </motion.div>
 
@@ -207,9 +227,15 @@ const TrackTable = ({
                            .reduce((prev, curr) => [prev, ', ', curr])}
                      </Text>
                   </Flex>
-                  {currentSong?.id === trackId && (
-                     <TrackStatus isPlaying={isPlaying} />
-                  )}
+                  {/* {currentSong?.id === trackId && (
+                     <TrackStatus
+                        isPlaying={isPlaying}
+                        item={track}
+                        currentUserIdOnHover={currentUserIdOnHover}
+                        selectedTrackId={selectedTrackId}
+                        index={index}
+                     />
+                  )} */}
                </Flex>
             </motion.div>
 
@@ -282,7 +308,7 @@ const TrackTable = ({
                onReorder={setItems}
                className="w-full"
             >
-               {items.map((item) => {
+               {items.map((item, index) => {
                   const track = isPlaylist ? item.track : item
                   const trackId = isPlaylist ? item.track?.id : item.id
 
@@ -297,7 +323,7 @@ const TrackTable = ({
                            cursor: 'grabbing',
                         }}
                      >
-                        {renderTrackContent(item, track, trackId)}
+                        {renderTrackContent(item, track, trackId, index)}
                      </Reorder.Item>
                   )
                })}
@@ -310,7 +336,7 @@ const TrackTable = ({
 
                   return (
                      <motion.div key={trackId}>
-                        {renderTrackContent(item, track, trackId)}
+                        {renderTrackContent(item, track, trackId, index)}
                      </motion.div>
                   )
                })}

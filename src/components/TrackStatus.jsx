@@ -11,22 +11,41 @@ import {
    Cross2Icon,
    MagnifyingGlassIcon,
 } from '@radix-ui/react-icons'
+import useSpotifyMutation from '../hook/useSpotifyMutation'
 
-const TrackStatus = ({ item, index, currentUserIdOnHover, selectedTrack }) => {
-   const { isPlaying, currentSong } = useSelector((state) => state.user)
+const TrackStatus = ({
+   item,
+   index,
+   currentUserIdOnHover,
+   selectedTrackId,
+   currentSong,
+}) => {
+   const { isPlaying } = useSelector((state) => state.user)
    const dispatch = useDispatch()
 
    const iconVariants = {
       initial: { scale: 0.8, opacity: 0 },
       animate: { scale: 1, opacity: 1 },
       exit: { scale: 0.8, opacity: 0 },
-      hover: { scale: 1.1 }
+      hover: { scale: 1.1 },
    }
+
+   const playTrack = useSpotifyMutation({
+      mutationKey: ['playTrack'],
+      endpoint: '/me/player/play',
+      method: 'put'
+   })
+
+   const pauseTrack = useSpotifyMutation({
+      mutationKey: ['stopTrack'],
+      endpoint: '/me/player/pause',
+      method: 'put'
+   })
 
    return (
       <Flex className="w-[20px] h-[20px] relative flex items-center justify-center">
          <AnimatePresence mode="wait">
-            {currentUserIdOnHover === item.id || selectedTrack === item.id ? (
+            {currentUserIdOnHover === item.id || selectedTrackId === item.id ? (
                isPlaying && currentSong.id === item.id ? (
                   <motion.div
                      key="pause"
@@ -41,6 +60,7 @@ const TrackStatus = ({ item, index, currentUserIdOnHover, selectedTrack }) => {
                      <PauseIcon
                         onClick={() => {
                            dispatch(setIsPlaying(false))
+                           pauseTrack.mutate({})
                         }}
                      />
                   </motion.div>
@@ -55,7 +75,28 @@ const TrackStatus = ({ item, index, currentUserIdOnHover, selectedTrack }) => {
                      transition={{ duration: 0.1 }}
                      className="absolute"
                   >
-                     <PlayIcon onClick={() => dispatch(setCurrentSong(item))} />
+                     <PlayIcon
+                        onClick={() => {
+                           dispatch(setCurrentSong(item))
+                           playTrack.mutate(
+                              {
+                                 uris: [item.uri],
+                                 position_ms: 0,
+                              },
+                              {
+                                 onSuccess: () => {
+                                    dispatch(setIsPlaying(true))
+                                 },
+                                 onError: (error) => {
+                                    console.error(
+                                       'An error occurred while playing track:',
+                                       error
+                                    )
+                                 },
+                              }
+                           )
+                        }}
+                     />
                   </motion.div>
                )
             ) : (
