@@ -162,7 +162,7 @@ const TrackTable = ({
                isPlaylist
                   ? 'grid-cols-[48px_1fr_1fr_120px_120px]'
                   : 'grid-cols-[48px_1fr_1fr_120px]'
-            } gap-4 p-2 px-4 items-center select-none active:backdrop-brightness-90 ${hoverClass(
+            } gap-4 p-2 px-4 items-center select-none active:backdrop-brightness-90 rounded ${hoverClass(
                item
             )} ${activeClass(item)} ${
                canReorderTracks ? 'cursor-grab active:cursor-grabbing' : ''

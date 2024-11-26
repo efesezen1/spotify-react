@@ -435,7 +435,7 @@ const PlayerSpotify = ({ parentRef }) => {
    return (
       <PlayerContext.Provider value={{ player, playbackState }}>
          <motion.div
-            dragSnapToOrigin={true}
+            dragSnapToOrigin={false}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             drag
@@ -448,7 +448,7 @@ const PlayerSpotify = ({ parentRef }) => {
                   controls.start(e)
                }
             }}
-            className={`w-10/12 bg-slate-100 rounded-lg p-4 mx-auto`}
+            className={`w-10/12 bg-slate-100 rounded-lg p-4 mx-auto z-50`}
          >
             <Flex direction="column" gap="4">
                <Flex justify="between" align="center">

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import {
    MagnifyingGlassIcon,
    HomeIcon,
-   BellIcon,
+   // BellIcon,
    ChevronLeftIcon,
    ChevronRightIcon,
 } from '@radix-ui/react-icons'
@@ -101,11 +101,11 @@ const Navbar = () => {
             </TextField.Root>
          </Flex>
          <Flex align="center">
-            <Tooltip content="What's New">
+            {/* <Tooltip content="What's New">
                <Button className="mr-2  w-[1rem] h-[1.5rem] " variant="ghost">
                   <BellIcon height="30" width="30" />
                </Button>
-            </Tooltip>
+            </Tooltip> */}
 
             {/* <Box className="mr-2">{user?.display_name}</Box> */}
             <Popover.Root>
