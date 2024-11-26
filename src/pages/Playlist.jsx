@@ -27,6 +27,12 @@ const Playlist = () => {
       endpoint: `/playlists/${id}`,
    })
 
+   useEffect(() => {
+      console.log('playlist', playlist)
+
+      return () => {}
+   }, [playlist])
+
    const { data: user } = useSpotifyQuery({
       queryKey: ['user'],
       endpoint: '/me',
@@ -160,7 +166,9 @@ const Playlist = () => {
             </Flex>
          </Flex>
          <Box className="p-5">
+            {playlist?.uri}
             <TrackTable
+               context_uri={playlist?.uri}
                playlist={playlist}
                tracks={playlist?.tracks?.items}
                isPlaylist={true}

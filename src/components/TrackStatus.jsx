@@ -19,6 +19,7 @@ const TrackStatus = ({
    currentUserIdOnHover,
    selectedTrackId,
    currentSong,
+   context_uri = null,
 }) => {
    const { isPlaying } = useSelector((state) => state.user)
    const dispatch = useDispatch()
@@ -33,13 +34,13 @@ const TrackStatus = ({
    const playTrack = useSpotifyMutation({
       mutationKey: ['playTrack'],
       endpoint: '/me/player/play',
-      method: 'put'
+      method: 'put',
    })
 
    const pauseTrack = useSpotifyMutation({
       mutationKey: ['stopTrack'],
       endpoint: '/me/player/pause',
-      method: 'put'
+      method: 'put',
    })
 
    return (
@@ -78,23 +79,36 @@ const TrackStatus = ({
                      <PlayIcon
                         onClick={() => {
                            dispatch(setCurrentSong(item))
-                           playTrack.mutate(
-                              {
-                                 uris: [item.uri],
-                                 position_ms: 0,
+                           const payload = {}
+
+                           // Check if the track is from an album or playlist
+                           if (context_uri) {
+                              // Track is from a playlist or other context
+                              payload.context_uri = context_uri
+                              // payload.offset = { uri: item.uri }
+
+                              payload.offset = { position: index }
+
+                              console.log('payload', payload)
+                           } else {
+                              // Single track
+                              payload.uris = [item.uri]
+                           }
+
+                           // Add position_ms if needed
+                           payload.position_ms = 0
+
+                           playTrack.mutate(payload, {
+                              onSuccess: () => {
+                                 dispatch(setIsPlaying(true))
                               },
-                              {
-                                 onSuccess: () => {
-                                    dispatch(setIsPlaying(true))
-                                 },
-                                 onError: (error) => {
-                                    console.error(
-                                       'An error occurred while playing track:',
-                                       error
-                                    )
-                                 },
-                              }
-                           )
+                              onError: (error) => {
+                                 console.error(
+                                    'An error occurred while playing track:',
+                                    error
+                                 )
+                              },
+                           })
                         }}
                      />
                   </motion.div>

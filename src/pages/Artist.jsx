@@ -57,10 +57,17 @@ const Artist = () => {
       endpoint: `/me/following/contains?type=artist&ids=${id}`,
    })
 
-   const { data: popularSongs, isLoading: isPopularSongsLoading } = useSpotifyQuery({
-      queryKey: ['popularSongs', id],
-      endpoint: `/artists/${id}/top-tracks`,
-   })
+   const { data: popularSongs, isLoading: isPopularSongsLoading } =
+      useSpotifyQuery({
+         queryKey: ['popularSongs', id],
+         endpoint: `/artists/${id}/top-tracks`,
+      })
+
+   React.useEffect(() => {
+      console.log('popularSongs', popularSongs)
+
+      return () => {}
+   }, [popularSongs])
 
    const { data: albums, isLoading: isAlbumsLoading } = useSpotifyQuery({
       queryKey: ['albums', id],
@@ -116,14 +123,18 @@ const Artist = () => {
                            <Text size="1">Artist</Text>
                         </Skeleton>
                         <Skeleton className="mb-4 w-96">
-                           <Text size="9" className="font-bold">Artist Name</Text>
+                           <Text size="9" className="font-bold">
+                              Artist Name
+                           </Text>
                         </Skeleton>
                         <Skeleton className="mb-4 w-32">
                            <Text size="1">1,234,567 Followers</Text>
                         </Skeleton>
                         <Box className="mt-2">
                            <Skeleton className="w-24">
-                              <Button variant="solid" color="blue">Follow</Button>
+                              <Button variant="solid" color="blue">
+                                 Follow
+                              </Button>
                            </Skeleton>
                         </Box>
                      </>
@@ -138,7 +149,11 @@ const Artist = () => {
                            {artist?.type || ''}
                         </Text>
                         <Flex direction="column">
-                           <Text size="9" weight="bold" className="select-none text-6xl md:text-7xl lg:text-8xl">
+                           <Text
+                              size="9"
+                              weight="bold"
+                              className="select-none text-6xl md:text-7xl lg:text-8xl"
+                           >
                               {artist?.name || ''}
                            </Text>
                            <Text
@@ -167,7 +182,9 @@ const Artist = () => {
                                           onMouseLeave={() =>
                                              setHoverOnFollowBtn(false)
                                           }
-                                          onClick={() => unfollowMutation.mutate()}
+                                          onClick={() =>
+                                             unfollowMutation.mutate()
+                                          }
                                        >
                                           Unfollow
                                        </Button>
@@ -202,10 +219,14 @@ const Artist = () => {
                <Box className="px-8 mb-6">
                   {isPopularSongsLoading ? (
                      <Skeleton className="w-32 mb-4">
-                        <Text weight="bold" size="7">Popular</Text>
+                        <Text weight="bold" size="7">
+                           Popular
+                        </Text>
                      </Skeleton>
                   ) : (
-                     <Text weight="bold" size="7">Popular</Text>
+                     <Text weight="bold" size="7">
+                        Popular
+                     </Text>
                   )}
                </Box>
             )}

@@ -16,6 +16,7 @@ const TrackTable = ({
    isLoading = false,
    onReorder,
    playlist,
+   context_uri = null,
 }) => {
    const dispatch = useDispatch()
    const queryClient = useQueryClient()
@@ -197,6 +198,7 @@ const TrackTable = ({
                      selectedTrackId={selectedTrackId}
                      index={index}
                      currentSong={currentSong}
+                     context_uri={context_uri}
                   />
                   {/* )} */}
                </Flex>

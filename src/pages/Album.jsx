@@ -16,6 +16,12 @@ const Album = () => {
       endpoint: `/albums/${id}`,
    })
 
+   React.useEffect(() => {
+      console.log(album)
+
+      return () => {}
+   }, [album])
+
    // Format duration
    const formatDuration = (ms) => {
       if (!ms) return '0 min 0 sec'
@@ -57,10 +63,14 @@ const Album = () => {
                   {isAlbumLoading ? (
                      <>
                         <Skeleton className="mb-2">
-                           <Text size="1" className="ml-1">Album</Text>
+                           <Text size="1" className="ml-1">
+                              Album
+                           </Text>
                         </Skeleton>
                         <Skeleton className="mb-4">
-                           <Text size="9" className="font-bold">Album Name</Text>
+                           <Text size="9" className="font-bold">
+                              Album Name
+                           </Text>
                         </Skeleton>
                         <Skeleton className="mb-2">
                            <Text size="2">Album Info</Text>
@@ -76,9 +86,9 @@ const Album = () => {
                         >
                            {album?.type?.toUpperCase()}
                         </Text>
-                        <Text 
-                           size="9" 
-                           weight="bold" 
+                        <Text
+                           size="9"
+                           weight="bold"
                            className="select-none text-6xl md:text-7xl lg:text-8xl"
                         >
                            {album?.name}
@@ -95,7 +105,9 @@ const Album = () => {
                                     </Text>
                                  </Link>
                                  {index < album.artists.length - 1 && (
-                                    <Text size="2" color="gray">,</Text>
+                                    <Text size="2" color="gray">
+                                       ,
+                                    </Text>
                                  )}
                               </React.Fragment>
                            ))}
@@ -118,7 +130,7 @@ const Album = () => {
             {isAlbumLoading ? (
                <Flex direction="column" gap="2">
                   {[...Array(5)].map((_, index) => (
-                     <Flex 
+                     <Flex
                         key={index}
                         className="grid grid-cols-[48px_1fr_1fr_120px] gap-4 p-2 px-4 items-center"
                      >
@@ -135,7 +147,9 @@ const Album = () => {
                                  <Text>Track Name</Text>
                               </Skeleton>
                               <Skeleton>
-                                 <Text size="1" color="gray">Artist Name</Text>
+                                 <Text size="1" color="gray">
+                                    Artist Name
+                                 </Text>
                               </Skeleton>
                            </Flex>
                         </Flex>
@@ -151,7 +165,10 @@ const Album = () => {
                   ))}
                </Flex>
             ) : (
-               <TrackTable tracks={album?.tracks?.items} />
+               <TrackTable
+                  context_uri={album?.uri}
+                  tracks={album?.tracks?.items}
+               />
             )}
          </Box>
       </Flex>
