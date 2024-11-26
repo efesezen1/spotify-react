@@ -119,17 +119,17 @@ const TrackTable = ({
       const range_start = oldIndex
       const insert_before = newIndex
 
-      console.log('Reorder Parameters:', {
-         range_start,
-         insert_before,
-         range_length: 1,
-         movedTrack: {
-            id: movedItemId,
-            name: newOrder[0].track.name,
-            oldPosition: oldIndex,
-            newPosition: newIndex,
-         },
-      })
+      // console.log('Reorder Parameters:', {
+      //    range_start,
+      //    insert_before,
+      //    range_length: 1,
+      //    movedTrack: {
+      //       id: movedItemId,
+      //       name: newOrder[0].track.name,
+      //       oldPosition: oldIndex,
+      //       newPosition: newIndex,
+      //    },
+      // })
 
       reorderTracksMutation.mutate(
          {

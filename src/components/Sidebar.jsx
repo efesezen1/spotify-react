@@ -2,7 +2,7 @@ import { Box, Skeleton, Switch, Tooltip } from '@radix-ui/themes'
 import * as Dialog from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
 import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { Flex, Text, Button } from '@radix-ui/themes'
 
 import Library from './icon/Library'
@@ -11,18 +11,23 @@ import {
    Cross2Icon,
    PlusIcon,
    ValueNoneIcon,
+   PlayIcon,
+   PauseIcon,
 } from '@radix-ui/react-icons'
 
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import PlaylistDialog from './PlaylistDialog'
+import { setIsPlaying } from '../store/slicers/userSlice'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
+   const dispatch = useDispatch()
    const navigate = useNavigate()
-   const location = useLocation()
-   const { selectedPlaylist } = useSelector((state) => state.user)
+   const params = useParams()
+   const [currentUri, setCurrentUri] = useState('')
+   const { selectedPlaylist, isPlaying } = useSelector((state) => state.user)
    const id = selectedPlaylist?.id
    const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
    const [isPublic, setIsPublic] = useState(false)
@@ -55,6 +60,18 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
       queryKey: ['user'],
       endpoint: '/me',
    })
+
+   const playPlaylist = (uri) => {
+      setCurrentUri(uri)
+      spotifyApi
+         .put('/me/player/play', {
+            context_uri: uri,
+            offset: { position: 0 },
+         })
+         .then(() => {
+            dispatch(setIsPlaying(true))
+         })
+   }
 
    return (
       <Flex
@@ -165,7 +182,11 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                           onClick={() => {
                              navigate('/playlist/' + playlist?.id)
                           }}
-                          className={`${
+                          onDoubleClick={() => {
+                             console.log(playlist)
+                             playPlaylist(playlist.uri)
+                          }}
+                          className={`group ${
                              playlist?.id === id ||
                              (location.pathname.startsWith('/playlist/') &&
                                 location.pathname.split('/')[2] ===
@@ -188,16 +209,31 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                              align="center"
                              className={`w-full ${sidebarClosed && 'mx-auto'}`}
                           >
-                             <Box>
+                             <Box
+                                className="relative"
+                                //   onClick={() => {
+                                //      playPlaylist(playlist.uri)
+                                //   }}
+                             >
                                 {playlist?.images?.at(0)?.url ? (
-                                   <img
-                                      className="sidebar-image object-cover w-10 h-10 max-w-fit "
-                                      src={playlist?.images?.at(0)?.url}
-                                      alt=""
-                                   />
+                                   <>
+                                      <img
+                                         className="sidebar-image object-cover w-10 h-10 max-w-fit transition-all duration-300 group-hover:brightness-75"
+                                         src={playlist?.images?.at(0)?.url}
+                                         alt=""
+                                      />
+                                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                         {/* <PlayIcon className="w-5 h-5 text-white" /> */}
+                                         {currentUri === playlist.uri &&
+                                         isPlaying ? (
+                                            <PauseIcon className="w-5 h-5 text-white" />
+                                         ) : (
+                                            <PlayIcon className="w-5 h-5 text-white" />
+                                         )}
+                                      </div>
+                                   </>
                                 ) : (
-                                   <Box className="sidebar-image w-10 h-10 flex justify-center items-center">
-                                      {' '}
+                                   <Box className="sidebar-image w-10 h-10 flex justify-center items-center group-hover:brightness-75 transition-all duration-300">
                                       <ValueNoneIcon />
                                    </Box>
                                 )}

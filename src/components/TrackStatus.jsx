@@ -47,7 +47,7 @@ const TrackStatus = ({
       <Flex className="w-[20px] h-[20px] relative flex items-center justify-center">
          <AnimatePresence mode="wait">
             {currentUserIdOnHover === item.id || selectedTrackId === item.id ? (
-               isPlaying && currentSong.id === item.id ? (
+               isPlaying && currentSong?.id === item?.id ? (
                   <motion.div
                      key="pause"
                      variants={iconVariants}
