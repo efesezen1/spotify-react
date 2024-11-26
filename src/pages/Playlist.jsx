@@ -17,14 +17,9 @@ import PlaylistDialog from '../components/PlaylistDialog'
 
 const Playlist = () => {
    const { id } = useParams()
-   const dispatch = useDispatch()
-   const queryClient = useQueryClient()
-   const { token, spotifyApi } = useSpotifyInstance()
-   const [searchQuery, setSearchQuery] = useState('')
    const [isPublic, setIsPublic] = useState(false)
    const [editModalOpen, setEditModalOpen] = useState(false)
    const container = useRef(null)
-   const prevId = usePrevious(id)
    const navigate = useNavigate()
 
    const { data: playlist, isLoading: isPlaylistLoading } = useSpotifyQuery({
@@ -148,7 +143,10 @@ const Playlist = () => {
                            </Text>
                         </PlaylistDialog>
                      ) : (
-                        <Text size="8" className="font-bold text-6xl md:text-7xl lg:text-8xl">
+                        <Text
+                           size="8"
+                           className="font-bold text-6xl md:text-7xl lg:text-8xl"
+                        >
                            {playlist?.name}
                         </Text>
                      )}

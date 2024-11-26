@@ -18,6 +18,7 @@ import {
    LoopIcon,
    ShuffleIcon,
 } from '@radix-ui/react-icons'
+import useSpotifyMutation from '../hook/useSpotifyMutation'
 
 const ScrollingText = ({ text, className, onClick }) => {
    const containerRef = useRef(null)
@@ -128,7 +129,11 @@ const SongInfo = () => {
                   onClick={handleTitleClick}
                />
                <ScrollingText
-                  text={isShow ? currentTrack.album.name : currentTrack.artists[0].name}
+                  text={
+                     isShow
+                        ? currentTrack.album.name
+                        : currentTrack.artists[0].name
+                  }
                   className="text-sm text-gray-500"
                   onClick={isShow ? handleTitleClick : handleArtistClick}
                />
@@ -138,9 +143,9 @@ const SongInfo = () => {
    )
 }
 
-const Controls = () => {
+const Controls = ({ isPlaying, setIsPlaying }) => {
    const { player, playbackState } = usePlayer()
-   const [isPlaying, setIsPlaying] = useState(false)
+   // const [isPlaying, setIsPlaying] = useState(false)
    const [isShuffle, setIsShuffle] = useState(false)
    const [isRepeat, setIsRepeat] = useState(false)
    const { spotifyApi } = useSpotifyInstance()
@@ -294,6 +299,7 @@ const styles = `
 `
 
 const PlayerSpotify = ({ parentRef }) => {
+   const [isPlaying, setIsPlaying] = useState(false)
    const [player, setPlayer] = useState(null)
    const [playbackState, setPlaybackState] = useState(null)
    const [isReady, setIsReady] = useState(false)
@@ -307,6 +313,12 @@ const PlayerSpotify = ({ parentRef }) => {
    const [showRemaining, setShowRemaining] = useState(true)
    const intervalRef = useRef()
 
+   const transferPlayback = useSpotifyMutation({
+      mutationKey: ['transferPlayback'],
+      endpoint: '/me/player',
+      method: 'put',
+   })
+
    useEffect(() => {
       if (!token) return
       const script = document.createElement('script')
@@ -317,7 +329,7 @@ const PlayerSpotify = ({ parentRef }) => {
 
       window.onSpotifyWebPlaybackSDKReady = () => {
          const player = new window.Spotify.Player({
-            name: 'Spotify React Web Player',
+            name: 'spotify_web_player',
             getOAuthToken: (cb) => {
                cb(token)
             },
@@ -326,6 +338,19 @@ const PlayerSpotify = ({ parentRef }) => {
 
          player.addListener('ready', ({ device_id }) => {
             console.log('Ready with Device ID', device_id)
+
+            transferPlayback.mutate(
+               { device_ids: [device_id], play: isPlaying },
+               {
+                  onSuccess: () => {
+                     console.log('Device transfer successful')
+                  },
+                  onError: (error) => {
+                     console.error('Failed to transfer playback:', error)
+                  },
+               }
+            )
+
             setIsReady(true)
             setPlayer(player)
          })
@@ -431,7 +456,10 @@ const PlayerSpotify = ({ parentRef }) => {
                      <SongInfo />
                   </Box>
                   <Box className="w-1/3">
-                     <Controls />
+                     <Controls
+                        isPlaying={isPlaying}
+                        setIsPlaying={setIsPlaying}
+                     />
                   </Box>
                   <Box className="w-1/3" />
                </Flex>
@@ -448,9 +476,9 @@ const PlayerSpotify = ({ parentRef }) => {
                      <Text size="1" color="gray">
                         {formatTime(position)}
                      </Text>
-                     <Text 
-                        size="1" 
-                        color="gray" 
+                     <Text
+                        size="1"
+                        color="gray"
                         className="cursor-pointer hover:text-gray-700"
                         onClick={toggleTimeDisplay}
                      >
