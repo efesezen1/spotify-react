@@ -169,7 +169,7 @@ const Controls = ({ isPlaying, setIsPlaying }) => {
 
    const handlePrevious = async () => {
       try {
-         await spotifyApi.post('/me/player/previous')
+         await player.previousTrack()
       } catch (error) {
          console.error('Error skipping to previous track:', error)
       }
@@ -177,7 +177,7 @@ const Controls = ({ isPlaying, setIsPlaying }) => {
 
    const handleNext = async () => {
       try {
-         await spotifyApi.post('/me/player/next')
+         await player.nextTrack()
       } catch (error) {
          console.error('Error skipping to next track:', error)
       }
