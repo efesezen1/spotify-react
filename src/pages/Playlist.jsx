@@ -166,7 +166,6 @@ const Playlist = () => {
             </Flex>
          </Flex>
          <Box className="p-5">
-            {playlist?.uri}
             <TrackTable
                context_uri={playlist?.uri}
                playlist={playlist}
