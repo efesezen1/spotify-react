@@ -3,7 +3,7 @@ import { Box, Flex } from '@radix-ui/themes'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import SpotifyPlayer from '../components/SpotifyPlayer'
+// import SpotifyPlayer from '../components/SpotifyPlayer'
 import PlayerSpotify from '../components/PlayerSpotify'
 
 const HomeLayout = () => {
