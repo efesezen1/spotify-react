@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
-
+import { useLocation } from 'react-router-dom'
 const useSpotifyInstance = () => {
+   const location = useLocation()
    const instance = axios.create({
       baseURL: `https://api.spotify.com/v1`,
    })
@@ -9,8 +10,7 @@ const useSpotifyInstance = () => {
    const [token, setToken] = useState(null)
 
    useEffect(() => {
-      const urlQueryData = location.hash.slice(1)
-      const urlParams = new URLSearchParams(urlQueryData)
+      const urlParams = new URLSearchParams(location.search)
       const accessToken = urlParams.get('access_token')
       if (accessToken) {
          localStorage.setItem('accessToken', accessToken)

@@ -5,11 +5,7 @@ import { motion, useAnimate } from 'framer-motion'
 import useMotionTimeline from '../hook/motionTimeline'
 
 const handleClick = () => {
-   const clientId = import.meta.env.VITE_APP_CLIENT_ID
-   const redirectUri = 'http://localhost:8080/'
-   const apiUrl = 'https://accounts.spotify.com/authorize'
-   const scope = import.meta.env.VITE_APP_SCOPE
-   window.location.href = `${apiUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&show_dialog=true`
+   window.location.href = 'http://localhost:8888/login'
 }
 
 const Login = () => {
@@ -34,12 +30,6 @@ const Login = () => {
                initial={{ scale: 0, opacity: 0, translateY: 100 }}
                animate={{ scale: 1 }}
                whileHover={{ scale: 1.2 }}
-
-               // transition={{
-               //    type: 'spring',
-               //    stiffness: 260,
-               //    damping: 20,
-               // }}
             >
                <SpotifyIcon width="40" height="40" />
             </motion.div>
@@ -47,15 +37,6 @@ const Login = () => {
                initial={{ scale: 0, opacity: 0, translateY: 100 }}
                animate={{ scale: 0 }}
                id="header"
-               // initial={{
-               //    opacity: 0,
-               // }}
-               // animate={{
-               //    opacity: 1,
-               // }}
-               // transition={{
-               //    duration: 1,
-               // }}
             >
                <Text size="9" className="select-none font-extrabold">
                   Spotify
