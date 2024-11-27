@@ -68,7 +68,7 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
             <Box className="relative overflow-hidden">
                <div
                   ref={containerRef}
-                  className="overflow-x-scroll scrollbar-hide"
+                  className="overflow-x-scroll scrollbar-hide scroll-smooth snap-x snap-mandatory"
                >
                   <Flex className="gap-4 w-full">
                      <div className="grid auto-cols-max grid-flow-col gap-4 px-4">
@@ -76,7 +76,7 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                            ? Array.from({ length: 8 }).map((_, index) => (
                                 <div
                                    key={`skeleton-${index}`}
-                                   className="w-[150px] initial:w-[300px] xs:w-[230px] sm:w-[220px] md:w-[170px] lg:w-[150px] xl:w-[150px]"
+                                   className="w-[150px] initial:w-[300px] xs:w-[230px] sm:w-[220px] md:w-[170px] lg:w-[150px] xl:w-[150px] snap-start"
                                 >
                                    <Box className="w-full aspect-square">
                                       <Skeleton className="w-full h-full rounded-md" />
@@ -107,7 +107,7 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                                 (playlist) => (
                                    <div
                                       key={playlist.id}
-                                      className="w-[150px] initial:w-[300px] xs:w-[230px] sm:w-[220px] md:w-[170px] lg:w-[150px] xl:w-[150px]"
+                                      className="w-[150px] initial:w-[300px] xs:w-[230px] sm:w-[220px] md:w-[170px] lg:w-[150px] xl:w-[150px] snap-start"
                                    >
                                       <Box
                                          onClick={() =>
