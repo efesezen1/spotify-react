@@ -41,14 +41,6 @@ const TrackStatus = ({
       method: 'put',
    })
 
-   useEffect(() => {
-      console.log(item.uri)
-      console.log(trackUri)
-      console.log(item.uri === trackUri)
-
-      return () => {}
-   }, [trackUri])
-
    return (
       <Flex className="w-[20px] h-[20px] relative flex items-center justify-center">
          <AnimatePresence mode="wait">
@@ -104,7 +96,7 @@ const TrackStatus = ({
 
                               payload.offset = { position: index }
 
-                              console.log('payload', payload)
+                              // console.log('payload', payload)
                            } else {
                               // Single track
                               payload.uris = [item.uri]
@@ -114,7 +106,7 @@ const TrackStatus = ({
                            payload.position_ms = 0
 
                            playTrack.mutate(payload, {
-                              onSuccess: () => {
+                              onSuccess: (payload) => {
                                  dispatch(setIsPlaying(true))
                                  dispatch(setContextUri(context_uri))
                               },

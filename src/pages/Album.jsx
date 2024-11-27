@@ -17,9 +17,9 @@ const Album = () => {
    })
 
    React.useEffect(() => {
-      console.log(album)
-
-      return () => {}
+      if (album) {
+         document.title = `Spotify | ${album?.name} - ${album?.artists[0]?.name}`
+      }
    }, [album])
 
    // Format duration

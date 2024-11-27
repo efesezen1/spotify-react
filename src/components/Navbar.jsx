@@ -139,21 +139,37 @@ const Navbar = () => {
                   </Popover.Trigger>
                </Tooltip>
                <Popover.Portal>
-                  <Popover.Content className="popover-menu  w-[200px]">
-                     <Link to="/account" className="popover-menu-item mt-1">
-                        Account
-                     </Link>
-                     <Link to="/profile" className="popover-menu-item ">
-                        Profile
-                     </Link>
+                  <Popover.Content 
+                     className="w-[200px]"
+                     asChild
+                     sideOffset={5}
+                  >
+                     <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                        transition={{
+                           type: "spring",
+                           duration: 0.2,
+                           stiffness: 300,
+                           damping: 25
+                        }}
+                        className="popover-menu"
+                     >
+                        <Link to="/account" className="popover-menu-item mt-1">
+                           Account
+                        </Link>
+                        <Link to="/profile" className="popover-menu-item ">
+                           Profile
+                        </Link>
 
-                     <Link className="popover-menu-item mb-1">Settings</Link>
+                        <Link className="popover-menu-item mb-1">Settings</Link>
 
-                     <hr />
-                     <Logout className="popover-menu-item my-1  mx-1 " />
+                        <hr />
+                        <Logout className="popover-menu-item my-1  mx-1 " />
 
-                     {/* <Popover.Close>Close</Popover.Close> */}
-                     <Popover.Arrow className=" fill-white"></Popover.Arrow>
+                        <Popover.Arrow className="fill-white" />
+                     </motion.div>
                   </Popover.Content>
                </Popover.Portal>
             </Popover.Root>

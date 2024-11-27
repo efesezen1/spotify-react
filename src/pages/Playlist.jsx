@@ -28,9 +28,9 @@ const Playlist = () => {
    })
 
    useEffect(() => {
-      console.log('playlist', playlist)
-
-      return () => {}
+      if (playlist) {
+         document.title = `Spotify | ${playlist?.name}`
+      }
    }, [playlist])
 
    const { data: user } = useSpotifyQuery({

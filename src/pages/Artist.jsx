@@ -6,6 +6,7 @@ import useSpotifyInstance from '../hook/spotifyInstance'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import TrackTable from '../components/TrackTable'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const Artist = () => {
    const params = useParams()
@@ -64,9 +65,9 @@ const Artist = () => {
       })
 
    React.useEffect(() => {
-      console.log('popularSongs', popularSongs)
-
-      return () => {}
+      if (popularSongs) {
+         // Removed console.log statement
+      }
    }, [popularSongs])
 
    const { data: albums, isLoading: isAlbumsLoading } = useSpotifyQuery({
@@ -174,40 +175,46 @@ const Artist = () => {
                               </Text>
                               {/* follow status */}
                               <Box>
-                                 {isFollowing?.at(0) ? (
-                                    hoverOnFollowBtn ? (
+                                 <motion.div layout>
+                                    {isFollowing?.at(0) ? (
                                        <Button
                                           variant="solid"
-                                          color="red"
-                                          onMouseLeave={() =>
-                                             setHoverOnFollowBtn(false)
-                                          }
-                                          onClick={() =>
-                                             unfollowMutation.mutate()
-                                          }
+                                          style={{
+                                             backgroundColor: hoverOnFollowBtn ? '#ef4444' : '#2563eb',
+                                             transition: 'background-color 0.2s ease'
+                                          }}
+                                          onMouseLeave={() => setHoverOnFollowBtn(false)}
+                                          onMouseEnter={() => setHoverOnFollowBtn(true)}
+                                          onClick={() => unfollowMutation.mutate()}
                                        >
-                                          Unfollow
+                                          <motion.span
+                                             key={hoverOnFollowBtn ? "unfollow" : "following"}
+                                             initial={{ opacity: 0 }}
+                                             animate={{ opacity: 1 }}
+                                             exit={{ opacity: 0 }}
+                                             transition={{ duration: 0.15 }}
+                                          >
+                                             {hoverOnFollowBtn ? "Unfollow" : "Following"}
+                                          </motion.span>
                                        </Button>
                                     ) : (
                                        <Button
                                           variant="solid"
                                           color="blue"
-                                          onMouseEnter={() =>
-                                             setHoverOnFollowBtn(true)
-                                          }
+                                          onClick={() => followMutation.mutate()}
                                        >
-                                          Following
+                                          <motion.span
+                                             key="follow"
+                                             initial={{ opacity: 0 }}
+                                             animate={{ opacity: 1 }}
+                                             exit={{ opacity: 0 }}
+                                             transition={{ duration: 0.15 }}
+                                          >
+                                             Follow
+                                          </motion.span>
                                        </Button>
-                                    )
-                                 ) : (
-                                    <Button
-                                       variant="solid"
-                                       color="blue"
-                                       onClick={() => followMutation.mutate()}
-                                    >
-                                       Follow
-                                    </Button>
-                                 )}
+                                    )}
+                                 </motion.div>
                               </Box>
                            </Flex>
                         </Flex>

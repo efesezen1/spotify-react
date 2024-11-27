@@ -304,6 +304,7 @@ const PlayerSpotify = ({ parentRef }) => {
    const [player, setPlayer] = useState(null)
    const [playbackState, setPlaybackState] = useState(null)
    const [isReady, setIsReady] = useState(false)
+   const [dragX, setDragX] = useState(0)
    const { token, spotifyApi } = useSpotifyInstance()
    const controls = useDragControls()
    const dispatch = useDispatch()
@@ -365,6 +366,9 @@ const PlayerSpotify = ({ parentRef }) => {
                dispatch(setTrackUri(state.track_window.current_track.uri))
 
                setPlaybackState(state)
+               // Check if track is saved
+               const trackId = state.track_window.current_track.id
+               
             }
          })
 
@@ -440,19 +444,42 @@ const PlayerSpotify = ({ parentRef }) => {
          <motion.div
             dragSnapToOrigin={false}
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            drag
+            animate={{
+               opacity: 1,
+               scale: 1,
+               backgroundColor:
+                  dragX > 0
+                     ? '#22c55e'
+                     : dragX < 0
+                     ? '#ef4444'
+                     : 'rgb(241 245 249)',
+               color: dragX !== 0 ? '#ffffff' : '#000000',
+            }}
+            drag="x"
+            dragDirectionLock
             layout
-            dragConstraints={parentRef}
+            dragConstraints={{ left: 0, right: 0 }}
             dragControls={controls}
             dragListener={false}
+            onDrag={(event, info) => {
+               setDragX(info.offset.x)
+            }}
+            onDragEnd={(event, info) => {
+               if (info.offset.x >= 150) {
+                  console.log('Track added to liked songs')
+               } else if (info.offset.x <= -150) {
+                  console.log('Item removed from the liked songs')
+               }
+               setDragX(0)
+            }}
             onPointerDown={(e) => {
                if (e.target.role === 'slider') {
                } else {
                   controls.start(e)
                }
             }}
-            className={`w-10/12 bg-slate-100 rounded-lg p-4 mx-auto z-50`}
+            className="w-10/12 rounded-lg p-4 mx-auto z-50"
+            transition={{ duration: 0.3 }}
          >
             <Flex direction="column" gap="4">
                <Flex justify="between" align="center">

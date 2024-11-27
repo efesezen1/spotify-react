@@ -98,15 +98,6 @@ const TrackTable = ({
    }
 
    const handleReorder = (newOrder) => {
-      console.log(
-         'New Order:',
-         newOrder.map((item) => ({
-            id: item.track.id,
-            name: item.track.name,
-            position: newOrder.indexOf(item),
-         }))
-      )
-
       setItems(newOrder)
 
       if (!playlist?.id) return
@@ -124,18 +115,6 @@ const TrackTable = ({
       const range_start = oldIndex
       const insert_before = newIndex
 
-      // console.log('Reorder Parameters:', {
-      //    range_start,
-      //    insert_before,
-      //    range_length: 1,
-      //    movedTrack: {
-      //       id: movedItemId,
-      //       name: newOrder[0].track.name,
-      //       oldPosition: oldIndex,
-      //       newPosition: newIndex,
-      //    },
-      // })
-
       reorderTracksMutation.mutate(
          {
             range_start,
@@ -144,14 +123,10 @@ const TrackTable = ({
          },
          {
             onSuccess: () => {
-               console.log('Track reorder successful')
-               // Invalidate the playlist query to refetch the latest order
                queryClient.invalidateQueries(['playlist', playlist.id])
                onReorder?.(newOrder)
             },
             onError: (error) => {
-               // Revert the optimistic update on error
-               console.error('Failed to reorder tracks:', error)
                setItems(tracks)
             },
          }

@@ -160,10 +160,9 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                           direction={'row'}
                           key={playlist?.id}
                           onClick={() => {
-                             navigate('/playlist/' + playlist?.id)
+                             navigate(`/playlist/${playlist.id}`)
                           }}
                           onDoubleClick={() => {
-                             console.log(playlist)
                              playPlaylist(playlist.uri)
                              dispatch(setContextUri(playlist.uri))
                           }}

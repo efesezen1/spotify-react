@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import useSpotifyInstance from '../hook/spotifyInstance'
 import { useEffect } from 'react'
-
+import { motion } from 'framer-motion'
 const Profile = () => {
    const navigate = useNavigate()
 
@@ -108,29 +108,45 @@ const Profile = () => {
                                           : ''}
                                     </Popover.Trigger>
                                     <Popover.Portal>
-                                       <Popover.Content className="flex flex-col   w-[15rem] max-h-[20rem] p-1 border rounded-lg text-left  mr-2 bg-white overflow-y-scroll">
-                                          {followingArtists?.artists?.items.map(
-                                             (artist) => {
-                                                return (
-                                                   <Link
-                                                      to={`/artist/${artist.id}`}
-                                                      key={artist.id}
-                                                      className="btn-color p-2 flex flex-row items-center gap-2"
-                                                   >
-                                                      <img
-                                                         src={
-                                                            artist?.images[2]
-                                                               .url
-                                                         }
-                                                         alt={artist.name}
-                                                         className="w-[2rem] h-[2rem] object-cover rounded-full"
-                                                      />
-                                                      <Text>{artist.name}</Text>
-                                                   </Link>
-                                                )
-                                             }
-                                          )}
-                                          <Popover.Arrow className=" fill-white"></Popover.Arrow>
+                                       <Popover.Content
+                                          className="flex flex-col w-[15rem] max-h-[20rem] p-1 border rounded-lg text-left mr-2 bg-white overflow-y-scroll"
+                                          asChild
+                                          sideOffset={5}
+                                       >
+                                          <motion.div
+                                             initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                                             animate={{ opacity: 1, scale: 1, y: 0 }}
+                                             exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                                             transition={{
+                                                type: "spring",
+                                                duration: 0.2,
+                                                stiffness: 300,
+                                                damping: 25
+                                             }}
+                                          >
+                                             {followingArtists?.artists?.items.map(
+                                                (artist) => {
+                                                   return (
+                                                      <Link
+                                                         to={`/artist/${artist.id}`}
+                                                         key={artist.id}
+                                                         className="btn-color p-2 flex flex-row items-center gap-2"
+                                                      >
+                                                         <img
+                                                            src={
+                                                               artist?.images[2]
+                                                                  .url
+                                                            }
+                                                            alt={artist.name}
+                                                            className="w-[2rem] h-[2rem] object-cover rounded-full"
+                                                         />
+                                                         <Text>{artist.name}</Text>
+                                                      </Link>
+                                                   )
+                                                }
+                                             )}
+                                             <Popover.Arrow className="fill-white" />
+                                          </motion.div>
                                        </Popover.Content>
                                     </Popover.Portal>
                                  </Popover.Root>
