@@ -73,24 +73,24 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
    }
 
    return (
-      <Flex direction="column">
-         <Box pl="1">
-            {isLoading ? (
-               <Skeleton>
-                  <Text size="5" weight="bold" mb="4">
-                     Featured Playlists
-                  </Text>
-               </Skeleton>
-            ) : (
-               playlistRecommendations?.message && (
-                  <Text size="5" weight="bold" mb="4">
-                     {playlistRecommendations?.message}
-                  </Text>
-               )
-            )}
-         </Box>
+      <Flex direction="column" className="">
          <Flex direction="column" className="w-[100%]" gap="3">
-            <Flex justify="between" align="center" mb="4">
+            <Flex justify="between" align="center" mt='2'>
+               <Box pl="1">
+                  {isLoading ? (
+                     <Skeleton>
+                        <Text size="5" weight="bold" mb="4">
+                           Featured Playlists
+                        </Text>
+                     </Skeleton>
+                  ) : (
+                     playlistRecommendations?.message && (
+                        <Text size="5" weight="bold" ml='3'>
+                           {playlistRecommendations?.message}
+                        </Text>
+                     )
+                  )}
+               </Box>
                <Box />
                <Flex gap="2">
                   <Box
@@ -112,14 +112,14 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
             <Box className="relative overflow-hidden">
                <motion.div
                   ref={containerRef}
-                  className="overflow-x-scroll scrollbar-hide cursor-grab active:cursor-grabbing"
+                  className="overflow-x-scroll scrollbar-hide active:cursor-grabbing"
                   drag="x"
                   dragConstraints={constraints}
                   dragElastic={0.3}
-                  dragTransition={{ 
-                     bounceStiffness: 300, 
+                  dragTransition={{
+                     bounceStiffness: 300,
                      bounceDamping: 20,
-                     power: 0.5
+                     power: 0.5,
                   }}
                   style={{ x: springX }}
                   onDragEnd={handleDragEnd}
@@ -137,12 +137,20 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                                    </Box>
                                    <Flex direction="column" p="2" gap="2">
                                       <Skeleton>
-                                         <Text size="2" weight="bold" className="w-full">
+                                         <Text
+                                            size="2"
+                                            weight="bold"
+                                            className="w-full"
+                                         >
                                             Playlist Name That Is Long
                                          </Text>
                                       </Skeleton>
                                       <Skeleton>
-                                         <Text size="1" color="gray" className="w-3/4">
+                                         <Text
+                                            size="1"
+                                            color="gray"
+                                            className="w-3/4"
+                                         >
                                             Creator Name
                                          </Text>
                                       </Skeleton>
