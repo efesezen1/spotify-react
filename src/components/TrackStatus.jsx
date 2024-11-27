@@ -1,16 +1,13 @@
 import React, { useEffect } from 'react'
 import { Box, Flex } from '@radix-ui/themes'
 import { useDispatch, useSelector } from 'react-redux'
-import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
-   PauseIcon,
-   PlayIcon,
-   TimerIcon,
-   ValueNoneIcon,
-   Cross2Icon,
-   MagnifyingGlassIcon,
-} from '@radix-ui/react-icons'
+   setContextUri,
+   setCurrentSong,
+   setIsPlaying,
+} from '../store/slicers/userSlice'
+import { motion, AnimatePresence } from 'framer-motion'
+import { PauseIcon, PlayIcon } from '@radix-ui/react-icons'
 import useSpotifyMutation from '../hook/useSpotifyMutation'
 
 const TrackStatus = ({
@@ -79,6 +76,7 @@ const TrackStatus = ({
                      <PlayIcon
                         onClick={() => {
                            dispatch(setCurrentSong(item))
+
                            const payload = {}
 
                            // Check if the track is from an album or playlist
@@ -101,6 +99,7 @@ const TrackStatus = ({
                            playTrack.mutate(payload, {
                               onSuccess: () => {
                                  dispatch(setIsPlaying(true))
+                                 dispatch(setContextUri(context_uri))
                               },
                               onError: (error) => {
                                  console.error(

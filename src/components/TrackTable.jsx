@@ -44,10 +44,6 @@ const TrackTable = ({
    const isPlaylistOwner = user?.id === playlist?.owner?.id
    const canReorderTracks = isPlaylist && isPlaylistOwner
 
-   React.useEffect(() => {
-      console.log('from tracktable => contexturi')
-      setContextUri(context_uri)
-   }, [context_uri])
 
    // Update items when tracks prop changes
    React.useEffect(() => {

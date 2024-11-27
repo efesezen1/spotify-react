@@ -34,34 +34,11 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const id = selectedPlaylist?.id
    const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
    const [isPublic, setIsPublic] = useState(false)
-   const { token, spotifyApi } = useSpotifyInstance()
-   const queryClient = useQueryClient()
+   const { spotifyApi } = useSpotifyInstance()
 
    const { data: userPlaylists, isLoading } = useSpotifyQuery({
       queryKey: ['userPlaylists'],
       endpoint: '/me/playlists',
-   })
-   useEffect(() => {
-      if (userPlaylists) {
-         fetch(userPlaylists.items.at(0).tracks.href, {
-            headers: {
-               Authorization: `Bearer ${token}`,
-            },
-         })
-            .then((res) => res.json())
-            .then((res) => {
-               // dispatch(setCurrentSong(res.items.at(0)))
-            })
-
-         // fetch(userPlaylists[0].tracks.href).then((res) => {
-         //    console.log(res)
-         // })
-      }
-   }, [userPlaylists])
-
-   const { data: user } = useSpotifyQuery({
-      queryKey: ['user'],
-      endpoint: '/me',
    })
 
    const playPlaylist = (uri) => {
@@ -188,6 +165,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                           onDoubleClick={() => {
                              console.log(playlist)
                              playPlaylist(playlist.uri)
+                             dispatch(setContextUri(playlist.uri))
                           }}
                           className={`group ${
                              playlist?.id === id ||
@@ -258,7 +236,14 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                              )}
                           </Flex>
                           <Flex align="center">
-                             {playlist.uri === currentUri && <AudioWave />}
+                             {playlist.uri === contextUri && (
+                                <motion.div
+                                   initial={{ opacity: 0 }}
+                                   animate={{ opacity: 1 }}
+                                >
+                                   <AudioWave />
+                                </motion.div>
+                             )}
                           </Flex>
                        </Flex>
                     )
