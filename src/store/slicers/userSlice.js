@@ -23,6 +23,7 @@ const userSlice = createSlice({
       isShuffled: false,
       isFollowing: [],
       volume: 50,
+      contextUri: '',
    },
    reducers: {
       setUser: (state, action) => {
@@ -72,6 +73,10 @@ const userSlice = createSlice({
       setVolume: (state, action) => {
          state.volume = action.payload
       },
+      setContextUri: (state, action) => {
+         console.log(action.payload)
+         state.contextUri = action.payload
+      },
    },
 })
 
@@ -87,5 +92,6 @@ export const {
    setIsShuffled,
    setIsFollowing,
    setVolume,
+   setContextUri,
 } = userSlice.actions
 export default userSlice.reducer

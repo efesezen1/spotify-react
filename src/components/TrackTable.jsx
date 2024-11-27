@@ -4,7 +4,11 @@ import { Box, Flex, Text, Skeleton } from '@radix-ui/themes'
 import { TimerIcon, PauseIcon, PlayIcon } from '@radix-ui/react-icons'
 import { Link } from 'react-router-dom'
 import TrackStatus from './TrackStatus'
-import { setCurrentSong, setIsPlaying } from '../store/slicers/userSlice'
+import {
+   setCurrentSong,
+   setIsPlaying,
+   setContextUri,
+} from '../store/slicers/userSlice'
 import { Reorder, AnimatePresence, motion } from 'framer-motion'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import useSpotifyMutation from '../hook/useSpotifyMutation'
@@ -39,6 +43,11 @@ const TrackTable = ({
    // Check if current user is the playlist owner
    const isPlaylistOwner = user?.id === playlist?.owner?.id
    const canReorderTracks = isPlaylist && isPlaylistOwner
+
+   React.useEffect(() => {
+      console.log('from tracktable => contexturi')
+      setContextUri(context_uri)
+   }, [context_uri])
 
    // Update items when tracks prop changes
    React.useEffect(() => {

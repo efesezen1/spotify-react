@@ -20,14 +20,17 @@ import useSpotifyInstance from '../hook/spotifyInstance'
 import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import PlaylistDialog from './PlaylistDialog'
-import { setIsPlaying } from '../store/slicers/userSlice'
+import { setContextUri, setIsPlaying } from '../store/slicers/userSlice'
+import AudioWave from './icon/AudioWave'
 
 const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
    const dispatch = useDispatch()
    const navigate = useNavigate()
    const params = useParams()
    const [currentUri, setCurrentUri] = useState('')
-   const { selectedPlaylist, isPlaying } = useSelector((state) => state.user)
+   const { selectedPlaylist, isPlaying, contextUri } = useSelector(
+      (state) => state.user
+   )
    const id = selectedPlaylist?.id
    const [openCreatePlaylistModal, setOpenCreatePlaylistModal] = useState(false)
    const [isPublic, setIsPublic] = useState(false)
@@ -253,6 +256,9 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                                    </Text>
                                 </Flex>
                              )}
+                          </Flex>
+                          <Flex align="center">
+                             {playlist.uri === currentUri && <AudioWave />}
                           </Flex>
                        </Flex>
                     )

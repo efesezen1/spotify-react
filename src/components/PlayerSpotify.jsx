@@ -439,6 +439,7 @@ const PlayerSpotify = ({ parentRef }) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             drag
+            layout
             dragConstraints={parentRef}
             dragControls={controls}
             dragListener={false}
