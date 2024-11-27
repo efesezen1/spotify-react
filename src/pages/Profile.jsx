@@ -154,7 +154,7 @@ const Profile = () => {
                      Top Artists
                   </Text>
                </Box>
-               <Box className="w-full overflow-y-scroll">
+               <Box className="w-[calc(100%-1rem)] mx-auto overflow-y-scroll">
                   <Grid
                      columns={{
                         initial: '1',
@@ -202,12 +202,12 @@ const Profile = () => {
                               <img
                                  src={artist.images[0].url}
                                  alt="artist"
-                                 className="object-cover rounded-lg w-[10rem] h-[10rem] mx-auto"
+                                 className="object-cover rounded-lg w-full h-full aspect-square mx-auto"
                               />
                               <Flex
                                  direction="column"
                                  p="1"
-                                 className="w-[10rem] justify-center"
+                                 className="w-full justify-center"
                               >
                                  <Text size="2" weight="bold" className="">
                                     {artist.name}
