@@ -19,7 +19,8 @@ import {
    ShuffleIcon,
 } from '@radix-ui/react-icons'
 import useSpotifyMutation from '../hook/useSpotifyMutation'
-
+import { setTrackUri } from '../store/slicers/userSlice'
+import { useDispatch } from 'react-redux'
 const ScrollingText = ({ text, className, onClick }) => {
    const containerRef = useRef(null)
    const textRef = useRef(null)
@@ -305,7 +306,7 @@ const PlayerSpotify = ({ parentRef }) => {
    const [isReady, setIsReady] = useState(false)
    const { token, spotifyApi } = useSpotifyInstance()
    const controls = useDragControls()
-
+   const dispatch = useDispatch()
    // Progress bar state
    const [position, setPosition] = useState(0)
    const [duration, setDuration] = useState(0)
@@ -361,6 +362,8 @@ const PlayerSpotify = ({ parentRef }) => {
 
          player.addListener('player_state_changed', (state) => {
             if (state) {
+               dispatch(setTrackUri(state.track_window.current_track.uri))
+
                setPlaybackState(state)
             }
          })

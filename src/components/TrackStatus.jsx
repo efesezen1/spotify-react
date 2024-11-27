@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { PauseIcon, PlayIcon } from '@radix-ui/react-icons'
 import useSpotifyMutation from '../hook/useSpotifyMutation'
+import AudioWave from './icon/AudioWave'
 
 const TrackStatus = ({
    item,
@@ -18,7 +19,7 @@ const TrackStatus = ({
    currentSong,
    context_uri = null,
 }) => {
-   const { isPlaying } = useSelector((state) => state.user)
+   const { isPlaying, trackUri } = useSelector((state) => state.user)
    const dispatch = useDispatch()
 
    const iconVariants = {
@@ -40,10 +41,26 @@ const TrackStatus = ({
       method: 'put',
    })
 
+   useEffect(() => {
+      console.log(item.uri)
+      console.log(trackUri)
+      console.log(item.uri === trackUri)
+
+      return () => {}
+   }, [trackUri])
+
    return (
       <Flex className="w-[20px] h-[20px] relative flex items-center justify-center">
          <AnimatePresence mode="wait">
-            {currentUserIdOnHover === item.id || selectedTrackId === item.id ? (
+            {item.uri === trackUri && isPlaying ? (
+               <AudioWave
+                  onClick={() => {
+                     dispatch(setIsPlaying(false))
+                     pauseTrack.mutate({})
+                  }}
+               />
+            ) : currentUserIdOnHover === item.id ||
+              selectedTrackId === item.id ? (
                isPlaying && currentSong?.id === item?.id ? (
                   <motion.div
                      key="pause"

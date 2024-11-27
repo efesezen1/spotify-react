@@ -8,7 +8,15 @@ import {
 } from '@radix-ui/react-icons'
 import * as Avatar from '@radix-ui/react-avatar'
 import * as Popover from '@radix-ui/react-popover'
-import { Button, Flex, Box, TextField, Text, Tooltip, DropdownMenu } from '@radix-ui/themes'
+import {
+   Button,
+   Flex,
+   Box,
+   TextField,
+   Text,
+   Tooltip,
+   DropdownMenu,
+} from '@radix-ui/themes'
 import SpotifyIcon from './icon/SpotifyIcon'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Logout from './Logout'
@@ -23,7 +31,7 @@ const Navbar = () => {
 
    const { data: user } = useSpotifyQuery({
       queryKey: ['user'],
-      endpoint: '/me'
+      endpoint: '/me',
    })
 
    const location = useLocation()
@@ -90,7 +98,7 @@ const Navbar = () => {
                style={{ width: '100%' }}
                color="gray"
                size="3"
-               placeholder="Search the docs…"
+               placeholder="Search tracks…"
                p="3"
                variant="soft"
                // radius="full"

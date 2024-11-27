@@ -24,6 +24,7 @@ const userSlice = createSlice({
       isFollowing: [],
       volume: 50,
       contextUri: '',
+      trackUri: '',
    },
    reducers: {
       setUser: (state, action) => {
@@ -77,6 +78,9 @@ const userSlice = createSlice({
          console.log(action.payload)
          state.contextUri = action.payload
       },
+      setTrackUri: (state, action) => {
+         state.trackUri = action.payload
+      },
    },
 })
 
@@ -93,5 +97,6 @@ export const {
    setIsFollowing,
    setVolume,
    setContextUri,
+   setTrackUri,
 } = userSlice.actions
 export default userSlice.reducer

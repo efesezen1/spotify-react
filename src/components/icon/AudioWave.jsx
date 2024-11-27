@@ -1,8 +1,9 @@
 import React from 'react'
 
-const AudioWave = () => {
+const AudioWave = ({ onClick }) => {
    return (
       <svg
+         onClick={onClick}
          width="1rem"
          height="1rem"
          viewBox="0 0 16 16"
