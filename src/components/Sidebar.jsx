@@ -236,7 +236,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
                              )}
                           </Flex>
                           <Flex align="center">
-                             {playlist.uri === contextUri && (
+                             {playlist.uri === contextUri && !sidebarClosed && (
                                 <motion.div
                                    initial={{ opacity: 0 }}
                                    animate={{ opacity: 1 }}
