@@ -1,11 +1,22 @@
 import { Box, Text, Flex, Skeleton } from '@radix-ui/themes'
 import React, { useRef, useEffect } from 'react'
-import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons'
+import {
+   ChevronLeftIcon,
+   ChevronRightIcon,
+   PlayIcon,
+} from '@radix-ui/react-icons'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { setContextUri, setIsPlaying } from '../store/slicers/userSlice'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import AudioWave from './icon/AudioWave'
 
 const ItemRow = ({ playlistRecommendations, isLoading }) => {
    const navigate = useNavigate()
+   const dispatch = useDispatch()
    const containerRef = useRef(null)
+   const { spotifyApi } = useSpotifyInstance()
+   const { contextUri, isPlaying } = useSelector((state) => state.user)
 
    const handleScroll = (direction) => {
       const container = containerRef.current
@@ -16,22 +27,36 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
          const itemWidth = firstItem.offsetWidth
          const gap = 16 // gap-4 equals 16px
          const scrollAmount = itemWidth + gap
-         
-         const targetScroll = direction === 'left' 
-            ? container.scrollLeft - scrollAmount
-            : container.scrollLeft + scrollAmount
+
+         const targetScroll =
+            direction === 'left'
+               ? container.scrollLeft - scrollAmount
+               : container.scrollLeft + scrollAmount
 
          container.scrollTo({
             left: targetScroll,
-            behavior: 'smooth'
+            behavior: 'smooth',
          })
       }
+   }
+
+   const playPlaylist = (uri, e) => {
+      e.stopPropagation() // Prevent navigation when clicking play button
+      spotifyApi
+         .put('/me/player/play', {
+            context_uri: uri,
+            offset: { position: 0 },
+         })
+         .then(() => {
+            dispatch(setIsPlaying(true))
+            dispatch(setContextUri(uri))
+         })
    }
 
    return (
       <Flex direction="column" className="">
          <Flex direction="column" className="w-[100%]" gap="3">
-            <Flex justify="between" align="center" mt='2'>
+            <Flex justify="between" align="center" mt="2">
                <Box pl="1">
                   {isLoading ? (
                      <Skeleton>
@@ -41,7 +66,7 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                      </Skeleton>
                   ) : (
                      playlistRecommendations?.message && (
-                        <Text size="5" weight="bold" ml='3'>
+                        <Text size="5" weight="bold" ml="3">
                            {playlistRecommendations?.message}
                         </Text>
                      )
@@ -113,14 +138,26 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                                          onClick={() =>
                                             navigate(`/playlist/${playlist.id}`)
                                          }
-                                         className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded p-1 transition-all duration-200"
+                                         className="group hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded p-1 transition-all duration-200"
                                       >
-                                         <img
-                                            src={playlist.images[0].url}
-                                            alt="playlist"
-                                            className="w-full h-full object-contain rounded select-none"
-                                            draggable={false}
-                                         />
+                                         <div className="relative">
+                                            <img
+                                               src={playlist.images[0].url}
+                                               alt="playlist"
+                                               className="w-full h-full object-contain rounded select-none group-hover:brightness-95 transition-all duration-200"
+                                               draggable={false}
+                                            />
+                                            <div 
+                                               className="absolute bottom-2 right-2 bg-red-600 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+                                               onClick={(e) => playPlaylist(playlist.uri, e)}
+                                            >
+                                               {contextUri === playlist.uri && isPlaying ? (
+                                                  <AudioWave className="w-5 h-5" color="#FFFFFF" />
+                                               ) : (
+                                                  <PlayIcon className="text-white w-5 h-5" />
+                                               )}
+                                            </div>
+                                         </div>
                                          <Flex direction="column" p="1">
                                             <Text
                                                size="2"

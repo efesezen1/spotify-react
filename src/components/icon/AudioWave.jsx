@@ -1,6 +1,6 @@
 import React from 'react'
 
-const AudioWave = ({ onClick }) => {
+const AudioWave = ({ onClick, color = "#000000" }) => {
    return (
       <svg
          onClick={onClick}
@@ -9,7 +9,7 @@ const AudioWave = ({ onClick }) => {
          viewBox="0 0 16 16"
          xmlns="http://www.w3.org/2000/svg"
       >
-         <rect x="1" y="7" width="2" height="2" rx="1" ry="1" fill="#000000">
+         <rect x="1" y="7" width="2" height="2" rx="1" ry="1" fill={color}>
             <animate
                attributeName="height"
                values="2;6;2"
@@ -24,7 +24,7 @@ const AudioWave = ({ onClick }) => {
             />
          </rect>
 
-         <rect x="4" y="6" width="2" height="4" rx="1" ry="1" fill="#000000">
+         <rect x="4" y="6" width="2" height="4" rx="1" ry="1" fill={color}>
             <animate
                attributeName="height"
                values="4;8;4"
@@ -39,7 +39,7 @@ const AudioWave = ({ onClick }) => {
             />
          </rect>
 
-         <rect x="7" y="5" width="2" height="6" rx="1" ry="1" fill="#000000">
+         <rect x="7" y="5" width="2" height="6" rx="1" ry="1" fill={color}>
             <animate
                attributeName="height"
                values="6;10;6"
@@ -54,7 +54,7 @@ const AudioWave = ({ onClick }) => {
             />
          </rect>
 
-         <rect x="10" y="6" width="2" height="4" rx="1" ry="1" fill="#000000">
+         <rect x="10" y="6" width="2" height="4" rx="1" ry="1" fill={color}>
             <animate
                attributeName="height"
                values="4;8;4"
@@ -69,7 +69,7 @@ const AudioWave = ({ onClick }) => {
             />
          </rect>
 
-         <rect x="13" y="7" width="2" height="2" rx="1" ry="1" fill="#000000">
+         <rect x="13" y="7" width="2" height="2" rx="1" ry="1" fill={color}>
             <animate
                attributeName="height"
                values="2;6;2"
