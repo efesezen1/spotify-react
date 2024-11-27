@@ -12,18 +12,19 @@ const Profile = () => {
 
    const { data: user, isLoading: isUserLoading } = useSpotifyQuery({
       queryKey: ['user'],
-      endpoint: '/me'
+      endpoint: '/me',
    })
 
-   const { data: followingArtists, isLoading: isFollowingLoading } = useSpotifyQuery({
-      queryKey: ['followingArtists'],
-      endpoint: '/me/following',
-      params: { type: 'artist' }
-   })
+   const { data: followingArtists, isLoading: isFollowingLoading } =
+      useSpotifyQuery({
+         queryKey: ['followingArtists'],
+         endpoint: '/me/following',
+         params: { type: 'artist' },
+      })
 
    const { data: topItems, isLoading: isTopItemsLoading } = useSpotifyQuery({
       queryKey: ['topArtists'],
-      endpoint: '/me/top/artists'
+      endpoint: '/me/top/artists',
    })
 
    return (
@@ -53,10 +54,14 @@ const Profile = () => {
                   {isUserLoading ? (
                      <>
                         <Skeleton>
-                           <Text size="1" className="ml-1">Profile</Text>
+                           <Text size="1" className="ml-1">
+                              Profile
+                           </Text>
                         </Skeleton>
                         <Skeleton>
-                           <Text size="9" className="font-bold">User Name</Text>
+                           <Text size="9" className="font-bold">
+                              User Name
+                           </Text>
                         </Skeleton>
                         <Flex direction="row" gap="3" className="mt-3">
                            <Skeleton>
@@ -78,15 +83,18 @@ const Profile = () => {
                            {user?.type || ''}
                         </Text>
                         <Flex direction="column">
-                           <Text size="9" weight="bold" className="select-none text-6xl md:text-7xl lg:text-8xl">
+                           <Text
+                              size="9"
+                              weight="bold"
+                              className="select-none text-6xl md:text-7xl lg:text-8xl"
+                           >
                               {user?.display_name || ''}
                            </Text>
                            <Text
                               className="mr-10  mt-3 ml-1 select-none"
                               size="2"
                               color="gray"
-                           >
-                           </Text>
+                           ></Text>
                            <Flex direction="row" className=" w-full">
                               <Text
                                  className="mr-10  mt-3 ml-1 select-none"
@@ -110,7 +118,10 @@ const Profile = () => {
                                                       className="btn-color p-2 flex flex-row items-center gap-2"
                                                    >
                                                       <img
-                                                         src={artist?.images[2].url}
+                                                         src={
+                                                            artist?.images[2]
+                                                               .url
+                                                         }
                                                          alt={artist.name}
                                                          className="w-[2rem] h-[2rem] object-cover rounded-full"
                                                       />
@@ -166,59 +177,70 @@ const Profile = () => {
                      }}
                      className="w-full"
                   >
-                     {isTopItemsLoading ? (
-                        // Skeleton loading state for top artists grid
-                        Array.from({ length: 9 }).map((_, index) => (
-                           <Flex
-                              align={'center'}
-                              direction={'column'}
-                              key={`skeleton-${index}`}
-                              className="p-3"
-                           >
-                              <Skeleton className="w-[80px] h-[80px] rounded-lg" />
-                              <Flex
-                                 direction="column"
-                                 p="1"
-                                 className="w-[80px]"
-                              >
-                                 <Skeleton>
-                                    <Text size="2" weight="bold">Artist Name</Text>
-                                 </Skeleton>
-                                 <Skeleton>
-                                    <Text size="1" color="gray">Artist</Text>
-                                 </Skeleton>
-                              </Flex>
-                           </Flex>
-                        ))
-                     ) : (
-                        topItems?.items.map((artist) => (
-                           <Flex
-                              align={'center'}
-                              direction={'column'}
-                              key={artist.id}
-                              onClick={() => navigate(`/artist/${artist.id}`)}
-                              className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded transition-all duration-200 p-3"
-                           >
-                              <img
-                                 src={artist.images[0].url}
-                                 alt="artist"
-                                 className="object-cover rounded-lg w-full h-full aspect-square mx-auto"
-                              />
-                              <Flex
-                                 direction="column"
-                                 p="1"
-                                 className="w-full justify-center"
-                              >
-                                 <Text size="2" weight="bold" className="">
-                                    {artist.name}
-                                 </Text>
-                                 <Text size="1" weight="" color="gray">
-                                    {artist.type}
-                                 </Text>
-                              </Flex>
-                           </Flex>
-                        ))
-                     )}
+                     {isTopItemsLoading
+                        ? // Skeleton loading state for top artists grid
+                          Array.from({ length: 9 }).map((_, index) => (
+                             <Flex
+                                align={'center'}
+                                direction={'column'}
+                                key={`skeleton-${index}`}
+                                className="p-3"
+                             >
+                                <Skeleton className="object-cover rounded-lg w-full h-full aspect-square mx-auto" />
+                                <Flex
+                                   direction="column"
+                                   p="1"
+                                   className="w-full"
+                                   gap="1"
+                                >
+                                   <Skeleton>
+                                      <Text
+                                         size="2"
+                                         weight="bold"
+                                         className="w-full "
+                                      >
+                                         Artist Name
+                                      </Text>
+                                   </Skeleton>
+                                   <Skeleton>
+                                      <Text size="1" color="gray">
+                                         Artist
+                                      </Text>
+                                   </Skeleton>
+                                </Flex>
+                             </Flex>
+                          ))
+                        : topItems?.items.map((artist) => (
+                             <Flex
+                                align={'center'}
+                                direction={'column'}
+                                key={artist.id}
+                                onClick={() => navigate(`/artist/${artist.id}`)}
+                                className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded transition-all duration-200 p-3"
+                             >
+                                <img
+                                   src={artist.images[0].url}
+                                   alt="artist"
+                                   className="object-cover rounded-lg w-full h-full aspect-square mx-auto"
+                                />
+                                <Flex
+                                   direction="column"
+                                   p="1"
+                                   className="w-full justify-center"
+                                >
+                                   <Text
+                                      size="2"
+                                      weight="bold"
+                                      className="whitespace-nowrap text-ellipsis"
+                                   >
+                                      {artist.name}
+                                   </Text>
+                                   <Text size="1" weight="" color="gray">
+                                      {artist.type}
+                                   </Text>
+                                </Flex>
+                             </Flex>
+                          ))}
                   </Grid>
                </Box>
             </Flex>
