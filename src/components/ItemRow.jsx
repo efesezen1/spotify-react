@@ -1,74 +1,30 @@
 import { Box, Text, Flex, Skeleton } from '@radix-ui/themes'
-import React, { useRef, useEffect, useState } from 'react'
-import { motion, useMotionValue, useSpring, animate } from 'framer-motion'
+import React, { useRef, useEffect } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons'
 import { useNavigate } from 'react-router-dom'
 
 const ItemRow = ({ playlistRecommendations, isLoading }) => {
    const navigate = useNavigate()
    const containerRef = useRef(null)
-   const [constraints, setConstraints] = useState({ left: 0, right: 0 })
-   const x = useMotionValue(0)
-   const springX = useSpring(x, { 
-      damping: 20, 
-      stiffness: 150,
-      mass: 0.5
-   })
-
-   useEffect(() => {
-      if (containerRef.current) {
-         const container = containerRef.current
-         const scrollWidth = container.scrollWidth
-         const viewportWidth = container.offsetWidth
-         setConstraints({
-            left: -(scrollWidth - viewportWidth),
-            right: 0
-         })
-      }
-   }, [playlistRecommendations])
 
    const handleScroll = (direction) => {
       const container = containerRef.current
       if (container) {
-         const scrollAmount = direction === 'left' ? -800 : 800
-         const currentX = x.get()
-         const targetX = Math.max(
-            constraints.left,
-            Math.min(constraints.right, currentX + -scrollAmount)
-         )
+         const firstItem = container.querySelector('[class*="w-[150px]"]')
+         if (!firstItem) return
 
-         animate(x, targetX, {
-            type: "spring",
-            stiffness: 150,
-            damping: 20,
-            mass: 0.5,
-            velocity: direction === 'left' ? -2 : 2
+         const itemWidth = firstItem.offsetWidth
+         const gap = 16 // gap-4 equals 16px
+         const scrollAmount = itemWidth + gap
+         
+         const targetScroll = direction === 'left' 
+            ? container.scrollLeft - scrollAmount
+            : container.scrollLeft + scrollAmount
+
+         container.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
          })
-      }
-   }
-
-   const handleDragEnd = (event, info) => {
-      const container = containerRef.current
-      if (container) {
-         if (Math.abs(info.velocity.x) > 100) {
-            const currentX = x.get()
-            const scrollAmount = Math.min(800, Math.abs(info.velocity.x))
-            const targetX = Math.max(
-               constraints.left,
-               Math.min(
-                  constraints.right,
-                  currentX + (info.velocity.x > 0 ? scrollAmount : -scrollAmount)
-               )
-            )
-
-            animate(x, targetX, {
-               type: "spring",
-               stiffness: 150,
-               damping: 20,
-               mass: 0.5,
-               velocity: info.velocity.x
-            })
-         }
       }
    }
 
@@ -110,19 +66,9 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                </Flex>
             </Flex>
             <Box className="relative overflow-hidden">
-               <motion.div
+               <div
                   ref={containerRef}
-                  className="overflow-x-scroll scrollbar-hide active:cursor-grabbing"
-                  drag="x"
-                  dragConstraints={constraints}
-                  dragElastic={0.3}
-                  dragTransition={{
-                     bounceStiffness: 300,
-                     bounceDamping: 20,
-                     power: 0.5,
-                  }}
-                  style={{ x: springX }}
-                  onDragEnd={handleDragEnd}
+                  className="overflow-x-scroll scrollbar-hide"
                >
                   <Flex className="gap-4 w-full">
                      <div className="grid auto-cols-max grid-flow-col gap-4 px-4">
@@ -198,7 +144,7 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                              )}
                      </div>
                   </Flex>
-               </motion.div>
+               </div>
             </Box>
          </Flex>
       </Flex>

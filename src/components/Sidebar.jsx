@@ -142,7 +142,7 @@ const Sidebar = ({ className, sidebarClosed, setSidebarClosed }) => {
             )}
          </Flex>
          <Box
-            className={`${className} overflow-y-scroll  relative rounded-lg h-[calc(100vh-120px)] ${
+            className={`${className} overflow-y-scroll scrollbar-hide relative rounded-lg h-[calc(100vh-120px)] ${
                isLoading ? 'pl-2' : 'pl-3'
             } `}
          >
