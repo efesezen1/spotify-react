@@ -4,13 +4,15 @@ const cors = require('cors')
 const querystring = require('querystring')
 const cookieParser = require('cookie-parser')
 const crypto = require('crypto')
+const rateLimit = require('express-rate-limit')
 require('dotenv').config()
 
 // Configuration
 const client_id = process.env.VITE_APP_CLIENT_ID
 const client_secret = process.env.VITE_APP_CLIENT_SECRET
 const redirect_uri = process.env.VITE_APP_REDIRECT_URI
-const frontend_uri = 'http://localhost:8080'
+const frontend_uri =
+   process.env.VITE_APP_FRONTEND_URI || 'http://localhost:8080'
 const stateKey = process.env.VITE_APP_STATE_KEY
 
 if (!client_id || !client_secret || !redirect_uri) {
@@ -24,6 +26,26 @@ if (!client_id || !client_secret || !redirect_uri) {
 }
 
 const app = express()
+
+// Rate limiting configuration
+const limiter = rateLimit({
+   windowMs: 15 * 60 * 1000, // 15 minutes
+   max: 100, // Limit each IP to 100 requests per windowMs
+   message: 'Too many requests from this IP, please try again after 15 minutes',
+   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
+
+// Apply rate limiting to all routes
+app.use(limiter)
+
+// Create specific limiters for different endpoints
+const authLimiter = rateLimit({
+   windowMs: 60 * 60 * 1000, // 1 hour
+   max: 5, // Limit each IP to 5 login attempts per hour
+   message:
+      'Too many login attempts from this IP, please try again after an hour',
+})
 
 // Middleware
 app.use(
@@ -39,6 +61,11 @@ app.use(express.json())
 const generateRandomString = (length) => {
    return crypto.randomBytes(60).toString('hex').slice(0, length)
 }
+
+// Apply specific rate limiter to auth routes
+app.use('/login', authLimiter)
+app.use('/callback', authLimiter)
+app.use('/refresh_token', authLimiter)
 
 // Routes
 app.get('/login', (req, res) => {

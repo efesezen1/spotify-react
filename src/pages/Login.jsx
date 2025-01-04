@@ -5,7 +5,9 @@ import { motion, useAnimate } from 'framer-motion'
 import useMotionTimeline from '../hook/motionTimeline'
 
 const handleClick = () => {
-   window.location.href = 'http://localhost:8888/login'
+   window.location.href =
+      import.meta.env.VITE_APP_BACKEND_URI + '/login' ||
+      'http://localhost:8888/login'
 }
 
 const Login = () => {
