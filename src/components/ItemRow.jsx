@@ -128,7 +128,7 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                                    </Flex>
                                 </div>
                              ))
-                           : playlistRecommendations?.playlists?.items.map(
+                           : playlistRecommendations?.items?.map(
                                 (playlist) => (
                                    <div
                                       key={playlist.id}
@@ -142,7 +142,7 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                                       >
                                          <div className="relative">
                                             <img
-                                               src={playlist.images[0].url}
+                                               src={playlist.images[0]?.url}
                                                alt="playlist"
                                                className="w-full h-full object-contain rounded select-none group-hover:brightness-95 transition-all duration-200"
                                                draggable={false}
@@ -168,11 +168,10 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                                             </Text>
                                             <Text
                                                size="1"
-                                               weight=""
                                                color="gray"
                                                className="select-none"
                                             >
-                                               {playlist.owner.display_name}
+                                               By {playlist.owner.display_name}
                                             </Text>
                                          </Flex>
                                       </Box>
