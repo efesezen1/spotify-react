@@ -1,26 +1,31 @@
-import { Box, Flex, Text, Grid } from '@radix-ui/themes'
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import {
-   fetchFollowingArtists,
-   fetchUserTopItems,
-} from '../store/slicers/userSlice'
+import { Box, Flex, Text, Grid, Skeleton } from '@radix-ui/themes'
 import * as Popover from '@radix-ui/react-popover'
 import { Link, useNavigate } from 'react-router-dom'
-import randomColor from 'randomcolor'
-import { random } from 'lodash'
-
+import useSpotifyQuery from '../hook/useSpotifyQuery'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import { useEffect } from 'react'
+import { motion } from 'framer-motion'
 const Profile = () => {
    const navigate = useNavigate()
-   const { userPlaylists, user, token, followingArtists, topItems } =
-      useSelector((state) => state.user)
 
-   const dispatch = useDispatch()
-   useEffect(() => {
-      if (!token) return
-      dispatch(fetchFollowingArtists({ token }))
-      dispatch(fetchUserTopItems(token))
-   }, [token])
+   const { token } = useSpotifyInstance()
+
+   const { data: user, isLoading: isUserLoading } = useSpotifyQuery({
+      queryKey: ['user'],
+      endpoint: '/me',
+   })
+
+   const { data: followingArtists, isLoading: isFollowingLoading } =
+      useSpotifyQuery({
+         queryKey: ['followingArtists'],
+         endpoint: '/me/following',
+         params: { type: 'artist' },
+      })
+
+   const { data: topItems, isLoading: isTopItemsLoading } = useSpotifyQuery({
+      queryKey: ['topArtists'],
+      endpoint: '/me/top/artists',
+   })
 
    return (
       <Flex
@@ -32,9 +37,11 @@ const Profile = () => {
          <Flex direction="column" className="w-full ">
             <Flex direction="row" className=" ">
                <Flex className="p-5 ">
-                  {user?.images[1]?.url ? (
+                  {isUserLoading ? (
+                     <Skeleton className="w-[150px] h-[150px] rounded-full" />
+                  ) : user?.images?.at(0)?.url ? (
                      <img
-                        src={user?.images[0]?.url}
+                        src={user?.images.at(0)?.url}
                         alt=""
                         className=" hero-image rounded-full object-cover  "
                      />
@@ -44,74 +51,117 @@ const Profile = () => {
                </Flex>
 
                <Flex direction="column" className="my-5" justify="end">
-                  <Text
-                     size="1"
-                     weight="light"
-                     className="ml-1 select-none"
-                     color="gray"
-                  >
-                     {/* {playlist?.name} */}
-                     {user?.type || ''}
-                  </Text>
-                  <Flex direction="column">
-                     <Text size="9" weight="bold" className="select-none">
-                        {/* {playlist?.name} */}
-                        {user?.display_name || ''}
-                     </Text>
-                     <Text
-                        className="mr-10  mt-3 ml-1 select-none"
-                        size="2"
-                        color="gray"
-                     >
-                        {/* {playlist?.description || ''} */}
-                     </Text>
-                     <Flex direction="row" className=" w-full">
+                  {isUserLoading ? (
+                     <>
+                        <Skeleton>
+                           <Text size="1" className="ml-1">
+                              Profile
+                           </Text>
+                        </Skeleton>
+                        <Skeleton>
+                           <Text size="9" className="font-bold">
+                              User Name
+                           </Text>
+                        </Skeleton>
+                        <Flex direction="row" gap="3" className="mt-3">
+                           <Skeleton>
+                              <Text size="1">123 Followed Artists</Text>
+                           </Skeleton>
+                           <Skeleton>
+                              <Text size="1">456 Followers</Text>
+                           </Skeleton>
+                        </Flex>
+                     </>
+                  ) : (
+                     <>
                         <Text
-                           className="mr-10  mt-3 ml-1 select-none"
                            size="1"
+                           weight="light"
+                           className="ml-1 select-none"
                            color="gray"
                         >
-                           <Popover.Root>
-                              <Popover.Trigger>
-                                 {followingArtists?.artists?.total
-                                    ? `${followingArtists?.artists?.total} Followed Artists`
-                                    : ''}
-                              </Popover.Trigger>
-                              <Popover.Portal>
-                                 <Popover.Content className="flex flex-col   w-[15rem] max-h-[20rem] p-1 border rounded-lg text-left  mr-2 bg-white overflow-y-scroll">
-                                    {followingArtists?.artists?.items.map(
-                                       (artist) => {
-                                          return (
-                                             <Link
-                                                to={`/artist/${artist.id}`}
-                                                key={artist.id}
-                                                className="btn-color p-2 flex flex-row items-center gap-2"
-                                             >
-                                                <img
-                                                   src={artist?.images[2].url}
-                                                   alt={artist.name}
-                                                   className="w-[2rem] h-[2rem] object-cover rounded-full"
-                                                />
-                                                <Text>{artist.name}</Text>
-                                             </Link>
-                                          )
-                                       }
-                                    )}
-                                    <Popover.Arrow className=" fill-white"></Popover.Arrow>
-                                 </Popover.Content>
-                              </Popover.Portal>
-                           </Popover.Root>
+                           {user?.type || ''}
                         </Text>
-                        <Text
-                           className="mr-10  mt-3 ml-1"
-                           size="1"
-                           color="gray"
-                        >
-                           {user?.followers?.total &&
-                              `${user?.followers?.total} Followers`}
-                        </Text>
-                     </Flex>
-                  </Flex>
+                        <Flex direction="column">
+                           <Text
+                              size="9"
+                              weight="bold"
+                              className="select-none text-6xl md:text-7xl lg:text-8xl"
+                           >
+                              {user?.display_name || ''}
+                           </Text>
+                           <Text
+                              className="mr-10  mt-3 ml-1 select-none"
+                              size="2"
+                              color="gray"
+                           ></Text>
+                           <Flex direction="row" className=" w-full">
+                              <Text
+                                 className="mr-10  mt-3 ml-1 select-none"
+                                 size="1"
+                                 color="gray"
+                              >
+                                 <Popover.Root>
+                                    <Popover.Trigger>
+                                       {followingArtists?.artists?.total
+                                          ? `${followingArtists?.artists?.total} Followed Artists`
+                                          : ''}
+                                    </Popover.Trigger>
+                                    <Popover.Portal>
+                                       <Popover.Content
+                                          className="flex flex-col w-[15rem] max-h-[20rem] p-1 border rounded-lg text-left mr-2 bg-white overflow-y-scroll"
+                                          asChild
+                                          sideOffset={5}
+                                       >
+                                          <motion.div
+                                             initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                                             animate={{ opacity: 1, scale: 1, y: 0 }}
+                                             exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                                             transition={{
+                                                type: "spring",
+                                                duration: 0.2,
+                                                stiffness: 300,
+                                                damping: 25
+                                             }}
+                                          >
+                                             {followingArtists?.artists?.items.map(
+                                                (artist) => {
+                                                   return (
+                                                      <Link
+                                                         to={`/artist/${artist.id}`}
+                                                         key={artist.id}
+                                                         className="btn-color p-2 flex flex-row items-center gap-2"
+                                                      >
+                                                         <img
+                                                            src={
+                                                               artist?.images?.at(2)?.url
+                                                            }
+                                                            alt={artist.name}
+                                                            className="w-[2rem] h-[2rem] object-cover rounded-full"
+                                                         />
+                                                         <Text>{artist.name}</Text>
+                                                      </Link>
+                                                   )
+                                                }
+                                             )}
+                                             <Popover.Arrow className="fill-white" />
+                                          </motion.div>
+                                       </Popover.Content>
+                                    </Popover.Portal>
+                                 </Popover.Root>
+                              </Text>
+                              <Text
+                                 className="mr-10  mt-3 ml-1"
+                                 size="1"
+                                 color="gray"
+                              >
+                                 {user?.followers?.total &&
+                                    `${user?.followers?.total} Followers`}
+                              </Text>
+                           </Flex>
+                        </Flex>
+                     </>
+                  )}
                </Flex>
             </Flex>
             {/* USER INFO END */}
@@ -125,13 +175,12 @@ const Profile = () => {
                   <Text
                      size="5"
                      weight="bold"
-                     className="hover:underline select-none w-full  "
+                     className="hover:underline select-none w-full"
                   >
-                     {/* {playlistRecommendations?.message} */}
-                     {/* Header */}
+                     Top Artists
                   </Text>
                </Box>
-               <Box className=" w-full overflow-y-scroll">
+               <Box className="w-[calc(100%-1rem)] mx-auto overflow-y-scroll">
                   <Grid
                      columns={{
                         initial: '1',
@@ -141,39 +190,72 @@ const Profile = () => {
                         lg: '7',
                         xl: '9',
                      }}
-                     // direction="row"
-                     align="center"
-                     // justify="center"
-                     // gap="2" // Adjust the gap as needed
-                     className="w-full "
+                     className="w-full"
                   >
-                     {topItems?.items.map((artist) => (
-                        <Flex
-                           align={'center'}
-                           direction={'column'}
-                           key={artist.id}
-                           onClick={() => navigate(`/artist/${artist.id}`)}
-                           className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded   transition-all duration-200   p-3 "
-                        >
-                           <img
-                              src={artist.images[0].url}
-                              alt="artist"
-                              className="  object-cover rounded-lg  w-[10rem] h-[10rem] mx-auto "
-                           />
-                           <Flex
-                              direction="column"
-                              p="1"
-                              className="w-[10rem]  justify-center "
-                           >
-                              <Text size="2" weight="bold " className="">
-                                 {artist.name}
-                              </Text>
-                              <Text size="1" weight="" color="gray">
-                                 {artist.type}
-                              </Text>
-                           </Flex>
-                        </Flex>
-                     ))}
+                     {isTopItemsLoading
+                        ? // Skeleton loading state for top artists grid
+                          Array.from({ length: 9 }).map((_, index) => (
+                             <Flex
+                                align={'center'}
+                                direction={'column'}
+                                key={`skeleton-${index}`}
+                                className="p-3"
+                             >
+                                <Skeleton className="object-cover rounded-lg w-full h-full aspect-square mx-auto" />
+                                <Flex
+                                   direction="column"
+                                   p="1"
+                                   className="w-full"
+                                   gap="1"
+                                >
+                                   <Skeleton>
+                                      <Text
+                                         size="2"
+                                         weight="bold"
+                                         className="w-full "
+                                      >
+                                         Artist Name
+                                      </Text>
+                                   </Skeleton>
+                                   <Skeleton>
+                                      <Text size="1" color="gray">
+                                         Artist
+                                      </Text>
+                                   </Skeleton>
+                                </Flex>
+                             </Flex>
+                          ))
+                        : topItems?.items.map((artist) => (
+                             <Flex
+                                align={'center'}
+                                direction={'column'}
+                                key={artist.id}
+                                onClick={() => navigate(`/artist/${artist.id}`)}
+                                className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded transition-all duration-200 p-3"
+                             >
+                                <img
+                                   src={artist.images?.at(0)?.url}
+                                   alt="artist"
+                                   className="object-cover rounded-lg w-full h-full aspect-square mx-auto"
+                                />
+                                <Flex
+                                   direction="column"
+                                   p="1"
+                                   className="w-full justify-center"
+                                >
+                                   <Text
+                                      size="2"
+                                      weight="bold"
+                                      className="whitespace-nowrap text-ellipsis"
+                                   >
+                                      {artist.name}
+                                   </Text>
+                                   <Text size="1" weight="" color="gray">
+                                      {artist.type}
+                                   </Text>
+                                </Flex>
+                             </Flex>
+                          ))}
                   </Grid>
                </Box>
             </Flex>

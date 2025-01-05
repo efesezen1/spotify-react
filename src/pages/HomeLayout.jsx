@@ -1,41 +1,45 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import { Box, Flex } from '@radix-ui/themes'
 import { Outlet } from 'react-router-dom'
-import Player from '../components/Player'
-import { Box, Flex, Text, Button, TextField } from '@radix-ui/themes'
-
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import SetUser from '../components/SetUser'
-import FireyPlayer from '../components/FireyPlayer'
+// import SpotifyPlayer from '../components/SpotifyPlayer'
+import PlayerSpotify from '../components/PlayerSpotify'
+
 const HomeLayout = () => {
    const [sidebarClosed, setSidebarClosed] = useState(false)
+   const containerRef = useRef(null)
+
    return (
       <Flex direction="column" className="h-screen overflow-hidden ">
-         <SetUser />
          <Navbar />
          <Flex
             direction="row"
-            className="h-[calc(100vh-8rem)]"
+            className="h-[calc(100vh-56px)]"
             style={{ width: '100%' }}
          >
-            <Sidebar
-               // className="w-1/4 lg:w-1/6"
-               sidebarClosed={sidebarClosed}
-               setSidebarClosed={setSidebarClosed}
-            />
             <Box
-               className={` ${
-                  sidebarClosed ? 'w-[95%]' : 'w-full mx-auto'
-               }   h-full max-w-[1955px]  rounded `}
+               className={`transition-all flex justify-center duration-300 ${
+                  sidebarClosed ? 'w-[80px]' : 'w-[240px]'
+               }`}
+            >
+               <Sidebar
+                  sidebarClosed={sidebarClosed}
+                  setSidebarClosed={setSidebarClosed}
+               />
+            </Box>
+            <Box
+               className={`relative transition-all duration-300 ${
+                  sidebarClosed ? 'w-[calc(100%-72px)]' : 'w-[calc(100%-240px)]'
+               } h-full max-w-[1955px] rounded`}
                p="3"
+               ref={containerRef}
             >
                <Outlet />
+               <Flex className="absolute bottom-24 my-auto w-full">
+                  <PlayerSpotify parentRef={containerRef} />
+               </Flex>
             </Box>
-         </Flex>
-         <hr />
-         <Flex className="h-20 ">
-            {/* <FireyPlayer /> */}
-            <Player />
          </Flex>
       </Flex>
    )

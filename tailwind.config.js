@@ -30,7 +30,27 @@ export default {
             overlayShow: 'overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
             contentShow: 'contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
          },
+         screens: {
+            'initial': '0px',
+            'xs': '520px',
+            'sm': '768px',
+            'md': '1024px',
+            'lg': '1280px',
+            'xl': '1640px',
+         },
       },
    },
-   plugins: [],
+   plugins: [
+      function ({ addUtilities }) {
+         addUtilities({
+            '.scrollbar-hide': {
+               '-ms-overflow-style': 'none',
+               'scrollbar-width': 'none',
+               '&::-webkit-scrollbar': {
+                  display: 'none',
+               },
+            },
+         })
+      },
+   ],
 }

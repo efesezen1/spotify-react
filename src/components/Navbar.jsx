@@ -1,23 +1,41 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
    MagnifyingGlassIcon,
    HomeIcon,
-   BellIcon,
-   CaretLeftIcon,
-   CaretRightIcon,
+   // BellIcon,
+   ChevronLeftIcon,
+   ChevronRightIcon,
 } from '@radix-ui/react-icons'
 import * as Avatar from '@radix-ui/react-avatar'
 import * as Popover from '@radix-ui/react-popover'
-import { Button, Flex, Box, TextField, Text, Tooltip } from '@radix-ui/themes'
+import {
+   Button,
+   Flex,
+   Box,
+   TextField,
+   Text,
+   Tooltip,
+   DropdownMenu,
+} from '@radix-ui/themes'
 import SpotifyIcon from './icon/SpotifyIcon'
-import { Link, useNavigation, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Logout from './Logout'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
 import { motion } from 'framer-motion'
+
 const Navbar = () => {
-   const user = useSelector((state) => state.user)
    const navigate = useNavigate()
+   const { token } = useSpotifyInstance()
+
+   const { data: user } = useSpotifyQuery({
+      queryKey: ['user'],
+      endpoint: '/me',
+   })
+
    const location = useLocation()
+
    return (
       <Flex
          direction="row"
@@ -48,7 +66,7 @@ const Navbar = () => {
                disabled={!location.key}
                className={`color-white  h-[20px] w-[20px] rounded  `}
             >
-               <CaretLeftIcon />
+               <ChevronLeftIcon />
             </Button>
             <Button
                className={`color-white  h-[20px] w-[20px] rounded  `}
@@ -59,7 +77,7 @@ const Navbar = () => {
                   navigate(1)
                }}
             >
-               <CaretRightIcon
+               <ChevronRightIcon
                // height="30" width="30"
                />
             </Button>
@@ -71,6 +89,7 @@ const Navbar = () => {
                   onClick={() => {
                      navigate('/')
                   }}
+                  variant="soft"
                >
                   <HomeIcon height="30" width="30" />
                </Button>
@@ -79,7 +98,7 @@ const Navbar = () => {
                style={{ width: '100%' }}
                color="gray"
                size="3"
-               placeholder="Search the docs…"
+               placeholder="Search tracks…"
                p="3"
                variant="soft"
                // radius="full"
@@ -90,16 +109,16 @@ const Navbar = () => {
             </TextField.Root>
          </Flex>
          <Flex align="center">
-            <Tooltip content="What's New">
+            {/* <Tooltip content="What's New">
                <Button className="mr-2  w-[1rem] h-[1.5rem] " variant="ghost">
                   <BellIcon height="30" width="30" />
                </Button>
-            </Tooltip>
+            </Tooltip> */}
 
-            <Box className="mr-2">{user?.display_name}</Box>
+            {/* <Box className="mr-2">{user?.display_name}</Box> */}
             <Popover.Root>
                <Tooltip
-                  content={user?.user?.display_name}
+                  content={user?.display_name}
                   delayDuration={0}
                   className=""
                >
@@ -107,7 +126,7 @@ const Navbar = () => {
                      <Avatar.Root className="AvatarRoot">
                         <Avatar.Image
                            className="AvatarImage"
-                           src={user.profilePicture}
+                           src={user?.images?.at(1)?.url}
                            alt="Colm Tuite"
                         />
                         <Avatar.Fallback
@@ -120,21 +139,37 @@ const Navbar = () => {
                   </Popover.Trigger>
                </Tooltip>
                <Popover.Portal>
-                  <Popover.Content className="popover-menu  w-[200px]">
-                     <Link to="/account" className="popover-menu-item mt-1">
-                        Account
-                     </Link>
-                     <Link to="/profile" className="popover-menu-item ">
-                        Profile
-                     </Link>
+                  <Popover.Content 
+                     className="w-[200px]"
+                     asChild
+                     sideOffset={5}
+                  >
+                     <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                        transition={{
+                           type: "spring",
+                           duration: 0.2,
+                           stiffness: 300,
+                           damping: 25
+                        }}
+                        className="popover-menu"
+                     >
+                        <Link to="/account" className="popover-menu-item mt-1">
+                           Account
+                        </Link>
+                        <Link to="/profile" className="popover-menu-item ">
+                           Profile
+                        </Link>
 
-                     <Link className="popover-menu-item mb-1">Settings</Link>
+                        <Link className="popover-menu-item mb-1">Settings</Link>
 
-                     <hr />
-                     <Logout className="popover-menu-item my-1  mx-1 " />
+                        <hr />
+                        <Logout className="popover-menu-item my-1  mx-1 " />
 
-                     {/* <Popover.Close>Close</Popover.Close> */}
-                     <Popover.Arrow className=" fill-white"></Popover.Arrow>
+                        <Popover.Arrow className="fill-white" />
+                     </motion.div>
                   </Popover.Content>
                </Popover.Portal>
             </Popover.Root>

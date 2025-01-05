@@ -1,34 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
-import {
-   fetchArtist,
-   setCurrentArtist,
-   setIsFollowing,
-   checkIsFollowing,
-   followOrUnfollow,
-   setCurrentSong,
-   setIsPlaying,
-} from '../store/slicers/userSlice'
-import { Box, Flex, Text, Grid, Table, Button } from '@radix-ui/themes'
-import * as Popover from '@radix-ui/react-popover'
-import { PauseIcon, PlayIcon, TimerIcon } from '@radix-ui/react-icons'
+import { Box, Flex, Text, Button, Skeleton } from '@radix-ui/themes'
+import useSpotifyInstance from '../hook/spotifyInstance'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import useSpotifyQuery from '../hook/useSpotifyQuery'
+import TrackTable from '../components/TrackTable'
+import { motion, AnimatePresence } from 'framer-motion'
+
 const Artist = () => {
    const params = useParams()
    const id = params.id
-
-   const { token, currentArtist, isFollowing, isPlaying, currentSong } =
-      useSelector((state) => state.user)
-   const [followStatus, setFollowStatus] = useState(false)
    const [hoverOnFollowBtn, setHoverOnFollowBtn] = useState(false)
-   const dispatch = useDispatch(fetchArtist)
-   const [artist, setArtist] = useState(null)
-   const [popularSongs, setPopularSongs] = useState(null)
-   const [albums, setAlbums] = useState(null)
-   const [selectedTrack, setSelectedTrack] = useState(null)
-   const [currentUserIdOnHover, setCurrentUserIdOnHover] = useState(null)
+   const dispatch = useDispatch()
+   const queryClient = useQueryClient()
 
-   let humanReadableNum = (number) => {
+   const humanReadableNum = (number) => {
       let numStr = number.toString()
       let counter = 0
       let res = ''
@@ -41,331 +28,224 @@ const Artist = () => {
       }
       return res
    }
-   useEffect(() => {
-      if (id && !token) return
 
-      dispatch(
-         checkIsFollowing({
-            type: 'artist',
-            id,
-         })
-      )
-   }, [currentArtist])
+   const { token, spotifyApi } = useSpotifyInstance()
 
-   useEffect(() => {
-      if (isFollowing.length === 0) return
-   }, [isFollowing])
+   const followMutation = useMutation({
+      mutationFn: async () => {
+         const res = await spotifyApi.put(`/me/following?type=artist&ids=${id}`)
+         return res.data
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ['isFollowing', id] })
+      },
+   })
 
-   const hoverClass = (item) =>
-      selectedTrack !== item.id ? 'hover:backdrop-brightness-95' : ''
-   useEffect(() => {
-      if (!token || !id) return
-      dispatch(fetchArtist({ token, id }))
-   }, [token, id])
-   const activeClass = (item) =>
-      selectedTrack === item.id ? 'backdrop-brightness-90' : ''
+   const unfollowMutation = useMutation({
+      mutationFn: async () => {
+         const res = await spotifyApi.delete(
+            `/me/following?type=artist&ids=${id}`
+         )
+         return res.data
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ['isFollowing', id] })
+      },
+   })
+
+   const { data: isFollowing } = useSpotifyQuery({
+      queryKey: ['isFollowing', id],
+      endpoint: `/me/following/contains?type=artist&ids=${id}`,
+   })
+
+   const { data: popularSongs, isLoading: isPopularSongsLoading } =
+      useSpotifyQuery({
+         queryKey: ['popularSongs', id],
+         endpoint: `/artists/${id}/top-tracks`,
+      })
+
+   React.useEffect(() => {
+      if (popularSongs) {
+         // Removed console.log statement
+      }
+   }, [popularSongs])
+
+   const { data: albums, isLoading: isAlbumsLoading } = useSpotifyQuery({
+      queryKey: ['albums', id],
+      endpoint: `/artists/${id}/albums`,
+   })
+
+   const { data: artist, isLoading: isArtistLoading } = useSpotifyQuery({
+      queryKey: ['artist', id],
+      endpoint: `/artists/${id}`,
+   })
+
+   const hoverClass = (item) => ''
+
+   const activeClass = (item) => ''
+
    const formatDuration = (ms) => {
       const minutes = Math.floor(ms / 60000)
       const seconds = ((ms % 60000) / 1000).toFixed(0)
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
    }
 
-   useEffect(() => {
-      if (!currentArtist) return
-      const { artist, popularSongs, albums } = currentArtist
-      setArtist(artist)
-      setPopularSongs(popularSongs.tracks)
-      setAlbums(albums)
-
-      return () => {
-         dispatch(setCurrentArtist(null))
-         setSelectedTrack(null)
-      }
-   }, [currentArtist])
-
-   useEffect(() => {
-      return () => {
-         dispatch(setIsFollowing(false))
-      }
-   }, [])
-
    return (
       <Flex
          className="rounded bg-gradient-to-b from-lime-500 via-white via-50% to-slate-white h-full w-full overflow-y-scroll"
          direction="column"
          align={'center'}
-         onClick={() => setSelectedTrack(null)}
       >
          {/* USER INFO */}
-         <Flex direction="column" className="w-full ">
-            <Flex direction="row" className=" ">
-               <Flex className="p-5 ">
-                  {artist?.images[1]?.url ? (
+         <Flex direction="column" className="w-full">
+            <Flex direction="row" className="mb-8">
+               <Flex className="p-5">
+                  {isArtistLoading ? (
+                     <Skeleton className="w-[125px] h-[125px] rounded-full" />
+                  ) : artist?.images?.at(0)?.url ? (
                      <img
-                        src={artist?.images[0]?.url}
+                        src={artist?.images?.at(0)?.url}
                         alt=""
-                        className=" hero-image rounded-full object-cover  "
+                        className="hero-image rounded-full object-cover w-[200px] h-[200px]"
                      />
                   ) : (
-                     <></>
+                     <Flex
+                        className="hero-image bg-gray-200 rounded-full w-[200px] h-[200px]"
+                        align={'center'}
+                        justify={'center'}
+                     ></Flex>
                   )}
                </Flex>
 
                <Flex direction="column" className="my-5" justify="end">
-                  <Text
-                     size="1"
-                     weight="light"
-                     className="ml-1 select-none"
-                     color="gray"
-                  >
-                     {artist?.type || ''}
-                  </Text>
-                  <Flex direction="column">
-                     <Text size="9" weight="bold" className="select-none">
-                        {artist?.name || ''}
-                     </Text>
-                     <Text
-                        className="mr-10  mt-3 ml-1 select-none"
-                        size="2"
-                        color="gray"
-                     ></Text>
-                     <Flex direction="row" className=" w-full">
-                        <Text
-                           className="mr-10  mt-3 ml-1 select-none"
-                           size="1"
-                           color="gray"
-                        >
-                           {artist?.followers?.total &&
-                              `${humanReadableNum(
-                                 artist?.followers?.total
-                              )} Followers`}
-                        </Text>
-                        {/* follow status */}
-                        {/* <Box>
-                           {isFollowing ? (
-                              hoverOnFollowBtn ? (
-                                 <Button
-                                    variant="outline"
-                                    color="blue"
-                                    onMouseLeave={() =>
-                                       setHoverOnFollowBtn(false)
-                                    }
-                                    onClick={() => {
-                                       dispatch(
-                                          followOrUnfollow({
-                                             type: 'artist',
-                                             id,
-                                             action: 'unfollow',
-                                          })
-                                       )
-                                    }}
-                                 >
-                                    Unfollow
-                                 </Button>
-                              ) : (
-                                 <Button
-                                    variant="outline"
-                                    color="blue"
-                                    onMouseEnter={() =>
-                                       setHoverOnFollowBtn(true)
-                                    }
-                                 >
-                                    Following
-                                 </Button>
-                              )
-                           ) : (
-                              <Button
-                                 variant="outline"
-                                 color="blue"
-                                 onClick={() =>
-                                    dispatch(
-                                       followOrUnfollow({
-                                          type: 'artist',
-                                          id,
-                                          action: 'follow',
-                                       })
-                                    )
-                                 }
-                              >
+                  {isArtistLoading ? (
+                     <>
+                        <Skeleton className="mb-2 w-16">
+                           <Text size="1">Artist</Text>
+                        </Skeleton>
+                        <Skeleton className="mb-4 w-96">
+                           <Text size="9" className="font-bold">
+                              Artist Name
+                           </Text>
+                        </Skeleton>
+                        <Skeleton className="mb-4 w-32">
+                           <Text size="1">1,234,567 Followers</Text>
+                        </Skeleton>
+                        <Box className="mt-2">
+                           <Skeleton className="w-24">
+                              <Button variant="solid" color="blue">
                                  Follow
                               </Button>
-                           )}
-                        </Box> */}
-                     </Flex>
-                  </Flex>
-               </Flex>
-            </Flex>
-            {popularSongs && (
-               <Text weight="bold" size="7" className="ml-3">
-                  Popular
-               </Text>
-            )}
-            <Table.Root
-               size="2"
-               layout=""
-               className="overflow-y-scroll"
-               onClick={(e) => e.stopPropagation()}
-            >
-               {/* <Table.Header className="sticky top-0 left-0  backdrop-brightness-100 backdrop-blur-3xl z-10">
-                  <Table.Row>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">#</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Title</Box>
-                     </Table.ColumnHeaderCell>
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">Album</Box>
-                     </Table.ColumnHeaderCell>
-
-                     <Table.ColumnHeaderCell>
-                        <Box className="text-xs">
-                           <TimerIcon />
+                           </Skeleton>
                         </Box>
-                     </Table.ColumnHeaderCell>
-                  </Table.Row>
-               </Table.Header> */}
-
-               <Table.Body>
-                  {popularSongs?.map((item, index) => {
-                     // console.log(item)
-                     return (
-                        <Table.Row
-                           key={item?.id}
-                           onClick={() => {
-                              // console.log(item)
-                              setSelectedTrack(item)
-                           }}
-                           onMouseEnter={() => {
-                              // console.log(item)
-                              setCurrentUserIdOnHover(item.id)
-                           }}
-                           onMouseLeave={() => setCurrentUserIdOnHover(null)}
-                           className={`select-none active:backdrop-brightness-90 ${hoverClass(
-                              item
-                           )} ${activeClass(item)}`}
+                     </>
+                  ) : (
+                     <>
+                        <Text
+                           size="1"
+                           weight="light"
+                           className="ml-1 select-none"
+                           color="gray"
                         >
-                           <Table.RowHeaderCell>
-                              {/* {currentUserIdOnHover === item.id ||
-                              selectedTrack === item.id ? (
-                                 <PlayIcon
-                                    onClick={() => {
-                                       setSelectedTrack(item)
-                                    }}
-                                 />
-                              ) : (
-                                 index + 1
-                              )} */}
-
-                              {currentUserIdOnHover === item.id ||
-                              selectedTrack === item.id ? (
-                                 isPlaying ? (
-                                    currentSong.id === item.id ? (
-                                       <PauseIcon
-                                          onClick={() => {
-                                             dispatch(setIsPlaying(false))
-                                          }}
-                                       />
-                                    ) : (
-                                       <PlayIcon
-                                          onClick={() =>
-                                             dispatch(setCurrentSong(item))
-                                          }
-                                       />
-                                    )
-                                 ) : (
-                                    <PlayIcon
-                                       onClick={() =>
-                                          dispatch(setCurrentSong(item))
-                                       }
-                                    />
-                                 )
-                              ) : (
-                                 <Box className="text-xs">{index + 1}</Box>
-                              )}
-                           </Table.RowHeaderCell>
-                           <Table.Cell>
-                              <Flex direction={'column'}>
-                                 {/* Song Title */}
-                                 <Text size="2">{item?.name}</Text>
-                                 {/* Artists */}
-                                 {/* <Text size="1">
-                                    {item.artists
-                                       .map((artist) => artist?.name)
-                                       .join(', ')}
-                                 </Text> */}
-                              </Flex>
-                           </Table.Cell>
-                           <Table.Cell>
-                              {/* Album Name */}
-                              <Text size="2">{item?.album?.name}</Text>
-                           </Table.Cell>
-
-                           <Table.Cell>
-                              <Text size="2">
-                                 {formatDuration(item?.duration_ms)}
-                              </Text>
-                           </Table.Cell>
-                        </Table.Row>
-                     )
-                  })}
-               </Table.Body>
-            </Table.Root>
-            {/* <Flex
-               direction="column"
-               align={{ xs: 'center', md: 'start' }}
-               className="overflow-y-scroll overflow-x-hidden"
-            >
-               <Box pl="1" className="w-full">
-                  <Text
-                     size="5"
-                     weight="bold"
-                     className="hover:underline select-none w-full  "
-                  ></Text>
-               </Box>
-               <Box className=" w-full overflow-y-scroll">
-                  <Grid
-                     columns={{
-                        initial: '1',
-                        xs: '2',
-                        sm: '3',
-                        md: '5',
-                        lg: '7',
-                        xl: '9',
-                     }}
-                     align="center"
-                     className="w-full "
-                  >
-                     {topItems?.items.map((artist) => (
-                        <Flex
-                           align={'center'}
-                           direction={'column'}
-                           key={artist.id}
-                           onClick={() => navigate(`/artist/${artist.id}`)}
-                           className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded   transition-all duration-200   p-3 "
-                        >
-                           <img
-                              src={artist.images[0].url}
-                              alt="artist"
-                              className="  object-cover rounded-lg  w-[10rem] h-[10rem] mx-auto "
-                           />
-                           <Flex
-                              direction="column"
-                              p="1"
-                              className="w-[10rem]  justify-center "
+                           {artist?.type || ''}
+                        </Text>
+                        <Flex direction="column">
+                           <Text
+                              size="9"
+                              weight="bold"
+                              className="select-none text-6xl md:text-7xl lg:text-8xl"
                            >
-                              <Text size="2" weight="bold " className="">
-                                 {artist.name}
+                              {artist?.name || ''}
+                           </Text>
+                           <Text
+                              className="mr-10 mt-3 ml-1 select-none"
+                              size="2"
+                              color="gray"
+                           ></Text>
+                           <Flex direction="row" className="w-full">
+                              <Text
+                                 className="mr-10 mt-3 ml-1 select-none"
+                                 size="1"
+                                 color="gray"
+                              >
+                                 {artist?.followers?.total &&
+                                    `${humanReadableNum(
+                                       artist?.followers?.total
+                                    )} Followers`}
                               </Text>
-                              <Text size="1" weight="" color="gray">
-                                 {artist.type}
-                              </Text>
+                              {/* follow status */}
+                              <Box>
+                                 <motion.div layout>
+                                    {isFollowing?.at(0) ? (
+                                       <Button
+                                          variant="solid"
+                                          style={{
+                                             backgroundColor: hoverOnFollowBtn ? '#ef4444' : '#2563eb',
+                                             transition: 'background-color 0.2s ease'
+                                          }}
+                                          onMouseLeave={() => setHoverOnFollowBtn(false)}
+                                          onMouseEnter={() => setHoverOnFollowBtn(true)}
+                                          onClick={() => unfollowMutation.mutate()}
+                                       >
+                                          <motion.span
+                                             key={hoverOnFollowBtn ? "unfollow" : "following"}
+                                             initial={{ opacity: 0 }}
+                                             animate={{ opacity: 1 }}
+                                             exit={{ opacity: 0 }}
+                                             transition={{ duration: 0.15 }}
+                                          >
+                                             {hoverOnFollowBtn ? "Unfollow" : "Following"}
+                                          </motion.span>
+                                       </Button>
+                                    ) : (
+                                       <Button
+                                          variant="solid"
+                                          color="blue"
+                                          onClick={() => followMutation.mutate()}
+                                       >
+                                          <motion.span
+                                             key="follow"
+                                             initial={{ opacity: 0 }}
+                                             animate={{ opacity: 1 }}
+                                             exit={{ opacity: 0 }}
+                                             transition={{ duration: 0.15 }}
+                                          >
+                                             Follow
+                                          </motion.span>
+                                       </Button>
+                                    )}
+                                 </motion.div>
+                              </Box>
                            </Flex>
                         </Flex>
-                     ))}
-                  </Grid>
+                     </>
+                  )}
+               </Flex>
+            </Flex>
+            {(popularSongs || isPopularSongsLoading) && (
+               <Box className="px-8 mb-6">
+                  {isPopularSongsLoading ? (
+                     <Skeleton className="w-32 mb-4">
+                        <Text weight="bold" size="7">
+                           Popular
+                        </Text>
+                     </Skeleton>
+                  ) : (
+                     <Text weight="bold" size="7">
+                        Popular
+                     </Text>
+                  )}
                </Box>
-            </Flex> */}
+            )}
+            {(popularSongs?.tracks || isPopularSongsLoading) && (
+               <Box className="px-8">
+                  <TrackTable
+                     tracks={popularSongs?.tracks}
+                     isPlaylist={false}
+                     isLoading={isPopularSongsLoading}
+                  />
+               </Box>
+            )}
          </Flex>
       </Flex>
    )

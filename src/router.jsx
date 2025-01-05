@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import {
    HomeLayout,
    Browse,
@@ -7,8 +7,11 @@ import {
    Playlist,
    Profile,
    Artist,
+   Album,
+   Shows,
 } from './pages'
 import { ErrorElement } from './components'
+
 const router = createBrowserRouter([
    {
       path: '/',
@@ -35,12 +38,17 @@ const router = createBrowserRouter([
             element: <Artist />,
             errorElement: <ErrorElement />,
          },
-         //  TODO : ADD ALBUM PAGE
-         // {
-         //    path: '/album/:id',
-         //    element: <Playlist />,
-         //    errorElement: <ErrorElement />,
-         // },
+         {
+            path: '/album/:id',
+            element: <Album />,
+            errorElement: <ErrorElement />,
+         },
+         {
+            path: '/show/:id',
+            element: <Shows />,
+            errorElement: <ErrorElement />,
+         },
+         
       ],
    },
    {

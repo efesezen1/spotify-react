@@ -1,59 +1,62 @@
-import { Box, Button, Text } from '@radix-ui/themes'
-import React from 'react'
+import { Box, Button, Flex, Text } from '@radix-ui/themes'
+import React, { useRef, useEffect } from 'react'
 import SpotifyIcon from '../components/icon/SpotifyIcon'
-import { motion } from 'framer-motion'
+import { motion, useAnimate } from 'framer-motion'
+import useMotionTimeline from '../hook/motionTimeline'
 
 const handleClick = () => {
-   const clientId = import.meta.env.VITE_APP_CLIENT_ID
-   const redirectUri = 'http://localhost:8080/'
-   const apiUrl = 'https://accounts.spotify.com/authorize'
-   const scope = import.meta.env.VITE_APP_SCOPE
-   window.location.href = `${apiUrl}?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=token&show_dialog=true`
+   const backendUri = import.meta.env.VITE_APP_BACKEND_URI || 'http://localhost:8888'
+   // Remove trailing slash if it exists
+   const cleanBackendUri = backendUri.replace(/\/$/, '')
+   window.location.href = `${cleanBackendUri}/login`
 }
 
 const Login = () => {
+   const TRANSITION = {
+      ease: 'easeInOut',
+      duration: 0.4,
+   }
+   const scope = useMotionTimeline([
+      ['#logo', { scale: 1, opacity: 1, translateY: 0 }, TRANSITION],
+      ['#header', { scale: 1, opacity: 1, translateY: 0 }, TRANSITION],
+      ['#button', { scale: 1, opacity: 1, translateY: 0 }, TRANSITION],
+   ])
+
    return (
-      <Box className="flex items-center justify-center h-screen">
-         <Box className="max-w-md flex flex-col justify-center items-center ">
+      <motion.div className="flex items-center justify-center h-screen">
+         <motion.div
+            ref={scope}
+            className="max-w-md  justify-center items-center flex flex-col gap-4 "
+         >
             <motion.div
-               initial={{ scale: 0 }}
-               animate={{ rotate: 360, scale: 1 }}
+               id="logo"
+               initial={{ scale: 0, opacity: 0, translateY: 100 }}
+               animate={{ scale: 1 }}
                whileHover={{ scale: 1.2 }}
-               transition={{
-                  type: 'spring',
-                  stiffness: 260,
-                  damping: 20,
-               }}
             >
                <SpotifyIcon width="40" height="40" />
             </motion.div>
             <motion.div
-               initial={{
-                  opacity: 0,
-               }}
-               animate={{
-                  opacity: 1,
-               }}
-               transition={{
-                  duration: 1,
-               }}
+               initial={{ scale: 0, opacity: 0, translateY: 100 }}
+               animate={{ scale: 0 }}
+               id="header"
             >
                <Text size="9" className="select-none font-extrabold">
                   Spotify
                </Text>
             </motion.div>
 
-            <p className="py-6">
-               Provident cupiditate voluptatem et in. Quaerat fugiat ut
-               assumenda excepturi exercitationem quasi. In deleniti eaque aut
-               repudiandae et a id nisi.
-            </p>
-
-            <Button className="w-full" onClick={handleClick}>
-               Login
-            </Button>
-         </Box>
-      </Box>
+            <motion.button
+               initial={{ scale: 0, opacity: 0, translateY: 100 }}
+               animate={{ scale: 0 }}
+               id="button"
+               className="w-full cursor-pointer"
+               onClick={handleClick}
+            >
+               <Button className="w-full cursor-pointer">Login</Button>
+            </motion.button>
+         </motion.div>
+      </motion.div>
    )
 }
 
