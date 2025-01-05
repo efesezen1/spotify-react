@@ -1,6 +1,6 @@
 # Spotify React Application
 
-This is a full-stack web application that integrates with the Spotify API, allowing users to interact with their Spotify account, browse music, and control playback.
+This is a full-stack web application that integrates with the Spotify API, allowing users to interact with their Spotify account, browse music, and control playback
 
 ## 🚀 Features
 
