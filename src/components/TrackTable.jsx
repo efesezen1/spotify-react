@@ -186,9 +186,9 @@ const TrackTable = ({
 
             <motion.div>
                <Flex align="center" gap="3">
-                  {track?.album?.images[0]?.url && (
+                  {track?.album?.images?.at(0)?.url && (
                      <img
-                        src={track.album.images[0].url}
+                        src={track.album.images?.at(0).url}
                         className="w-10 h-10 rounded"
                         alt=""
                      />

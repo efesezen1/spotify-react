@@ -81,7 +81,7 @@ const Shows = () => {
                   <Skeleton width="100%" height="100%" className="rounded" />
                ) : show?.images?.at(0)?.url ? (
                   <img
-                     src={show?.images.at(0)?.url}
+                     src={show?.images?.at(0)?.url}
                      alt=""
                      className="hero-image rounded object-cover w-full h-full"
                   />
@@ -169,9 +169,9 @@ const Shows = () => {
 
                      <motion.div>
                         <Flex align="center" gap="3">
-                           {episode?.images[0]?.url && (
+                           {episode?.images?.at(0)?.url && (
                               <img
-                                 src={episode.images[0].url}
+                                 src={episode.images?.at(0)?.url}
                                  className="w-10 h-10 rounded"
                                  alt=""
                               />

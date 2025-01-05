@@ -30,7 +30,7 @@ const userSlice = createSlice({
       setUser: (state, action) => {
          state.user = action.payload
 
-         state.profilePicture = action.payload.images[0].url
+         state.profilePicture = action.payload?.images?.at(0)?.url
       },
       setCurrentSong: (state, action) => {
          state.currentSong = action.payload

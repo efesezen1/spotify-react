@@ -34,6 +34,7 @@ const useSpotifyQuery = ({
          } catch (error) {
             if (error.response?.status === 401) {
                localStorage.removeItem('token')
+               console.log('useSpotifyQuery: token removed')
                navigate('/login')
             }
             console.error(`Error fetching ${endpoint}:`, error)

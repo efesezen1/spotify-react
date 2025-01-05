@@ -20,6 +20,7 @@ const useSpotifyMutation = ({
          } catch (error) {
             if (error.response?.status === 401) {
                localStorage.removeItem('token')
+               console.log('useSpotifyMutation: token removed')
                navigate('/login')
             }
             console.error(`Error in ${method.toUpperCase()} ${endpoint}:`, error)

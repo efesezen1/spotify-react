@@ -102,9 +102,9 @@ const Artist = () => {
                <Flex className="p-5">
                   {isArtistLoading ? (
                      <Skeleton className="w-[125px] h-[125px] rounded-full" />
-                  ) : artist?.images[1]?.url ? (
+                  ) : artist?.images?.at(0)?.url ? (
                      <img
-                        src={artist?.images[0]?.url}
+                        src={artist?.images?.at(0)?.url}
                         alt=""
                         className="hero-image rounded-full object-cover w-[200px] h-[200px]"
                      />

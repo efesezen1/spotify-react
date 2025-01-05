@@ -48,9 +48,9 @@ const Album = () => {
                <Flex className="p-5 h-full items-center aspect-square">
                   {isAlbumLoading ? (
                      <Skeleton width="100%" height="100%" className="rounded" />
-                  ) : album?.images[0]?.url ? (
+                  ) : album?.images?.at(0)?.url ? (
                      <img
-                        src={album.images[0].url}
+                        src={album.images?.at(0).url}
                         alt={album.name}
                         className="hero-image rounded object-cover w-full h-full"
                      />

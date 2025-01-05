@@ -5,9 +5,10 @@ import { motion, useAnimate } from 'framer-motion'
 import useMotionTimeline from '../hook/motionTimeline'
 
 const handleClick = () => {
-   window.location.href =
-      import.meta.env.VITE_APP_BACKEND_URI + '/login' ||
-      'http://localhost:8888/login'
+   const backendUri = import.meta.env.VITE_APP_BACKEND_URI || 'http://localhost:8888'
+   // Remove trailing slash if it exists
+   const cleanBackendUri = backendUri.replace(/\/$/, '')
+   window.location.href = `${cleanBackendUri}/login`
 }
 
 const Login = () => {

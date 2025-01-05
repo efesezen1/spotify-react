@@ -128,56 +128,64 @@ const ItemRow = ({ playlistRecommendations, isLoading }) => {
                                    </Flex>
                                 </div>
                              ))
-                           : playlistRecommendations?.items?.map(
-                                (playlist) => (
-                                   <div
-                                      key={playlist.id}
-                                      className="w-[150px] initial:w-[300px] xs:w-[230px] sm:w-[220px] md:w-[170px] lg:w-[150px] xl:w-[150px] snap-start"
+                           : playlistRecommendations?.items?.map((playlist) => (
+                                <div
+                                   key={playlist.id}
+                                   className="w-[150px] initial:w-[300px] xs:w-[230px] sm:w-[220px] md:w-[170px] lg:w-[150px] xl:w-[150px] snap-start"
+                                >
+                                   <Box
+                                      onClick={() =>
+                                         navigate(`/playlist/${playlist.id}`)
+                                      }
+                                      className="group hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded p-1 transition-all duration-200"
                                    >
-                                      <Box
-                                         onClick={() =>
-                                            navigate(`/playlist/${playlist.id}`)
-                                         }
-                                         className="group hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded p-1 transition-all duration-200"
-                                      >
-                                         <div className="relative">
+                                      <div className="relative">
+                                         {playlist.images?.at(0)?.url ? (
                                             <img
-                                               src={playlist.images[0]?.url}
+                                               src={playlist.images?.at(0)?.url}
                                                alt="playlist"
                                                className="w-full h-full object-contain rounded select-none group-hover:brightness-95 transition-all duration-200"
                                                draggable={false}
                                             />
-                                            <div 
-                                               className="absolute bottom-2 right-2 bg-red-600 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
-                                               onClick={(e) => playPlaylist(playlist.uri, e)}
-                                            >
-                                               {contextUri === playlist.uri && isPlaying ? (
-                                                  <AudioWave className="w-5 h-5" color="#FFFFFF" />
-                                               ) : (
-                                                  <PlayIcon className="text-white w-5 h-5" />
-                                               )}
-                                            </div>
+                                         ) : (
+                                            <div className="w-full aspect-square bg-slate-200 rounded"></div>
+                                         )}
+                                         <div
+                                            className="absolute bottom-2 right-2 bg-red-600 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
+                                            onClick={(e) =>
+                                               playPlaylist(playlist.uri, e)
+                                            }
+                                         >
+                                            {contextUri === playlist.uri &&
+                                            isPlaying ? (
+                                               <AudioWave
+                                                  className="w-5 h-5"
+                                                  color="#FFFFFF"
+                                               />
+                                            ) : (
+                                               <PlayIcon className="text-white w-5 h-5" />
+                                            )}
                                          </div>
-                                         <Flex direction="column" p="1">
-                                            <Text
-                                               size="2"
-                                               weight="bold"
-                                               className="select-none"
-                                            >
-                                               {playlist.name}
-                                            </Text>
-                                            <Text
-                                               size="1"
-                                               color="gray"
-                                               className="select-none"
-                                            >
-                                               By {playlist.owner.display_name}
-                                            </Text>
-                                         </Flex>
-                                      </Box>
-                                   </div>
-                                )
-                             )}
+                                      </div>
+                                      <Flex direction="column" p="1">
+                                         <Text
+                                            size="2"
+                                            weight="bold"
+                                            className="select-none"
+                                         >
+                                            {playlist.name}
+                                         </Text>
+                                         <Text
+                                            size="1"
+                                            color="gray"
+                                            className="select-none"
+                                         >
+                                            By {playlist.owner.display_name}
+                                         </Text>
+                                      </Flex>
+                                   </Box>
+                                </div>
+                             ))}
                      </div>
                   </Flex>
                </div>

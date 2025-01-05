@@ -115,10 +115,10 @@ const SongInfo = () => {
                   stiffness: 400,
                   damping: 25,
                }}
-               key={currentTrack.album.images[0].url}
+               key={currentTrack.album.images?.at(0).url}
             >
                <img
-                  src={currentTrack.album.images[0].url}
+                  src={currentTrack.album.images?.at(0).url}
                   alt={currentTrack.album.name}
                   className="absolute inset-0 w-full h-full object-cover rounded"
                />
@@ -368,7 +368,6 @@ const PlayerSpotify = ({ parentRef }) => {
                setPlaybackState(state)
                // Check if track is saved
                const trackId = state.track_window.current_track.id
-               
             }
          })
 

@@ -134,8 +134,7 @@ const Profile = () => {
                                                       >
                                                          <img
                                                             src={
-                                                               artist?.images[2]
-                                                                  .url
+                                                               artist?.images?.at(2)?.url
                                                             }
                                                             alt={artist.name}
                                                             className="w-[2rem] h-[2rem] object-cover rounded-full"
@@ -235,7 +234,7 @@ const Profile = () => {
                                 className="hover:backdrop-brightness-95 active:backdrop-brightness-90 rounded transition-all duration-200 p-3"
                              >
                                 <img
-                                   src={artist.images[0].url}
+                                   src={artist.images?.at(0)?.url}
                                    alt="artist"
                                    className="object-cover rounded-lg w-full h-full aspect-square mx-auto"
                                 />
