@@ -15,7 +15,7 @@ This is a full-stack web application that integrates with the Spotify API, allow
 - State management with React hooks
 - Modern UI components
 
-![Main Page](./public/main-page.jpeg)
+![Main Page](./public/spotify-main-page.jpeg)
 *Main application interface showing the home page with navigation and content*
 
 ![Playlist Page](./public/playlist-page.jpeg)
