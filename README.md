@@ -2,6 +2,8 @@
 
 This is a full-stack web application that integrates with the Spotify API, allowing users to interact with their Spotify account, browse music, and control playback
 
+[See Example](https://spotify-light.netlify.app/login)
+
 [Watch demo](https://www.youtube.com/watch?v=KOv4k4s6tEg&ab_channel=EfeKonyal%C4%B1)
 
 ## 🚀 Features
